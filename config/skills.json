@@ -1,0 +1,137 @@
+{
+  "skills": [
+    {
+      "name": "orchestrator",
+      "description": "Central routing brain of AIOS: intent classification, user confirmation, dispatch to registered worker skills. Never executes tasks itself.",
+      "path": "skills/orchestrator/SKILL.md",
+      "domains": ["routing", "intent-classification", "task-dispatch"],
+      "triggers": [
+        "route this to another agent",
+        "dispatch to a skill",
+        "orchestrate multiple tasks",
+        "multi-step handoff"
+      ],
+      "required_parameters": []
+    },
+    {
+      "name": "skill-builder",
+      "description": "Create new skills, modify and improve existing skills, measure skill performance with evals.",
+      "path": "skills/skill_builder.md",
+      "domains": ["meta", "skill-development", "evals"],
+      "triggers": [
+        "build a new skill",
+        "improve this skill",
+        "run evals on the skill",
+        "create a skill"
+      ],
+      "required_parameters": ["skill_goal"],
+      "sub_skills": [
+        {
+          "name": "description-optimization",
+          "description": "Tune a skill's frontmatter description for better triggering accuracy.",
+          "required_parameters": ["skill_path"]
+        },
+        {
+          "name": "benchmarking",
+          "description": "Run with-skill vs baseline evals with variance analysis.",
+          "required_parameters": ["skill_path", "eval_cases"]
+        }
+      ]
+    },
+    {
+      "name": "content-drafting",
+      "description": "Core domain for drafting text: social copy, campaign text, marketing and creative writing.",
+      "path": "",
+      "domains": ["content-drafting"],
+      "triggers": [
+        "write a post for",
+        "draft copy",
+        "create a campaign",
+        "social media text",
+        "ad copy"
+      ],
+      "required_parameters": ["tone", "audience"],
+      "sub_skills": [
+        {
+          "name": "social-copy",
+          "description": "Platform-specific social post drafting.",
+          "required_parameters": ["platform", "tone", "length"]
+        },
+        {
+          "name": "campaign-text",
+          "description": "Full campaign copy across channels.",
+          "required_parameters": ["channel", "audience", "goal"]
+        }
+      ]
+    },
+    {
+      "name": "web-development",
+      "description": "Core domain for web work: front-end layout, script logic, styling.",
+      "path": "",
+      "domains": ["web-development"],
+      "triggers": [
+        "build a page",
+        "fix the layout",
+        "add a script",
+        "front-end",
+        "web dev"
+      ],
+      "required_parameters": ["deliverable_type", "stack"],
+      "sub_skills": [
+        {
+          "name": "frontend-layout",
+          "description": "Page structure and responsive styling.",
+          "required_parameters": ["deliverable_type", "style"]
+        },
+        {
+          "name": "script-logic",
+          "description": "Client-side behavior and error handling.",
+          "required_parameters": ["behavior", "stack"]
+        }
+      ]
+    },
+    {
+      "name": "career-switch-lead-scout",
+      "description": "Discover, filter, score, and queue prospective students seeking entry-level AI and marketing training. Monitor public LinkedIn posts, career-transition subreddits and Facebook groups for 'open to work', 'career pivot', 'seeking entry level', 'looking for new path' signals; restrict to Kosovo and worldwide-remote regions; score candidates 1-100; draft non-technical outreach for scores >= 70 into a human review queue with 90-day dedup and per-platform daily caps.",
+      "path": "skills/career-switch-lead-scout/SKILL.md",
+      "domains": ["lead-generation", "prospecting", "candidate-qualification", "career-transition"],
+      "triggers": [
+        "find leads for the training program",
+        "career pivot",
+        "open to work",
+        "prospect students",
+        "lead scout",
+        "qualify job seekers",
+        "career switchers"
+      ],
+      "required_parameters": ["source", "limit"],
+      "sub_skills": []
+    },
+    {
+      "name": "task-scheduling",
+      "description": "Core domain for scheduling: calendar management, reminders, appointment booking.",
+      "path": "",
+      "domains": ["task-scheduling"],
+      "triggers": [
+        "schedule",
+        "remind me",
+        "book a calendar slot",
+        "set an appointment",
+        "plan my week"
+      ],
+      "required_parameters": ["action", "time_or_window"],
+      "sub_skills": [
+        {
+          "name": "calendar-management",
+          "description": "Create and manage calendar events.",
+          "required_parameters": ["calendar", "timeslot"]
+        },
+        {
+          "name": "reminders",
+          "description": "Set timed reminders.",
+          "required_parameters": ["delay", "channel"]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+2026-09-22T19:42:33.986882 linkedin fetch skipped: api_token missing in config/lead_sources.json. LinkedIn has no open discovery API; supply a private-app token or a manual CSV export.
+2026-09-22T19:42:34.089678 facebook fetch skipped: access_token missing in config/lead_sources.json. Group discovery requires Graph API access with group membership.
+2026-09-22T19:42:35.633953 PDF export skipped: reportlab not installed. CSV remains available.
+2026-09-22T19:43:02.412834 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-22T19:43:02.413010 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-22T19:43:02.413053 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-22T19:43:02.413093 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-22T19:43:02.413124 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-22T19:43:02.413155 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-22T19:43:02.413188 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-22T19:43:02.413217 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-22T19:43:02.413245 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-22T19:43:02.413386 PDF export skipped: reportlab not installed. CSV remains available.
+2026-09-22T19:43:02.462590 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-22T19:43:02.462698 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-22T19:43:02.462735 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-22T19:43:02.462889 PDF export skipped: reportlab not installed. CSV remains available.
+2026-09-23T21:43:32.239564 linkedin fetch skipped: api_token missing in config/lead_sources.json. LinkedIn has no open discovery API; supply a private-app token or a manual CSV export.
+2026-09-23T21:43:32.312272 facebook fetch skipped: access_token missing in config/lead_sources.json. Group discovery requires Graph API access with group membership.
+2026-09-23T21:43:32.547630 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-23T21:43:32.547690 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-23T21:43:32.547729 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-23T21:43:32.547768 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-23T21:43:32.547799 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-23T21:43:32.547828 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-23T21:43:32.547862 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-23T21:43:32.547892 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-23T21:43:32.547921 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-23T21:43:32.548045 PDF export skipped: reportlab not installed. CSV remains available.
+2026-09-23T21:43:32.775144 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-23T21:43:32.775218 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-23T21:43:32.775260 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-23T21:43:32.775304 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-23T21:43:32.775339 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-23T21:43:32.775373 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-23T21:43:32.775413 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-23T21:43:32.775447 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-23T21:43:32.775531 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-23T21:43:32.775573 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-23T21:43:32.775607 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-23T21:43:32.775640 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-23T21:43:32.775678 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-23T21:43:32.775712 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-23T21:43:32.775742 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-23T21:43:32.775775 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-23T21:43:32.775806 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-23T21:43:32.775836 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-23T21:43:32.775973 PDF export skipped: reportlab not installed. CSV remains available.
+2026-09-23T21:43:44.583765 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-23T21:43:44.583874 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-23T21:43:44.584105 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-23T21:43:55.994846 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-23T21:43:55.994971 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-23T21:43:55.995015 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-23T21:43:55.995134 output write failed: [Errno 30] Read-only file system: '/nonexistent_dir'; records saved to /Users/arlindakaloshi/.hubsy/skills/career-switch-lead-scout/data/failed_sync_20260923T214355.csv.
+2026-09-23T21:44:06.516608 output write failed: [Errno 30] Read-only file system: '/nonexistent'; records saved to /Users/arlindakaloshi/.hubsy/skills/career-switch-lead-scout/data/failed_sync_20260923T214406.csv.
+2026-09-24T18:00:01.193968 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-24T18:00:01.194586 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-24T18:00:01.194699 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-24T18:00:01.194797 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-24T18:00:01.194870 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-24T18:00:01.194949 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-24T18:00:01.195029 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-24T18:00:01.195098 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-24T18:00:01.195173 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-24T18:00:01.195258 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-24T18:00:01.195324 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-24T18:00:01.195388 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-24T18:00:01.195460 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-24T18:00:01.195522 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-24T18:00:01.195585 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-24T18:00:01.195657 dedup: dropped https://linkedin.com/in/mock-arta-berisha (seen within 90 days).
+2026-09-24T18:00:01.195723 dedup: dropped https://www.reddit.com/user/mock-dardan-gashi (seen within 90 days).
+2026-09-24T18:00:01.195860 dedup: dropped https://facebook.com/groups/mock/elira (seen within 90 days).
+2026-09-24T18:00:01.196341 PDF export skipped: reportlab not installed. CSV remains available.

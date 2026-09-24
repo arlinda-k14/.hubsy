@@ -1,0 +1,150 @@
+{
+  "regions": {
+    "kosovo": [
+      "kosovo",
+      "pristina",
+      "prishtina",
+      "prizren",
+      "gjakova",
+      "gjilan",
+      "peja",
+      "peje",
+      "mitrovica",
+      "ferizaj"
+    ],
+    "remote_worldwide": [
+      "remote",
+      "remote-ready",
+      "worldwide",
+      "anywhere",
+      "work from home",
+      "online"
+    ]
+  },
+  "keywords": {
+    "switch_intent": [
+      "open to work",
+      "career pivot",
+      "career transition",
+      "career change",
+      "seeking entry level",
+      "entry level",
+      "looking for new path",
+      "new career direction",
+      "change careers"
+    ],
+    "tech_entry_intent": [
+      "break into tech",
+      "no experience",
+      "without a degree",
+      "how to get into ai",
+      "how to get into marketing",
+      "digital career",
+      "entry level digital",
+      "start in ai",
+      "learn marketing from scratch",
+      "zero experience"
+    ],
+    "investment_intent": [
+      "bootcamp",
+      "paid course",
+      "installments",
+      "installment plan",
+      "income share",
+      "income-share",
+      "willing to invest",
+      "invest in education",
+      "career retraining",
+      "tuition",
+      "pay for a course"
+    ],
+    "study_commitment": [
+      "10 hours",
+      "12 hours",
+      "15 hours",
+      "hours a week",
+      "hours per week",
+      "part-time",
+      "part time",
+      "evenings",
+      "weekends",
+      "after work"
+    ]
+  },
+  "scoring": {
+    "weights": {
+      "study_commitment": 0.40,
+      "investment_intent": 0.35,
+      "role_alignment": 0.25
+    },
+    "min_score": 70,
+    "study_target": {
+      "qualified_hours": 10,
+      "hard_floor_hours": 5
+    }
+  },
+  "dedup": {
+    "window_days": 90
+  },
+  "caps": {
+    "daily_ceiling_per_platform": 100,
+    "min_ceiling": 50,
+    "max_ceiling": 100
+  },
+  "qualification": {
+    "max_exp_years": 2,
+    "disqualifying_industries": [
+      "digital marketing",
+      "digital marketer",
+      "marketing",
+      "machine learning",
+      "ml engineer",
+      "software engineering",
+      "software development",
+      "software developer",
+      "software engineer",
+      "data science",
+      "data analyst"
+    ],
+    "target_roles": [
+      "AI Marketing Assistant",
+      "Content Operations Specialist",
+      "Junior Growth Marketer",
+      "Freelance AI Copywriter"
+    ]
+  },
+  "offer": {
+    "tuition_upfront": 1500,
+    "installments": {
+      "count": 15,
+      "amount": 100
+    },
+    "positioning": "Entry-level digital careers, zero coding required, plain-English AI prompts, everyday practical tools, step-by-step beginner guidance."
+  },
+  "platforms": {
+    "reddit": {
+      "enabled": false,
+      "user_agent": "",
+      "client_id": "",
+      "client_secret": "",
+      "subreddits": ["CareerChange", "FindAPath"],
+      "base_url": "https://www.reddit.com"
+    },
+    "linkedin": {
+      "enabled": false,
+      "api_token": "",
+      "base_url": "https://api.linkedin.com/v2",
+      "note": "LinkedIn has no open API for public post discovery. Configure a private-app token or switch to manual CSV export of saved leads."
+    },
+    "facebook": {
+      "enabled": false,
+      "access_token": "",
+      "graph_url": "https://graph.facebook.com/v19.0",
+      "note": "Group post discovery needs an API user with group access. Configure access_token or use manual review."
+    }
+  },
+  "output": {
+    "dir": "output",
+    "formats": ["csv", "pdf"]
+  }
+}
