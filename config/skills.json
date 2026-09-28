@@ -175,6 +175,26 @@
           "required_parameters": ["prompt", "file_path"]
         }
       ]
+    },
+    {
+      "name": "hindsight-memory",
+      "description": "Long-term memory management for Hubsy powered by the Hindsight engine (vectorize-io/hindsight). Capture user context into persistent memory (Retain), fetch past facts and experiences to ground answers (Recall), and build durable user mental models that personalize every session (Reflect).",
+      "path": "skills/hindsight-memory/SKILL.md",
+      "domains": ["memory-management", "persistent-memory", "long-term-recall", "user-modeling"],
+      "triggers": [
+        "remember that I",
+        "what do you know about me",
+        "what did we discuss last time",
+        "remind me about",
+        "long-term memory",
+        "hindsight",
+        "retain",
+        "recall",
+        "reflect",
+        "mental model"
+      ],
+      "required_parameters": ["operation", "bank_id"],
+      "sub_skills": []
     }
   ]
 }
