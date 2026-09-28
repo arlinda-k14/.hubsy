@@ -304,6 +304,29 @@
       ],
       "required_parameters": ["design_context", "target_page_type"],
       "sub_skills": []
+    },
+    {
+      "name": "humanizer",
+      "description": "Rewrite AI-sounding text so it reads like the writer without changing what it says. Scans prose for AI writing patterns (overused vocabulary, rigid syntax, rule-of-three triads, dramatic one-line closers, not-X-but-Y contrasts, dashes everywhere, inflated significance, sales language, stock AI words, bold labels, chatbot residue, knowledge-limit disclaimers) and rewrites it into a natural human voice. Based on blader/humanizer (github.com/blader/humanizer, MIT, v3.1.0) and Wikipedia's Sign of AI writing. Supports pasted-text mode, file mode (prose-only edits, code preserved), and embedded mode (commit messages, PRs, documents). Use when humanizing, de-AI-ing, or editing any text that sounds machine-generated, whether for an assignment, essay, blog post, email, comment, or response.",
+      "path": "skills/humanizer/SKILL.md",
+      "domains": ["content-drafting", "writing-editing", "ai-writing-tells", "proofreading", "natural-language"],
+      "triggers": [
+        "humanize this",
+        "remove AI writing patterns",
+        "make this sound human",
+        "rewrite this prose",
+        "AI tells",
+        "too many AI phrases",
+        "de-AI my text",
+        "sounds like a chatbot",
+        "assignment writing",
+        "essay rewrite",
+        "natural voice",
+        "remove overused AI words",
+        "signs of AI writing"
+      ],
+      "required_parameters": ["text", "output_mode"],
+      "sub_skills": []
     }
   ]
 }
