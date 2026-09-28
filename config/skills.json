@@ -215,6 +215,27 @@
       ],
       "required_parameters": ["target_asset", "metric"],
       "sub_skills": []
+    },
+    {
+      "name": "google-workspace-cli",
+      "description": "Drive Gmail, Calendar, Drive, Sheets, Docs, Chat, and other Google Workspace APIs from the terminal using the gws CLI (googleworkspace/cli). Every gws command returns structured JSON and the command surface is built dynamically from Google's Discovery Service. Use whenever the user wants to check or send email, manage calendar events and agendas, list or upload Drive files, read or write spreadsheet cells and rows, edit documents, or send Google Chat messages.",
+      "path": "skills/google-workspace-cli/SKILL.md",
+      "domains": ["workspace-automation", "google-workspace", "email", "calendar", "productivity"],
+      "triggers": [
+        "check my email",
+        "send an email",
+        "what's on my calendar",
+        "add an event",
+        "list my drive files",
+        "upload this file to drive",
+        "read this spreadsheet",
+        "append a row",
+        "edit this doc",
+        "gmail",
+        "gws"
+      ],
+      "required_parameters": ["service", "action"],
+      "sub_skills": []
     }
   ]
 }
