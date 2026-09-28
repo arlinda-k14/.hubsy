@@ -236,6 +236,29 @@
       ],
       "required_parameters": ["service", "action"],
       "sub_skills": []
+    },
+    {
+      "name": "anthropic-skills-engine",
+      "description": "Author, structure, and consume skills per the official Agent Skills Specification (agentskills.io) as implemented by anthropics/skills: a folder with a SKILL.md combining YAML frontmatter (name, description, optional license/compatibility/metadata) with a Markdown instruction body, organized for progressive disclosure across scripts/, references/, and assets/. Leverages Anthropic's enterprise skills for document processing (pdf, docx, pptx, xlsx) and brand-guidelines styling. Use when building or validating a custom skill, processing/generating documents, or applying on-brand colors and typography.",
+      "path": "skills/anthropic-skills-engine/SKILL.md",
+      "domains": ["standard-specifications", "skill-development", "agent-skills", "document-processing", "branding"],
+      "triggers": [
+        "agent skills spec",
+        "create a custom skill",
+        "SKILL.md",
+        "skill frontmatter",
+        "skills-ref",
+        "validate this skill",
+        "pdf processing",
+        "docx",
+        "pptx",
+        "xlsx",
+        "brand guidelines",
+        "brand colors",
+        "how do I format a skill"
+      ],
+      "required_parameters": ["skill_goal", "target_format"],
+      "sub_skills": []
     }
   ]
 }
