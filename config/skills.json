@@ -327,6 +327,32 @@
       ],
       "required_parameters": ["text", "output_mode"],
       "sub_skills": []
+    },
+    {
+      "name": "claude-plugins-official",
+      "description": "Interface Hubsy with the official Anthropic Claude Plugins directory (github.com/anthropics/claude-plugins-official), the curated marketplace of Claude Code plugin integrations for external tools: GitHub (issues, PRs, code review, repo search via the GitHub MCP server and GITHUB_PERSONAL_ACCESS_TOKEN), Slack (message search, channels, threads via slack-mcp-plugin), Google Workspace (Gmail/Calendar/Drive via OAuth connectors and google-cloud-storage), Notion (search pages, create/update documents, manage databases via the Notion plugin), and Web Search (Exa, Tavily, web MCPs). Covers the standard plugin structure (.claude-plugin/plugin.json, .mcp.json, commands/, agents/, skills/), immutable plugin-name rules, marketplace source types (relative, url, git-subdir), MCP server config syntax (http/stdio with ${ENV_VAR} token injection), and authentication patterns across those tools. Use when setting up or driving any official Claude plugin, wiring an external-tool MCP server, or explaining how Claude plugins expose GitHub/Slack/Google/Notion/web-search tools.",
+      "path": "skills/claude-plugins-official/SKILL.md",
+      "domains": ["tool-integrations", "claude-plugins", "mcp-servers", "external-tools", "authentication"],
+      "triggers": [
+        "claude plugin",
+        "official plugins",
+        "install plugin",
+        "plugin install",
+        "github mcp",
+        "slack integration",
+        "google workspace",
+        "gmail calendar drive",
+        "notion plugin",
+        "web search mcp",
+        "exa",
+        "tavily",
+        "mcp server config",
+        "external tool integration",
+        "plugin marketplace",
+        "GITHUB_PERSONAL_ACCESS_TOKEN"
+      ],
+      "required_parameters": ["tool", "action"],
+      "sub_skills": []
     }
   ]
 }
