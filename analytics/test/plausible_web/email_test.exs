@@ -1,0 +1,632 @@
+defmodule PlausibleWeb.EmailTest do
+  use Plausible.DataCase, async: true
+
+  import Plausible.Factory
+
+  alias PlausibleWeb.Email
+
+  describe "base_email layout" do
+    test "greets user by first name if user in template assigns" do
+      email =
+        Email.base_email()
+        |> Email.render("welcome_email.html", %{
+          user: build(:user, name: "John Doe"),
+          code: "123"
+        })
+
+      assert email.html_body =~ "Hey John,"
+      assert email.text_body =~ "Hey John,"
+    end
+
+    test "greets impersonally when user not in template assigns" do
+      email =
+        Email.base_email()
+        |> Email.render("welcome_email.html")
+
+      assert email.html_body =~ "Hey,"
+      assert email.text_body =~ "Hey,"
+    end
+
+    test "renders plausible link" do
+      email =
+        Email.base_email()
+        |> Email.render("welcome_email.html")
+
+      assert email.html_body =~ plausible_link()
+      assert email.text_body =~ plausible_url()
+    end
+
+    @tag :ee_only
+    test "renders unsubscribe placeholder" do
+      email =
+        Email.base_email()
+        |> Email.render("welcome_email.html")
+
+      assert email.html_body =~ "{{{ pm:unsubscribe }}}"
+    end
+
+    test "can be disabled with a nil layout" do
+      email =
+        Email.base_email(%{layout: nil})
+        |> Email.render("welcome_email.html", %{
+          user: build(:user, name: "John Doe")
+        })
+
+      refute email.html_body =~ "Hey John,"
+
+      refute email.text_body =~ "Hey John,"
+    end
+  end
+
+  describe "priority email layout" do
+    @tag :ee_only
+    test "uses the `priority` message stream in Postmark in EE" do
+      email =
+        Email.priority_email()
+        |> Email.render("activation_email.html", %{
+          user: build(:user, name: "John Doe"),
+          code: "123"
+        })
+
+      assert %{"MessageStream" => "priority"} = email.private[:message_params]
+    end
+
+    @tag :ce_build_only
+    test "doesn't use the `priority` message stream in Postmark in CE" do
+      email =
+        Email.priority_email()
+        |> Email.render("activation_email.html", %{
+          user: build(:user, name: "John Doe"),
+          code: "123"
+        })
+
+      refute email.private[:message_params]["MessageStream"]
+    end
+
+    test "greets user by first name if user in template assigns" do
+      email =
+        Email.priority_email()
+        |> Email.render("activation_email.html", %{
+          user: build(:user, name: "John Doe"),
+          code: "123"
+        })
+
+      assert email.html_body =~ "Hey John,"
+      assert email.text_body =~ "Hey John,"
+    end
+
+    test "greets impersonally when user not in template assigns" do
+      email =
+        Email.priority_email()
+        |> Email.render("password_reset_email.html", %{
+          reset_link: "imaginary"
+        })
+
+      assert email.html_body =~ "Hey,"
+      assert email.text_body =~ "Hey,"
+    end
+
+    test "renders plausible link" do
+      email =
+        Email.priority_email()
+        |> Email.render("password_reset_email.html", %{
+          reset_link: "imaginary"
+        })
+
+      assert email.html_body =~ plausible_link()
+      assert email.text_body =~ plausible_url()
+    end
+
+    test "does not render unsubscribe placeholder" do
+      email =
+        Email.priority_email()
+        |> Email.render("password_reset_email.html", %{
+          reset_link: "imaginary"
+        })
+
+      refute email.html_body =~ "{{{ pm:unsubscribe }}}"
+    end
+
+    test "can be disabled with a nil layout" do
+      email =
+        Email.priority_email(%{layout: nil})
+        |> Email.render("password_reset_email.html", %{
+          reset_link: "imaginary"
+        })
+
+      refute email.html_body =~ "Hey John,"
+      refute email.html_body =~ plausible_link()
+
+      refute email.text_body =~ "Hey John,"
+      refute email.text_body =~ plausible_url()
+    end
+  end
+
+  describe "over_limit_email/3" do
+    test "renders usage, suggested plan, and links to upgrade and account settings" do
+      user = build(:user)
+      team = build(:team, identifier: Ecto.UUID.generate())
+      penultimate_cycle = Date.range(~D[2023-03-01], ~D[2023-03-31])
+      last_cycle = Date.range(~D[2023-04-01], ~D[2023-04-30])
+
+      usage = %{
+        penultimate_cycle: %{date_range: penultimate_cycle, total: 12_300},
+        last_cycle: %{date_range: last_cycle, total: 32_100}
+      }
+
+      %{html_body: html_body, subject: subject} =
+        PlausibleWeb.Email.over_limit_email(user, team, usage, "100k")
+
+      assert subject == "[Action required] You have outgrown your Plausible subscription tier"
+
+      assert html_body =~ PlausibleWeb.TextHelpers.format_date_range(last_cycle)
+      assert html_body =~ "We recommend you upgrade to the 100k pageviews/month plan"
+      assert html_body =~ "your account recorded 32,100 billable pageviews"
+
+      assert html_body =~
+               "cycle before that (#{PlausibleWeb.TextHelpers.format_date_range(penultimate_cycle)}), your account used 12,300 billable pageviews"
+
+      assert text_of_element(
+               html_body,
+               ~s|a[href$="/billing/choose-plan?__team=#{team.identifier}"]|
+             ) ==
+               "Click here to upgrade your subscription"
+
+      assert text_of_element(
+               html_body,
+               ~s|a[href$="/settings/billing/subscription?__team=#{team.identifier}"]|
+             ) ==
+               "account settings"
+
+      assert html_body =~ url(~p"/billing/choose-plan?#{[__team: team.identifier]}")
+    end
+
+    test "asks enterprise level usage to contact us" do
+      user = build(:user)
+      team = build(:team, identifier: Ecto.UUID.generate())
+      penultimate_cycle = Date.range(~D[2023-03-01], ~D[2023-03-31])
+      last_cycle = Date.range(~D[2023-04-01], ~D[2023-04-30])
+      suggested_plan = :enterprise
+
+      usage = %{
+        penultimate_cycle: %{date_range: penultimate_cycle, total: 12_300},
+        last_cycle: %{date_range: last_cycle, total: 32_100}
+      }
+
+      %{html_body: html_body} =
+        PlausibleWeb.Email.over_limit_email(user, team, usage, suggested_plan)
+
+      refute html_body =~ "Click here to upgrade your subscription"
+      assert html_body =~ "Your usage exceeds our standard plans, so please reply back"
+    end
+  end
+
+  describe "dashboard_locked/3" do
+    test "renders usage, suggested plan, and links to upgrade and account settings" do
+      user = build(:user)
+      team = build(:team, identifier: Ecto.UUID.generate())
+      penultimate_cycle = Date.range(~D[2023-03-01], ~D[2023-03-31])
+      last_cycle = Date.range(~D[2023-04-01], ~D[2023-04-30])
+
+      usage = %{
+        penultimate_cycle: %{date_range: penultimate_cycle, total: 12_300},
+        last_cycle: %{date_range: last_cycle, total: 32_100}
+      }
+
+      %{html_body: html_body, subject: subject} =
+        PlausibleWeb.Email.dashboard_locked(user, team, usage, "100k")
+
+      assert subject == "[Action required] Your Plausible dashboard is now locked"
+
+      assert html_body =~ PlausibleWeb.TextHelpers.format_date_range(last_cycle)
+      assert html_body =~ "We recommend you upgrade to the 100k pageviews/month plan"
+      assert html_body =~ "your account recorded 32,100 billable pageviews"
+
+      assert html_body =~
+               "cycle before that (#{PlausibleWeb.TextHelpers.format_date_range(penultimate_cycle)}), the usage was 12,300 billable pageviews"
+
+      assert text_of_element(
+               html_body,
+               ~s|a[href$="/billing/choose-plan?__team=#{team.identifier}"]|
+             ) ==
+               "Click here to upgrade your subscription"
+
+      assert text_of_element(
+               html_body,
+               ~s|a[href$="/settings/billing/subscription?__team=#{team.identifier}"]|
+             ) ==
+               "account settings"
+
+      assert html_body =~ url(~p"/billing/choose-plan?#{[__team: team.identifier]}")
+    end
+
+    test "asks enterprise level usage to contact us" do
+      user = build(:user)
+      team = build(:team, identifier: Ecto.UUID.generate())
+      penultimate_cycle = Date.range(~D[2023-03-01], ~D[2023-03-31])
+      last_cycle = Date.range(~D[2023-04-01], ~D[2023-04-30])
+      suggested_plan = :enterprise
+
+      usage = %{
+        penultimate_cycle: %{date_range: penultimate_cycle, total: 12_300},
+        last_cycle: %{date_range: last_cycle, total: 32_100}
+      }
+
+      %{html_body: html_body} =
+        PlausibleWeb.Email.dashboard_locked(user, team, usage, suggested_plan)
+
+      refute html_body =~ "Click here to upgrade your subscription"
+      assert html_body =~ "Your usage exceeds our standard plans, so please reply back"
+    end
+  end
+
+  describe "enterprise_over_limit_internal_email/2" do
+    test "renders pageview usage by billing cycles + sites usage/limit" do
+      team = insert(:team, name: "Acme Inc", identifier: Ecto.UUID.generate())
+      owner = build(:user, email: "owner@acme.test")
+      billing_member = build(:user, email: "billing@acme.test")
+      penultimate_cycle = Date.range(~D[2023-03-01], ~D[2023-03-31])
+      last_cycle = Date.range(~D[2023-04-01], ~D[2023-04-30])
+
+      pageview_usage = %{
+        penultimate_cycle: %{date_range: penultimate_cycle, total: 123_141_888},
+        last_cycle: %{date_range: last_cycle, total: 123_222_999}
+      }
+
+      %{html_body: html_body, subject: subject} =
+        PlausibleWeb.Email.enterprise_over_limit_internal_email(team, %{
+          team_member_emails: [owner.email, billing_member.email],
+          exceeds_pageview_limit?: true,
+          pageview_usage: pageview_usage,
+          pageview_limit: 100_000_000,
+          exceeds_site_limit?: false,
+          site_usage: 50,
+          site_limit: 50
+        })
+
+      assert subject == "Acme Inc has outgrown their enterprise plan"
+
+      assert html_body =~ "Team name: Acme Inc"
+      assert html_body =~ "Team identifier: #{team.identifier}"
+      assert html_body =~ "Customer email(s): owner@acme.test, billing@acme.test"
+      assert html_body =~ "Monthly pageviews: EXCEEDED"
+      assert html_body =~ "Sites: OK"
+
+      assert html_body =~ PlausibleWeb.TextHelpers.format_date_range(last_cycle)
+      assert html_body =~ "123,222,999"
+      assert html_body =~ "/ 100,000,000"
+
+      assert html_body =~ PlausibleWeb.TextHelpers.format_date_range(penultimate_cycle)
+      assert html_body =~ "123,141,888"
+
+      assert html_body =~ "50 / 50 allowed sites"
+    end
+
+    test "renders :unlimited pageview limit" do
+      team = insert(:team, name: "Acme Inc", identifier: Ecto.UUID.generate())
+      penultimate_cycle = Date.range(~D[2023-03-01], ~D[2023-03-31])
+      last_cycle = Date.range(~D[2023-04-01], ~D[2023-04-30])
+
+      pageview_usage = %{
+        penultimate_cycle: %{date_range: penultimate_cycle, total: 100},
+        last_cycle: %{date_range: last_cycle, total: 200}
+      }
+
+      %{html_body: html_body} =
+        PlausibleWeb.Email.enterprise_over_limit_internal_email(team, %{
+          team_member_emails: ["owner@acme.test"],
+          exceeds_pageview_limit?: false,
+          pageview_usage: pageview_usage,
+          pageview_limit: :unlimited,
+          exceeds_site_limit?: true,
+          site_usage: 51,
+          site_limit: 50
+        })
+
+      assert html_body =~ "200"
+      assert html_body =~ "/ unlimited"
+      assert html_body =~ "Monthly pageviews: OK"
+      assert html_body =~ "Sites: EXCEEDED"
+    end
+  end
+
+  describe "approaching accept_traffic_until" do
+    test "renders first warning" do
+      user = build(:user, id: 123, name: "John Doe")
+      team = build(:team, identifier: Ecto.UUID.generate())
+
+      notification = %{
+        id: user.id,
+        email: user.email,
+        deadline: Date.add(Date.utc_today(), 7),
+        site_ids: [1, 2, 3],
+        name: user.name,
+        team: team
+      }
+
+      %{html_body: body, subject: subject} =
+        PlausibleWeb.Email.approaching_accept_traffic_until(notification)
+
+      assert subject == "Your stats stop collecting soon"
+      assert body =~ plausible_link(team: team, label: "start a Plausible subscription")
+      assert body =~ "Hey John,"
+
+      assert body =~
+               "Your sites are still sending us data, but your account is no longer active. We'll stop counting new stats next week."
+    end
+
+    test "renders final warning" do
+      user = build(:user, id: 123, name: "John Doe")
+      team = build(:team, identifier: Ecto.UUID.generate())
+
+      notification = %{
+        id: user.id,
+        email: user.email,
+        deadline: Date.add(Date.utc_today(), 1),
+        site_ids: [1, 2, 3],
+        name: user.name,
+        team: team
+      }
+
+      %{html_body: body, subject: subject} =
+        PlausibleWeb.Email.approaching_accept_traffic_until_tomorrow(notification)
+
+      assert subject == "Your stats stop tomorrow"
+      assert body =~ plausible_link(team: team, label: "start a Plausible subscription")
+
+      assert body =~
+               "Your sites are still sending us data, but your account is no longer active. We'll stop counting new stats tomorrow."
+    end
+
+    test "final warning does not mention deletion when no deletion_date is given" do
+      user = build(:user, id: 123, name: "John Doe")
+      team = build(:team, identifier: Ecto.UUID.generate())
+
+      notification = %{
+        id: user.id,
+        email: user.email,
+        deadline: Date.add(Date.utc_today(), 1),
+        site_ids: [1, 2, 3],
+        name: user.name,
+        team: team
+      }
+
+      %{html_body: body} =
+        PlausibleWeb.Email.approaching_accept_traffic_until_tomorrow(notification)
+
+      refute body =~ "permanently delete"
+    end
+
+    test "final warning mentions the deletion date when given" do
+      user = build(:user, id: 123, name: "John Doe")
+      team = build(:team, identifier: Ecto.UUID.generate())
+
+      notification = %{
+        id: user.id,
+        email: user.email,
+        deadline: Date.add(Date.utc_today(), 1),
+        site_ids: [1, 2, 3],
+        name: user.name,
+        team: team
+      }
+
+      deletion_date = ~D[2026-10-19]
+
+      %{html_body: body} =
+        PlausibleWeb.Email.approaching_accept_traffic_until_tomorrow(notification, deletion_date)
+
+      assert body =~
+               "If you don't subscribe, we'll permanently delete your Plausible dashboards and all their stats on #{PlausibleWeb.EmailView.date_format(deletion_date)}. This cannot be undone."
+
+      assert body =~ ~s|<a href="https://plausible.io/docs/export-stats">export your stats</a>|
+    end
+  end
+
+  describe "deletion_full_notice_email/4" do
+    test "renders trial copy for an expired_trial schedule" do
+      user = build(:user, id: 123, name: "John Doe")
+      team = build(:team, identifier: Ecto.UUID.generate(), name: "My Team")
+
+      schedule =
+        build(:team_deletion_schedule, category: :expired_trial, deletion_date: ~D[2026-10-19])
+
+      sites_summary = %{domains: ["a.example.com", "b.example.com"], more_count: 0}
+
+      %{html_body: body, subject: subject} =
+        PlausibleWeb.Email.deletion_full_notice_email(user, team, schedule, sites_summary)
+
+      assert body =~ PlausibleWeb.EmailView.choose_plan_url(team)
+      assert body =~ ~s|<a href="https://plausible.io/docs/export-stats">export your stats</a>|
+
+      body = text(body)
+
+      days = Plausible.Teams.DeletionSchedule.first_notice_before_deletion_days()
+      assert subject == "Your Plausible dashboards and stats will be deleted in #{days} days"
+      assert body =~ "Your Plausible trial ended a while ago"
+      refute body =~ "subscription lapsed"
+
+      assert body =~
+               "we'll permanently delete the Plausible dashboards and stats for your My Team team on 19 Oct 2026. This cannot be undone."
+
+      assert body =~ "This covers a.example.com, b.example.com."
+    end
+
+    test "renders subscription copy for a churned_subscription schedule" do
+      user = build(:user, id: 123, name: "John Doe")
+      team = build(:team, identifier: Ecto.UUID.generate())
+
+      schedule =
+        build(:team_deletion_schedule,
+          category: :churned_subscription,
+          deletion_date: ~D[2026-10-19]
+        )
+
+      sites_summary = %{domains: [], more_count: 0}
+
+      %{html_body: body} =
+        PlausibleWeb.Email.deletion_full_notice_email(user, team, schedule, sites_summary)
+
+      assert body =~ "Your Plausible subscription lapsed a while ago"
+      refute body =~ "trial ended"
+    end
+
+    test "caps the listed domains and mentions how many more there are" do
+      user = build(:user, id: 123, name: "John Doe")
+      team = build(:team, identifier: Ecto.UUID.generate())
+      schedule = build(:team_deletion_schedule, deletion_date: ~D[2026-10-19])
+      sites_summary = %{domains: ["a.example.com", "b.example.com"], more_count: 7}
+
+      %{html_body: body} =
+        PlausibleWeb.Email.deletion_full_notice_email(user, team, schedule, sites_summary)
+
+      assert body =~ "This covers a.example.com, b.example.com (and 7 more sites)."
+    end
+
+    test "omits the site list entirely when there are no domains to show" do
+      user = build(:user, id: 123, name: "John Doe")
+      team = build(:team, identifier: Ecto.UUID.generate())
+      schedule = build(:team_deletion_schedule, deletion_date: ~D[2026-10-19])
+      sites_summary = %{domains: [], more_count: 0}
+
+      %{html_body: body} =
+        PlausibleWeb.Email.deletion_full_notice_email(user, team, schedule, sites_summary)
+
+      refute body =~ "This covers"
+    end
+  end
+
+  describe "deletion_reminder_email/4" do
+    test "renders the deletion date, site list, and subscribe link" do
+      user = build(:user, id: 123, name: "John Doe")
+      team = build(:team, identifier: Ecto.UUID.generate(), name: "My Team")
+      schedule = build(:team_deletion_schedule, deletion_date: ~D[2026-10-19])
+      sites_summary = %{domains: ["a.example.com"], more_count: 3}
+
+      %{html_body: body, subject: subject} =
+        PlausibleWeb.Email.deletion_reminder_email(user, team, schedule, sites_summary)
+
+      assert body =~ PlausibleWeb.EmailView.choose_plan_url(team)
+      assert body =~ ~s|<a href="https://plausible.io/docs/export-stats">export your stats</a>|
+
+      body = text(body)
+
+      days = Plausible.Teams.DeletionSchedule.reminder_before_deletion_days()
+
+      assert subject ==
+               "Final notice: your Plausible dashboards and stats will be deleted in #{days} days"
+
+      assert body =~
+               "We'll permanently delete the Plausible dashboards and stats for your My Team team on 19 Oct 2026."
+
+      assert body =~ "This covers a.example.com (and 3 more sites)."
+      assert body =~ "This cannot be undone."
+    end
+  end
+
+  describe "site setup emails" do
+    setup do
+      trial_user = new_user(trial_expiry_date: Date.add(Date.utc_today(), 100))
+      site = new_site(owner: trial_user)
+
+      emails = [
+        PlausibleWeb.Email.create_site_email(trial_user),
+        PlausibleWeb.Email.site_setup_help(trial_user, site.team, site),
+        PlausibleWeb.Email.site_setup_success(trial_user, site)
+      ]
+
+      {:ok, emails: emails, user: trial_user, site: site}
+    end
+
+    test "create site email", %{user: user} do
+      email = PlausibleWeb.Email.create_site_email(user)
+
+      assert email.html_body =~
+               "You’ve created your Plausible account but haven’t added a site yet."
+    end
+
+    test "site setup help email", %{user: user, site: site} do
+      email = PlausibleWeb.Email.site_setup_help(user, site.team, site)
+
+      assert email.html_body =~
+               "We haven't recorded any traffic for #{site.domain} yet."
+    end
+
+    test "site setup success email", %{user: user, site: site} do
+      email = PlausibleWeb.Email.site_setup_success(user, site)
+
+      assert email.html_body =~ "Your first visitor is now visible in Plausible."
+    end
+  end
+
+  describe "import emails" do
+    setup do
+      user = new_user()
+      site = new_site(owner: user)
+
+      {:ok, user: user, site: site}
+    end
+
+    for {source, success_phrase, failure_phrase} <- [
+          {:google_analytics_4, "Your Google Analytics import has completed successfully",
+           "Unfortunately, your Google Analytics import for"},
+          {:universal_analytics, "Your Google Analytics import has completed successfully",
+           "Unfortunately, your Google Analytics import for"},
+          {:csv, "Your CSV import has completed successfully",
+           "Unfortunately, your CSV import for"}
+        ] do
+      test "success email for #{source}", %{user: user, site: site} do
+        site_import = insert(:site_import, site: site, source: unquote(source))
+        PlausibleWeb.Email.import_success(site_import, user)
+
+        email = PlausibleWeb.Email.import_success(site_import, user)
+
+        assert email.text_body =~ unquote(success_phrase)
+      end
+
+      test "failure email for #{source}", %{user: user, site: site} do
+        site_import = insert(:site_import, site: site, source: unquote(source))
+
+        email = PlausibleWeb.Email.import_failure(site_import, user)
+
+        assert email.text_body =~ unquote(failure_phrase)
+      end
+    end
+  end
+
+  describe "text_body" do
+    test "welcome email" do
+      email =
+        Email.base_email()
+        |> Email.render("welcome_email.html", %{
+          user: build(:user, name: "John Doe"),
+          code: "123"
+        })
+
+      assert email.text_body =~ "Welcome to Plausible."
+    end
+  end
+
+  def plausible_url do
+    PlausibleWeb.EmailView.plausible_url()
+  end
+
+  def plausible_link(opts \\ []) do
+    suffix =
+      if team = Keyword.get(opts, :team) do
+        "?__team=#{team.identifier}"
+      else
+        ""
+      end
+
+    plausible_url = plausible_url()
+
+    label =
+      if label = Keyword.get(opts, :label) do
+        label
+      else
+        plausible_url
+      end
+
+    "<a href=\"#{plausible_url <> suffix}\">#{label}</a>"
+  end
+end

@@ -1,0 +1,58 @@
+<.settings_tiles>
+  <.tile>
+    <:title>Site details</:title>
+    <:subtitle>Manage your site configuration</:subtitle>
+
+    <.settings_rows>
+      <%= if Plausible.Sites.regular?(@site) do %>
+        <.settings_row label="Site domain" docs="change-domain-name">
+          <span class="text-gray-800 dark:text-gray-200">{@site.domain}</span>
+          <.styled_link
+            href={~p"/#{@site.domain}/change-domain"}
+            aria-label="Change domain"
+            class="text-sm"
+          >
+            Change
+          </.styled_link>
+        </.settings_row>
+
+        <.settings_divider />
+      <% end %>
+
+      <.form :let={f} for={@changeset} action={"/#{URI.encode_www_form(@site.domain)}/settings"}>
+        <.settings_row
+          label="Reporting timezone"
+          for={f[:timezone].id}
+          docs="general"
+          actions_class="gap-3"
+          x-data={"{ changed: false, saved: '#{@site.timezone}' }"}
+          x-on:change="changed = $event.target.value !== saved"
+        >
+          <div class="min-w-0">
+            <.input
+              field={f[:timezone]}
+              type="select"
+              options={Plausible.Timezones.options()}
+              width="w-full max-w-72"
+              mt?={false}
+            />
+          </div>
+          <.button
+            theme="secondary"
+            type="submit"
+            class="shrink-0"
+            mt?={false}
+            disabled
+            x-bind:disabled="!changed"
+          >
+            Save
+          </.button>
+        </.settings_row>
+      </.form>
+    </.settings_rows>
+  </.tile>
+
+  <%= if Plausible.Sites.regular?(@site) do %>
+    {live_render(@conn, PlausibleWeb.Live.TrackingSettings, session: %{"domain" => @site.domain})}
+  <% end %>
+</.settings_tiles>

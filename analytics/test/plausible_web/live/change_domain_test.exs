@@ -1,0 +1,469 @@
+defmodule PlausibleWeb.Live.ChangeDomainTest do
+  use PlausibleWeb.ConnCase, async: false
+
+  import Phoenix.LiveViewTest
+
+  on_ee do
+    use Plausible.Test.Support.DNS
+  end
+
+  alias Plausible.Repo
+
+  describe "ChangeDomain LiveView" do
+    setup [:create_user, :log_in, :create_site]
+
+    on_ee do
+      setup do
+        stub_dns()
+
+        # Stub detection by default to prevent async task race conditions
+        # Tests that need specific detection results can override this stub
+        stub_detection_result(%{
+          "v1Detected" => false,
+          "gtmLikely" => false,
+          "wordpressLikely" => false,
+          "wordpressPlugin" => false
+        })
+
+        :ok
+      end
+    end
+
+    test "mounts and renders form", %{conn: conn, site: site} do
+      {:ok, _lv, html} = live(conn, "/#{site.domain}/change-domain")
+
+      assert html =~ "Change your website domain"
+    end
+
+    test "form submission when no change is made", %{conn: conn, site: site} do
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      html =
+        lv
+        |> element("form")
+        |> render_submit(%{site: %{domain: site.domain}})
+
+      assert html =~ "New domain must be different than the current one"
+    end
+
+    test "form submission to an existing domain", %{conn: conn, site: site} do
+      another_site = insert(:site)
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      html =
+        lv
+        |> element("form")
+        |> render_submit(%{site: %{domain: another_site.domain}})
+
+      assert html =~ "This domain is already registered"
+
+      site = Repo.reload!(site)
+      assert site.domain != another_site.domain
+      assert is_nil(site.domain_changed_from)
+    end
+
+    test "form submission to a domain already owned by the same team shows a targeted error",
+         %{conn: conn, site: site, user: user} do
+      owned_site = new_site(owner: user)
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      html =
+        lv
+        |> element("form")
+        |> render_submit(%{site: %{domain: owned_site.domain}})
+
+      assert html =~ "You already own this site"
+
+      expected_settings_link =
+        ~p"/#{owned_site.domain}/settings/general"
+
+      assert html =~ expected_settings_link
+
+      site = Repo.reload!(site)
+      assert site.domain != owned_site.domain
+      assert is_nil(site.domain_changed_from)
+    end
+
+    test "form submission to a domain in transition period", %{conn: conn, site: site} do
+      _another_site = insert(:site, domain_changed_from: "foo.example.com")
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      html =
+        lv
+        |> element("form")
+        |> render_submit(%{site: %{domain: "foo.example.com"}})
+
+      assert html =~ "This domain is already registered"
+
+      site = Repo.reload!(site)
+      assert site.domain != "foo.example.com"
+      assert is_nil(site.domain_changed_from)
+    end
+
+    test "domain swap is allowed when both sites belong to the same team",
+         %{conn: conn, site: site, user: user} do
+      other_site = new_site(owner: user)
+
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      new_domain = "tmp.#{site.domain}"
+
+      lv
+      |> element("form")
+      |> render_submit(%{site: %{domain: new_domain}})
+
+      on_ee do
+        render_async(lv, 500)
+      end
+
+      assert_patch(lv, "/#{URI.encode_www_form(new_domain)}/change-domain/success")
+
+      # Now swap: rename other_site to the original domain of site
+      original_domain = site.domain
+      other_original_domain = other_site.domain
+      {:ok, lv2, _html} = live(conn, "/#{other_original_domain}/change-domain")
+
+      lv2
+      |> element("form")
+      |> render_submit(%{site: %{domain: original_domain}})
+
+      on_ee do
+        render_async(lv2, 500)
+      end
+
+      assert_patch(lv2, "/#{URI.encode_www_form(original_domain)}/change-domain/success")
+
+      assert Repo.reload!(other_site).domain == original_domain
+    end
+
+    for {role, membership_type} <- [
+          {:editor, :site_guest},
+          {:editor, :team_member},
+          {:admin, :team_member},
+          {:owner, :team_member}
+        ] do
+      test "#{Phoenix.Naming.humanize(membership_type)} with role #{role} can submit the form and it changes the record in the database",
+           %{conn: conn, user: user} do
+        site = new_site()
+
+        add_site_guest_or_team_member(site,
+          user: user,
+          role: unquote(role),
+          membership_type: unquote(membership_type)
+        )
+
+        original_domain = site.domain
+        new_domain = "new.#{site.domain}"
+        {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+        lv
+        |> element("form")
+        |> render_submit(%{site: %{domain: new_domain}})
+
+        on_ee do
+          render_async(lv, 500)
+        end
+
+        site = Repo.reload!(site)
+        assert site.domain == new_domain
+        assert site.domain_changed_from == original_domain
+      end
+    end
+
+    test "successful form submission navigates to success page", %{conn: conn, site: site} do
+      on_ee do
+        stub_detection_result(%{
+          "v1Detected" => false,
+          "gtmLikely" => false,
+          "wordpressLikely" => false,
+          "wordpressPlugin" => false
+        })
+      end
+
+      original_domain = site.domain
+      new_domain = "new.#{site.domain}"
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      lv
+      |> element("form")
+      |> render_submit(%{site: %{domain: new_domain}})
+
+      assert_patch(lv, "/#{URI.encode_www_form(new_domain)}/change-domain/success")
+
+      html = render_async(lv, 500)
+      assert html =~ "Domain Changed Successfully"
+      assert html =~ original_domain
+      assert html =~ new_domain
+    end
+
+    test "form validation shows error for empty domain", %{conn: conn, site: site} do
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      html =
+        lv
+        |> element("form")
+        |> render_submit(%{site: %{domain: ""}})
+
+      assert html =~ "Please enter a domain or subdomain"
+    end
+
+    test "form validation shows error for invalid domain format", %{conn: conn, site: site} do
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      html =
+        lv
+        |> element("form")
+        |> render_submit(%{site: %{domain: "invalid domain with spaces"}})
+
+      assert html =~ "only letters, numbers, slashes, underscores and period allowed"
+    end
+
+    test "renders back to settings link with correct path", %{conn: conn, site: site} do
+      {:ok, _lv, html} = live(conn, "/#{site.domain}/change-domain")
+
+      expected_link = ~p"/#{site.domain}/settings/general"
+      assert html =~ expected_link
+    end
+
+    @tag :ee_only
+    test "success page shows WordPress plugin notice when detected", %{conn: conn, site: site} do
+      stub_detection_result(%{
+        "v1Detected" => true,
+        "gtmLikely" => false,
+        "wordpressLikely" => true,
+        "wordpressPlugin" => true
+      })
+
+      new_domain = "new.#{site.domain}"
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      lv
+      |> element("form")
+      |> render_submit(%{site: %{domain: new_domain}})
+
+      assert_patch(lv, "/#{URI.encode_www_form(new_domain)}/change-domain/success")
+
+      html = render_async(lv, 500)
+      assert html =~ "using our WordPress plugin"
+      assert html =~ "also update the site"
+      assert html =~ "Plausible Wordpress Plugin settings"
+      assert html =~ "within 72 hours"
+
+      assert element_exists?(
+               html,
+               "a[href='#{PlausibleWeb.Live.ChangeDomain.change_domain_docs_link()}']"
+             )
+    end
+
+    @tag :ee_only
+    test "success page shows generic v1 notice when detected but not WordPress", %{
+      conn: conn,
+      site: site
+    } do
+      stub_detection_result(%{
+        "v1Detected" => true,
+        "gtmLikely" => false,
+        "wordpressLikely" => false,
+        "wordpressPlugin" => false
+      })
+
+      new_domain = "new.#{site.domain}"
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      lv
+      |> element("form")
+      |> render_submit(%{site: %{domain: new_domain}})
+
+      assert_patch(lv, "/#{URI.encode_www_form(new_domain)}/change-domain/success")
+
+      html = render_async(lv, 500)
+      assert html =~ "using our legacy script"
+      assert html =~ "update the site domain"
+      assert html =~ "Plausible installation"
+      assert html =~ "within 72 hours"
+      refute html =~ "Wordpress"
+
+      assert element_exists?(
+               html,
+               "a[href='#{PlausibleWeb.Live.ChangeDomain.change_domain_docs_link()}']"
+             )
+    end
+
+    @tag :ee_only
+    test "success page shows 'tracking works' notice when no v1 tracking detected", %{
+      conn: conn,
+      site: site
+    } do
+      stub_detection_result(%{
+        "v1Detected" => false,
+        "gtmLikely" => false,
+        "wordpressLikely" => false,
+        "wordpressPlugin" => false
+      })
+
+      new_domain = "new.#{site.domain}"
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      lv
+      |> element("form")
+      |> render_submit(%{site: %{domain: new_domain}})
+
+      assert_patch(lv, "/#{URI.encode_www_form(new_domain)}/change-domain/success")
+
+      html = render_async(lv, 500)
+      assert html =~ "Your new domain should be tracking nicely"
+      assert html =~ "domain change checklist"
+
+      assert element_exists?(
+               html,
+               "a[href='#{PlausibleWeb.Live.ChangeDomain.change_domain_checklist_docs_link()}']"
+             )
+
+      assert element_exists?(
+               html,
+               "a[href='#{PlausibleWeb.Live.ChangeDomain.change_domain_docs_link()}']"
+             )
+    end
+
+    @tag :ee_only
+    test "success page shows npm notice when detected", %{conn: conn, site: site} do
+      stub_detection_result(%{
+        "v1Detected" => false,
+        "gtmLikely" => false,
+        "npm" => true,
+        "wordpressLikely" => false,
+        "wordpressPlugin" => false
+      })
+
+      new_domain = "new.#{site.domain}"
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      lv
+      |> element("form")
+      |> render_submit(%{site: %{domain: new_domain}})
+
+      assert_patch(lv, "/#{URI.encode_www_form(new_domain)}/change-domain/success")
+
+      html = render_async(lv, 500)
+      assert html =~ "using our @plausible-analytics/tracker module"
+      assert html =~ "Plausible installation"
+      assert html =~ "within 72 hours"
+
+      assert element_exists?(
+               html,
+               "a[href='#{PlausibleWeb.Live.ChangeDomain.change_domain_docs_link()}']"
+             )
+    end
+
+    @tag ee_only: true, capture_log: true
+    test "ratelimit is respected: browserless request isn't made and the notice is generic", %{
+      conn: conn,
+      site: site
+    } do
+      new_domain = "new.#{site.domain}"
+
+      # exceed the rate limit for site detection
+      Plausible.RateLimit.check_rate(
+        Plausible.RateLimit,
+        "site_detection:#{new_domain}",
+        :timer.minutes(60),
+        1,
+        100
+      )
+
+      # stub won't be used, if it were used, the output would be different
+      stub_detection_result(%{
+        "v1Detected" => false,
+        "gtmLikely" => false,
+        "wordpressLikely" => false,
+        "wordpressPlugin" => false
+      })
+
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      lv
+      |> element("form")
+      |> render_submit(%{site: %{domain: new_domain}})
+
+      assert_patch(lv, "/#{URI.encode_www_form(new_domain)}/change-domain/success")
+
+      html = render_async(lv, 500)
+      assert html =~ "We could not reach your new domain"
+      assert html =~ "Additional action may be required"
+
+      assert element_exists?(
+               html,
+               "a[href='#{PlausibleWeb.Live.ChangeDomain.change_domain_docs_link()}']"
+             )
+    end
+
+    @tag ee_only: true, capture_log: true
+    test "success page handles detection error gracefully", %{conn: conn, site: site} do
+      stub_detection_error()
+
+      new_domain = "new.#{site.domain}"
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      lv
+      |> element("form")
+      |> render_submit(%{site: %{domain: new_domain}})
+
+      assert_patch(lv, "/#{URI.encode_www_form(new_domain)}/change-domain/success")
+
+      html = render_async(lv, 500)
+      assert html =~ "We could not reach your new domain"
+      assert html =~ "Additional action may be required"
+
+      assert element_exists?(
+               html,
+               "a[href='#{PlausibleWeb.Live.ChangeDomain.change_domain_docs_link()}']"
+             )
+    end
+
+    @tag :ce_build_only
+    test "success page shows generic v1 notice for CE", %{
+      conn: conn,
+      site: site
+    } do
+      new_domain = "new.#{site.domain}"
+      {:ok, lv, _html} = live(conn, "/#{site.domain}/change-domain")
+
+      lv
+      |> element("form")
+      |> render_submit(%{site: %{domain: new_domain}})
+
+      assert_patch(lv, "/#{URI.encode_www_form(new_domain)}/change-domain/success")
+
+      html = render_async(lv, 500)
+
+      assert html =~ "Additional action may be required"
+      assert html =~ "using our legacy snippet"
+      assert html =~ "must also update the site domain"
+      assert html =~ "72 hours"
+
+      assert element_exists?(
+               html,
+               "a[href='#{PlausibleWeb.Live.ChangeDomain.change_domain_docs_link()}']"
+             )
+    end
+  end
+
+  defp stub_detection_result(js_data) do
+    Req.Test.stub(Plausible.InstallationSupport.Checks.Detection, fn conn ->
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(200, Jason.encode!(%{"data" => Map.put(js_data, "completed", true)}))
+    end)
+  end
+
+  defp stub_detection_error do
+    Req.Test.stub(Plausible.InstallationSupport.Checks.Detection, fn conn ->
+      conn
+      |> put_resp_content_type("application/json")
+      |> send_resp(
+        200,
+        Jason.encode!(%{"data" => %{"error" => %{"message" => "Simulated browser error"}}})
+      )
+    end)
+  end
+end

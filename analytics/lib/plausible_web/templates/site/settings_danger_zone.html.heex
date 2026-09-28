@@ -1,0 +1,38 @@
+<.notice title="Danger zone" theme={:red}>
+  Destructive actions below can result in irrecoverable data loss. Be careful.
+</.notice>
+
+<.settings_tiles>
+  {live_render(@conn, PlausibleWeb.Live.SiteTransferSettings,
+    id: "site-transfer-settings",
+    session: %{"domain" => @site.domain}
+  )}
+
+  <.tile docs="reset-site-data">
+    <:title>Reset stats</:title>
+    <:subtitle>Reset all stats but keep the site configuration intact.</:subtitle>
+    <.button_link
+      href={~p"/#{@site.domain}/stats"}
+      method="delete"
+      data-confirm="Resetting the stats cannot be reversed. Are you sure?"
+      theme="danger"
+      mt?={false}
+    >
+      Reset {@site.domain} stats
+    </.button_link>
+  </.tile>
+
+  <.tile docs="delete-site-data">
+    <:title>Delete site</:title>
+    <:subtitle>Permanently delete all stats and site settings.</:subtitle>
+    <.button_link
+      href={stats_path(@site.domain)}
+      theme="danger"
+      method="delete"
+      data-confirm="Deleting the site data cannot be reversed. Are you sure?"
+      mt?={false}
+    >
+      Delete {@site.domain}
+    </.button_link>
+  </.tile>
+</.settings_tiles>

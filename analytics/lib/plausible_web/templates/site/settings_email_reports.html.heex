@@ -1,0 +1,213 @@
+<.settings_tiles>
+  <% email_reports = [
+    weekly: %{
+      report: @weekly_report,
+      disable_route: ~p"/sites/#{@site.domain}/weekly-report/disable",
+      enable_route: ~p"/sites/#{@site.domain}/weekly-report/enable",
+      remove_route_fn: fn recipient ->
+        ~p"/sites/#{@site.domain}/weekly-report/recipients/#{recipient}"
+      end,
+      add_route: ~p"/sites/#{@site.domain}/weekly-report/recipients",
+      heading: "Weekly email reports",
+      subtitle: "Send weekly analytics reports to as many addresses as you wish.",
+      toggle: "Send a weekly email report every Monday",
+      add_label: "Add weekly report recipient"
+    },
+    monthly: %{
+      report: @monthly_report,
+      disable_route: ~p"/sites/#{@site.domain}/monthly-report/disable",
+      enable_route: ~p"/sites/#{@site.domain}/monthly-report/enable",
+      remove_route_fn: fn recipient ->
+        ~p"/sites/#{@site.domain}/monthly-report/recipients/#{recipient}"
+      end,
+      add_route: ~p"/sites/#{@site.domain}/monthly-report/recipients",
+      heading: "Monthly email reports",
+      subtitle: "Send monthly analytics reports to as many addresses as you wish.",
+      toggle: "Send a monthly email report on 1st of the month",
+      add_label: "Add monthly report recipient"
+    }
+  ] %>
+
+  <.tile :for={{_type, meta} <- email_reports} docs="email-reports">
+    <:title>
+      {meta.heading}
+    </:title>
+    <:subtitle>
+      {meta.subtitle}
+    </:subtitle>
+
+    <.form
+      for={nil}
+      action={(meta.report && meta.disable_route) || meta.enable_route}
+      method="post"
+    >
+      <div>
+        <.toggle_submit set_to={meta.report}>
+          {meta.toggle}
+        </.toggle_submit>
+      </div>
+    </.form>
+
+    <div :if={meta.report} class="mt-4">
+      <.table :if={Enum.count(meta.report.recipients) > 0} rows={meta.report.recipients}>
+        <:thead>
+          <.th>
+            Recipients
+          </.th>
+          <.th invisible>Actions</.th>
+        </:thead>
+
+        <:tbody :let={recipient}>
+          <.td>
+            <div class="flex items-center gap-x-2">
+              <Heroicons.envelope_open class="w-6 h-6 feather" />
+              <div>
+                {recipient}
+              </div>
+            </div>
+          </.td>
+          <.td actions>
+            <.delete_button
+              method="delete"
+              href={meta.remove_route_fn.(recipient)}
+            />
+          </.td>
+        </:tbody>
+      </.table>
+
+      <.form
+        :let={f}
+        class="mt-4"
+        for={@conn}
+        action={meta.add_route}
+        method="post"
+      >
+        <div class="flex items-end gap-x-2">
+          <PlausibleWeb.Live.Components.Form.input
+            field={f[:recipient]}
+            type="email"
+            required
+            placeholder="e.g. joe@example.com"
+            mt?={false}
+          />
+          <.button type="submit" mt?={false}>
+            Add recipient
+          </.button>
+        </div>
+      </.form>
+    </div>
+  </.tile>
+
+  <% change_notifications = [
+    spike: %{
+      notification: @spike_notification,
+      heading: "Traffic spike notifications",
+      subtitle: "Get notified when your site has unusually high number of current visitors.",
+      threshold_text: "Current visitors threshold",
+      toggle: "Send notifications of traffic spikes"
+    },
+    drop: %{
+      notification: @drop_notification,
+      heading: "Traffic drop notifications",
+      subtitle:
+        "Get notified when your site has unusually low number of visitors within 12 hours.",
+      threshold_text: "12 hours visitor threshold",
+      toggle: "Send notifications of traffic drops"
+    }
+  ] %>
+
+  <.tile :for={{type, meta} <- change_notifications} docs="traffic-spikes">
+    <:title>
+      {meta.heading}
+    </:title>
+    <:subtitle>
+      {meta.subtitle}
+    </:subtitle>
+
+    <.form
+      for={nil}
+      action={
+        (meta.notification &&
+           ~p"/sites/#{@site.domain}/traffic-change-notification/#{type}/disable") ||
+          ~p"/sites/#{@site.domain}/traffic-change-notification/#{type}/enable"
+      }
+      method="post"
+    >
+      <.toggle_submit set_to={meta.notification}>
+        {meta.toggle}
+      </.toggle_submit>
+    </.form>
+
+    <.form
+      :let={f}
+      :if={meta.notification}
+      class="mt-4"
+      for={Plausible.Site.TrafficChangeNotification.changeset(meta.notification, %{})}
+      action={~p"/sites/#{@site.domain}/traffic-change-notification/#{type}"}
+    >
+      <div class="flex items-end gap-x-4">
+        <PlausibleWeb.Live.Components.Form.input
+          field={f[:threshold]}
+          type="number"
+          required
+          label={meta.threshold_text}
+        />
+        <.button type="submit" mt?={false}>
+          Save threshold
+        </.button>
+      </div>
+    </.form>
+
+    <div :if={meta.notification && Enum.count(meta.notification.recipients) > 0} class="mt-4">
+      <.table rows={meta.notification.recipients}>
+        <:thead>
+          <.th>
+            Recipients
+          </.th>
+          <.th invisible>Actions</.th>
+        </:thead>
+
+        <:tbody :let={recipient}>
+          <.td>
+            <div class="flex items-center gap-x-2">
+              <Heroicons.envelope_open class="w-6 h-6 feather" />
+              <div>
+                {recipient}
+              </div>
+            </div>
+          </.td>
+          <.td actions>
+            <.delete_button
+              method="delete"
+              href={
+                ~p"/sites/#{@site.domain}/traffic-change-notification/#{type}/recipients/#{recipient}"
+              }
+            />
+          </.td>
+        </:tbody>
+      </.table>
+    </div>
+
+    <div :if={meta.notification}>
+      <.form
+        :let={f}
+        for={@conn}
+        class="mt-4"
+        action={~p"/sites/#{@site.domain}/traffic-change-notification/#{type}/recipients"}
+      >
+        <div class="flex items-end gap-x-4">
+          <PlausibleWeb.Live.Components.Form.input
+            field={f[:recipient]}
+            type="email"
+            placeholder="e.g. joe@example.com"
+            mt?={false}
+            required
+          />
+          <.button type="submit" mt?={false}>
+            Add recipient
+          </.button>
+        </div>
+      </.form>
+    </div>
+  </.tile>
+</.settings_tiles>
