@@ -259,6 +259,28 @@
       ],
       "required_parameters": ["skill_goal", "target_format"],
       "sub_skills": []
+    },
+    {
+      "name": "context-mode",
+      "description": "Context window optimization for Hubsy via the context-mode MCP server (mksglu/context-mode). Enforces mandatory routing rules to keep raw tool output out of context: intercept heavy web fetches (ctx_fetch_and_index), sandbox large file reads (ctx_execute/ctx_execute_file/ctx_batch_execute), and use intent-driven search (ctx_index, ctx_search) so only distilled results reach the context window (~98% reduction). Also tracks edits, git ops, tasks, and decisions in SQLite/FTS5 for session continuity across compaction. Use for long-running sessions, token/context pressure, reading big files or pages, or when a search would replace a full read.",
+      "path": "skills/context-mode/SKILL.md",
+      "domains": ["performance-optimization", "context-management", "token-efficiency", "session-continuity"],
+      "triggers": [
+        "context window",
+        "context mode",
+        "too much context",
+        "token usage",
+        "ctx",
+        "ctx_execute",
+        "ctx_search",
+        "ctx_stats",
+        "sandbox output",
+        "session continuity",
+        "think in code",
+        "reading big files"
+      ],
+      "required_parameters": ["operation", "data_source"],
+      "sub_skills": []
     }
   ]
 }
