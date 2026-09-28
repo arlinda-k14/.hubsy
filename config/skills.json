@@ -619,6 +619,45 @@
         "target_style"
       ],
       "sub_skills": []
+    },
+    {
+      "name": "skillui",
+      "description": "Design reverse-engineering engine running extraction work through skillui (adapted from amaancoderx/skillui, MIT). Reverse-engineers a complete design system from a live website (--url), local project (--dir), or cloned git repo (--repo) via pure static analysis - no AI, no API keys. Extracts exact design tokens (colors, spacing, typography JSON), grid and layout systems (flex/grid containers, page structure, spacing relationships), component patterns (DOM fingerprints, HTML patterns, class analysis, hover/focus state diffs), and motion specs (CSS keyframes, scroll triggers, GSAP/Lottie/Three.js/AOS detection) into DESIGN.md, ANIMATIONS.md, LAYOUT.md, COMPONENTS.md, INTERACTIONS.md, VISUAL_GUIDE.md, tokens/*.json, and locally bundled woff2 fonts - packed into a .skill ZIP that a coding agent loads as context to rebuild equivalent UI. Ultra mode (--mode ultra, requires Playwright/Chromium) adds a 7-frame scroll-journey screenshot set, full-page and section captures, complete keyframe extraction, and animation-library detection. Use when reverse-engineering or matching an existing design system, extracting tokens/palettes/typography/spacing/components/animations from any site, directory, or repo, rebuilding a page to a target visual language, or generating a reusable design-system skill from reference material. Not for backend-only, content-extraction-only, or non-UI tasks.",
+      "path": "skills/skillui/SKILL.md",
+      "domains": [
+        "frontend-design",
+        "design-systems",
+        "reverse-engineering",
+        "design-tokens",
+        "component-extraction",
+        "motion-specs"
+      ],
+      "triggers": [
+        "reverse engineer design",
+        "extract design tokens",
+        "match a design system",
+        "clone the design of",
+        "replicate that website",
+        "design system extraction",
+        "tk from a site",
+        "analyze this repo design",
+        "extract colors and fonts",
+        "extract animations",
+        "make a skill from a website",
+        "token extraction",
+        "frontend audit design",
+        "design fingerprints",
+        "component patterns",
+        "spacing scale",
+        "rebuild in this style",
+        "visual language match",
+        "design reference package",
+        "skillui"
+      ],
+      "required_parameters": [
+        "target_source"
+      ],
+      "sub_skills": []
     }
   ]
 }
