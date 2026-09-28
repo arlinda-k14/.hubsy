@@ -281,6 +281,29 @@
       ],
       "required_parameters": ["operation", "data_source"],
       "sub_skills": []
+    },
+    {
+      "name": "design-taste-frontend",
+      "description": "Anti-slop frontend design engine derived from taste-skill (github.com/Leonxlnx/taste-skill). Gives the agent good design taste so generated UI does not look generic or templated. Defines three adjustable dials (DESIGN_VARIANCE 1-10 perfect-symmetry-to-artsy-chaos, MOTION_INTENSITY 1-10 static-to-cinematic, VISUAL_DENSITY 1-10 art-gallery-to-cockpit), typography scale discipline (display text-4xl/6xl tracking-tighter, body max-w-[65ch], serif/Fraunces/Instrument_Serif restrictions), spacing rhythm (py-16/24 daily app, py-32/48 art gallery), interaction polish (state cycles, motivated motion, reduced-motion, spring physics), color calibration (one accent, no AI-purple, premium-consumer beige-ban), layout diversification (anti-center bias, zigzag cap, bento rhythm, eyebrow max 1-per-3-sections), and a strict pre-flight anti-tell checklist. Use when building or redesigning landing pages, portfolios, heroes, bento grids, pricing pages, or any frontend that should not look like LLM-default output.",
+      "path": "skills/design-taste-frontend/SKILL.md",
+      "domains": ["frontend-design", "anti-slop", "landing-page", "portfolio", "design-systems", "ui-polish"],
+      "triggers": [
+        "stop generating boring designs",
+        "make this look less generic",
+        "premium landing page",
+        "design a portfolio",
+        "redesign my page",
+        "better design taste",
+        "anti-slop",
+        "design dials",
+        "bento grid",
+        "hero section",
+        "typography scale",
+        "ai purple gradients",
+        "not all landing pages look the same"
+      ],
+      "required_parameters": ["design_context", "target_page_type"],
+      "sub_skills": []
     }
   ]
 }
