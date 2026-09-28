@@ -4,7 +4,11 @@
       "name": "orchestrator",
       "description": "Central routing brain of AIOS: intent classification, user confirmation, dispatch to registered worker skills. Never executes tasks itself.",
       "path": "skills/orchestrator/SKILL.md",
-      "domains": ["routing", "intent-classification", "task-dispatch"],
+      "domains": [
+        "routing",
+        "intent-classification",
+        "task-dispatch"
+      ],
       "triggers": [
         "route this to another agent",
         "dispatch to a skill",
@@ -17,24 +21,35 @@
       "name": "skill-builder",
       "description": "Create new skills, modify and improve existing skills, measure skill performance with evals.",
       "path": "skills/skill_builder.md",
-      "domains": ["meta", "skill-development", "evals"],
+      "domains": [
+        "meta",
+        "skill-development",
+        "evals"
+      ],
       "triggers": [
         "build a new skill",
         "improve this skill",
         "run evals on the skill",
         "create a skill"
       ],
-      "required_parameters": ["skill_goal"],
+      "required_parameters": [
+        "skill_goal"
+      ],
       "sub_skills": [
         {
           "name": "description-optimization",
           "description": "Tune a skill's frontmatter description for better triggering accuracy.",
-          "required_parameters": ["skill_path"]
+          "required_parameters": [
+            "skill_path"
+          ]
         },
         {
           "name": "benchmarking",
           "description": "Run with-skill vs baseline evals with variance analysis.",
-          "required_parameters": ["skill_path", "eval_cases"]
+          "required_parameters": [
+            "skill_path",
+            "eval_cases"
+          ]
         }
       ]
     },
@@ -42,7 +57,9 @@
       "name": "content-drafting",
       "description": "Core domain for drafting text: social copy, campaign text, marketing and creative writing.",
       "path": "",
-      "domains": ["content-drafting"],
+      "domains": [
+        "content-drafting"
+      ],
       "triggers": [
         "write a post for",
         "draft copy",
@@ -50,17 +67,28 @@
         "social media text",
         "ad copy"
       ],
-      "required_parameters": ["tone", "audience"],
+      "required_parameters": [
+        "tone",
+        "audience"
+      ],
       "sub_skills": [
         {
           "name": "social-copy",
           "description": "Platform-specific social post drafting.",
-          "required_parameters": ["platform", "tone", "length"]
+          "required_parameters": [
+            "platform",
+            "tone",
+            "length"
+          ]
         },
         {
           "name": "campaign-text",
           "description": "Full campaign copy across channels.",
-          "required_parameters": ["channel", "audience", "goal"]
+          "required_parameters": [
+            "channel",
+            "audience",
+            "goal"
+          ]
         }
       ]
     },
@@ -68,7 +96,9 @@
       "name": "web-development",
       "description": "Core domain for web work: front-end layout, script logic, styling.",
       "path": "",
-      "domains": ["web-development"],
+      "domains": [
+        "web-development"
+      ],
       "triggers": [
         "build a page",
         "fix the layout",
@@ -76,17 +106,26 @@
         "front-end",
         "web dev"
       ],
-      "required_parameters": ["deliverable_type", "stack"],
+      "required_parameters": [
+        "deliverable_type",
+        "stack"
+      ],
       "sub_skills": [
         {
           "name": "frontend-layout",
           "description": "Page structure and responsive styling.",
-          "required_parameters": ["deliverable_type", "style"]
+          "required_parameters": [
+            "deliverable_type",
+            "style"
+          ]
         },
         {
           "name": "script-logic",
           "description": "Client-side behavior and error handling.",
-          "required_parameters": ["behavior", "stack"]
+          "required_parameters": [
+            "behavior",
+            "stack"
+          ]
         }
       ]
     },
@@ -94,7 +133,12 @@
       "name": "career-switch-lead-scout",
       "description": "Discover, filter, score, and queue prospective students seeking entry-level AI and marketing training. Monitor public LinkedIn posts, career-transition subreddits and Facebook groups for 'open to work', 'career pivot', 'seeking entry level', 'looking for new path' signals; restrict to Kosovo and worldwide-remote regions; score candidates 1-100; draft non-technical outreach for scores >= 70 into a human review queue with 90-day dedup and per-platform daily caps.",
       "path": "skills/career-switch-lead-scout/SKILL.md",
-      "domains": ["lead-generation", "prospecting", "candidate-qualification", "career-transition"],
+      "domains": [
+        "lead-generation",
+        "prospecting",
+        "candidate-qualification",
+        "career-transition"
+      ],
       "triggers": [
         "find leads for the training program",
         "career pivot",
@@ -104,14 +148,19 @@
         "qualify job seekers",
         "career switchers"
       ],
-      "required_parameters": ["source", "limit"],
+      "required_parameters": [
+        "source",
+        "limit"
+      ],
       "sub_skills": []
     },
     {
       "name": "task-scheduling",
       "description": "Core domain for scheduling: calendar management, reminders, appointment booking.",
       "path": "",
-      "domains": ["task-scheduling"],
+      "domains": [
+        "task-scheduling"
+      ],
       "triggers": [
         "schedule",
         "remind me",
@@ -119,17 +168,26 @@
         "set an appointment",
         "plan my week"
       ],
-      "required_parameters": ["action", "time_or_window"],
+      "required_parameters": [
+        "action",
+        "time_or_window"
+      ],
       "sub_skills": [
         {
           "name": "calendar-management",
           "description": "Create and manage calendar events.",
-          "required_parameters": ["calendar", "timeslot"]
+          "required_parameters": [
+            "calendar",
+            "timeslot"
+          ]
         },
         {
           "name": "reminders",
           "description": "Set timed reminders.",
-          "required_parameters": ["delay", "channel"]
+          "required_parameters": [
+            "delay",
+            "channel"
+          ]
         }
       ]
     },
@@ -137,7 +195,11 @@
       "name": "scrapegraphai",
       "description": "LLM-driven web scraping with the ScrapeGraphAI Python library: extract structured data from websites and local documents (HTML, XML, JSON, Markdown, PDF) using SmartScraperGraph, SmartScraperMultiGraph, SearchGraph, ScriptCreatorGraph, or SpeechGraph pipelines. Deals with Playwright JS rendering, Ollama and API LLM configs, and JSON output schemas.",
       "path": "skills/scrapegraphai/SKILL.md",
-      "domains": ["web-scraping", "data-extraction", "ai-scraping"],
+      "domains": [
+        "web-scraping",
+        "data-extraction",
+        "ai-scraping"
+      ],
       "triggers": [
         "scrape this page",
         "extract data from",
@@ -147,32 +209,49 @@
         "scrape multiple pages",
         "ScrapeGraphAI"
       ],
-      "required_parameters": ["prompt", "source"],
+      "required_parameters": [
+        "prompt",
+        "source"
+      ],
       "sub_skills": [
         {
           "name": "single-page-extraction",
           "description": "SmartScraperGraph: one page/URL, one prompt, structured data out.",
-          "required_parameters": ["prompt", "source"]
+          "required_parameters": [
+            "prompt",
+            "source"
+          ]
         },
         {
           "name": "multi-page-extraction",
           "description": "SmartScraperMultiGraph: one prompt across a list of sources.",
-          "required_parameters": ["prompt", "source_list"]
+          "required_parameters": [
+            "prompt",
+            "source_list"
+          ]
         },
         {
           "name": "search-extraction",
           "description": "SearchGraph: answer from top search-engine results.",
-          "required_parameters": ["prompt"]
+          "required_parameters": [
+            "prompt"
+          ]
         },
         {
           "name": "script-generation",
           "description": "ScriptCreatorGraph: generate a Python scraper script for a page.",
-          "required_parameters": ["prompt", "source"]
+          "required_parameters": [
+            "prompt",
+            "source"
+          ]
         },
         {
           "name": "local-document-parsing",
           "description": "Parse local HTML, XML, JSON, or Markdown files with the graph pipelines.",
-          "required_parameters": ["prompt", "file_path"]
+          "required_parameters": [
+            "prompt",
+            "file_path"
+          ]
         }
       ]
     },
@@ -180,7 +259,12 @@
       "name": "hindsight-memory",
       "description": "Long-term memory management for Hubsy powered by the Hindsight engine (vectorize-io/hindsight). Capture user context into persistent memory (Retain), fetch past facts and experiences to ground answers (Recall), and build durable user mental models that personalize every session (Reflect).",
       "path": "skills/hindsight-memory/SKILL.md",
-      "domains": ["memory-management", "persistent-memory", "long-term-recall", "user-modeling"],
+      "domains": [
+        "memory-management",
+        "persistent-memory",
+        "long-term-recall",
+        "user-modeling"
+      ],
       "triggers": [
         "remember that I",
         "what do you know about me",
@@ -193,14 +277,22 @@
         "reflect",
         "mental model"
       ],
-      "required_parameters": ["operation", "bank_id"],
+      "required_parameters": [
+        "operation",
+        "bank_id"
+      ],
       "sub_skills": []
     },
     {
       "name": "autoresearch-optimizer",
       "description": "Autonomous experiment loop that turns Hubsy into a self-improving researcher. Form a hypothesis, modify a target asset or prompt, run a fixed evaluation metric, and keep the change only if the score improves or revert if it is worse. Modeled on karpathy/autoresearch (edits train.py against a fixed val_bpb evaluator while a program.md direction file steers the loop), generalized to prompts, configs, and code. Use for overnight/autonomous optimization, iterative experimentation, prompt tuning, and benchmark-driven change review.",
       "path": "skills/autoresearch-optimizer/SKILL.md",
-      "domains": ["optimization-and-testing", "experimentation", "benchmarking", "autonomous-research"],
+      "domains": [
+        "optimization-and-testing",
+        "experimentation",
+        "benchmarking",
+        "autonomous-research"
+      ],
       "triggers": [
         "experiment overnight",
         "run experiments on this",
@@ -213,14 +305,23 @@
         "revert if worse",
         "benchmark my changes"
       ],
-      "required_parameters": ["target_asset", "metric"],
+      "required_parameters": [
+        "target_asset",
+        "metric"
+      ],
       "sub_skills": []
     },
     {
       "name": "google-workspace-cli",
       "description": "Drive Gmail, Calendar, Drive, Sheets, Docs, Chat, and other Google Workspace APIs from the terminal using the gws CLI (googleworkspace/cli). Every gws command returns structured JSON and the command surface is built dynamically from Google's Discovery Service. Use whenever the user wants to check or send email, manage calendar events and agendas, list or upload Drive files, read or write spreadsheet cells and rows, edit documents, or send Google Chat messages.",
       "path": "skills/google-workspace-cli/SKILL.md",
-      "domains": ["workspace-automation", "google-workspace", "email", "calendar", "productivity"],
+      "domains": [
+        "workspace-automation",
+        "google-workspace",
+        "email",
+        "calendar",
+        "productivity"
+      ],
       "triggers": [
         "check my email",
         "send an email",
@@ -234,14 +335,23 @@
         "gmail",
         "gws"
       ],
-      "required_parameters": ["service", "action"],
+      "required_parameters": [
+        "service",
+        "action"
+      ],
       "sub_skills": []
     },
     {
       "name": "anthropic-skills-engine",
       "description": "Author, structure, and consume skills per the official Agent Skills Specification (agentskills.io) as implemented by anthropics/skills: a folder with a SKILL.md combining YAML frontmatter (name, description, optional license/compatibility/metadata) with a Markdown instruction body, organized for progressive disclosure across scripts/, references/, and assets/. Leverages Anthropic's enterprise skills for document processing (pdf, docx, pptx, xlsx) and brand-guidelines styling. Use when building or validating a custom skill, processing/generating documents, or applying on-brand colors and typography.",
       "path": "skills/anthropic-skills-engine/SKILL.md",
-      "domains": ["standard-specifications", "skill-development", "agent-skills", "document-processing", "branding"],
+      "domains": [
+        "standard-specifications",
+        "skill-development",
+        "agent-skills",
+        "document-processing",
+        "branding"
+      ],
       "triggers": [
         "agent skills spec",
         "create a custom skill",
@@ -257,14 +367,22 @@
         "brand colors",
         "how do I format a skill"
       ],
-      "required_parameters": ["skill_goal", "target_format"],
+      "required_parameters": [
+        "skill_goal",
+        "target_format"
+      ],
       "sub_skills": []
     },
     {
       "name": "context-mode",
       "description": "Context window optimization for Hubsy via the context-mode MCP server (mksglu/context-mode). Enforces mandatory routing rules to keep raw tool output out of context: intercept heavy web fetches (ctx_fetch_and_index), sandbox large file reads (ctx_execute/ctx_execute_file/ctx_batch_execute), and use intent-driven search (ctx_index, ctx_search) so only distilled results reach the context window (~98% reduction). Also tracks edits, git ops, tasks, and decisions in SQLite/FTS5 for session continuity across compaction. Use for long-running sessions, token/context pressure, reading big files or pages, or when a search would replace a full read.",
       "path": "skills/context-mode/SKILL.md",
-      "domains": ["performance-optimization", "context-management", "token-efficiency", "session-continuity"],
+      "domains": [
+        "performance-optimization",
+        "context-management",
+        "token-efficiency",
+        "session-continuity"
+      ],
       "triggers": [
         "context window",
         "context mode",
@@ -279,14 +397,24 @@
         "think in code",
         "reading big files"
       ],
-      "required_parameters": ["operation", "data_source"],
+      "required_parameters": [
+        "operation",
+        "data_source"
+      ],
       "sub_skills": []
     },
     {
       "name": "design-taste-frontend",
       "description": "Anti-slop frontend design engine derived from taste-skill (github.com/Leonxlnx/taste-skill). Gives the agent good design taste so generated UI does not look generic or templated. Defines three adjustable dials (DESIGN_VARIANCE 1-10 perfect-symmetry-to-artsy-chaos, MOTION_INTENSITY 1-10 static-to-cinematic, VISUAL_DENSITY 1-10 art-gallery-to-cockpit), typography scale discipline (display text-4xl/6xl tracking-tighter, body max-w-[65ch], serif/Fraunces/Instrument_Serif restrictions), spacing rhythm (py-16/24 daily app, py-32/48 art gallery), interaction polish (state cycles, motivated motion, reduced-motion, spring physics), color calibration (one accent, no AI-purple, premium-consumer beige-ban), layout diversification (anti-center bias, zigzag cap, bento rhythm, eyebrow max 1-per-3-sections), and a strict pre-flight anti-tell checklist. Use when building or redesigning landing pages, portfolios, heroes, bento grids, pricing pages, or any frontend that should not look like LLM-default output.",
       "path": "skills/design-taste-frontend/SKILL.md",
-      "domains": ["frontend-design", "anti-slop", "landing-page", "portfolio", "design-systems", "ui-polish"],
+      "domains": [
+        "frontend-design",
+        "anti-slop",
+        "landing-page",
+        "portfolio",
+        "design-systems",
+        "ui-polish"
+      ],
       "triggers": [
         "stop generating boring designs",
         "make this look less generic",
@@ -302,14 +430,23 @@
         "ai purple gradients",
         "not all landing pages look the same"
       ],
-      "required_parameters": ["design_context", "target_page_type"],
+      "required_parameters": [
+        "design_context",
+        "target_page_type"
+      ],
       "sub_skills": []
     },
     {
       "name": "humanizer",
       "description": "Rewrite AI-sounding text so it reads like the writer without changing what it says. Scans prose for AI writing patterns (overused vocabulary, rigid syntax, rule-of-three triads, dramatic one-line closers, not-X-but-Y contrasts, dashes everywhere, inflated significance, sales language, stock AI words, bold labels, chatbot residue, knowledge-limit disclaimers) and rewrites it into a natural human voice. Based on blader/humanizer (github.com/blader/humanizer, MIT, v3.1.0) and Wikipedia's Sign of AI writing. Supports pasted-text mode, file mode (prose-only edits, code preserved), and embedded mode (commit messages, PRs, documents). Use when humanizing, de-AI-ing, or editing any text that sounds machine-generated, whether for an assignment, essay, blog post, email, comment, or response.",
       "path": "skills/humanizer/SKILL.md",
-      "domains": ["content-drafting", "writing-editing", "ai-writing-tells", "proofreading", "natural-language"],
+      "domains": [
+        "content-drafting",
+        "writing-editing",
+        "ai-writing-tells",
+        "proofreading",
+        "natural-language"
+      ],
       "triggers": [
         "humanize this",
         "remove AI writing patterns",
@@ -325,14 +462,23 @@
         "remove overused AI words",
         "signs of AI writing"
       ],
-      "required_parameters": ["text", "output_mode"],
+      "required_parameters": [
+        "text",
+        "output_mode"
+      ],
       "sub_skills": []
     },
     {
       "name": "claude-plugins-official",
       "description": "Interface Hubsy with the official Anthropic Claude Plugins directory (github.com/anthropics/claude-plugins-official), the curated marketplace of Claude Code plugin integrations for external tools: GitHub (issues, PRs, code review, repo search via the GitHub MCP server and GITHUB_PERSONAL_ACCESS_TOKEN), Slack (message search, channels, threads via slack-mcp-plugin), Google Workspace (Gmail/Calendar/Drive via OAuth connectors and google-cloud-storage), Notion (search pages, create/update documents, manage databases via the Notion plugin), and Web Search (Exa, Tavily, web MCPs). Covers the standard plugin structure (.claude-plugin/plugin.json, .mcp.json, commands/, agents/, skills/), immutable plugin-name rules, marketplace source types (relative, url, git-subdir), MCP server config syntax (http/stdio with ${ENV_VAR} token injection), and authentication patterns across those tools. Use when setting up or driving any official Claude plugin, wiring an external-tool MCP server, or explaining how Claude plugins expose GitHub/Slack/Google/Notion/web-search tools.",
       "path": "skills/claude-plugins-official/SKILL.md",
-      "domains": ["tool-integrations", "claude-plugins", "mcp-servers", "external-tools", "authentication"],
+      "domains": [
+        "tool-integrations",
+        "claude-plugins",
+        "mcp-servers",
+        "external-tools",
+        "authentication"
+      ],
       "triggers": [
         "claude plugin",
         "official plugins",
@@ -351,14 +497,24 @@
         "plugin marketplace",
         "GITHUB_PERSONAL_ACCESS_TOKEN"
       ],
-      "required_parameters": ["tool", "action"],
+      "required_parameters": [
+        "tool",
+        "action"
+      ],
       "sub_skills": []
     },
     {
       "name": "ui-ux-pro-max",
       "description": "Advanced UI/UX design intelligence for web, mobile, and desktop interfaces, adapted from ui-ux-pro-max-skill (github.com/nextlevelbuilder/ui-ux-pro-max-skill). Covers user conversion flows (hero+features+CTA, funnel, pricing, lead-magnet, waitlist, social-proof and 34 landing patterns with CTA placement), micro-interaction guidelines (press feedback in 80-150ms, spring physics, 30-50ms staggers, exit-faster-than-enter, interruptible and cancel-safe motion, transform/opacity only, reduced-motion), component design tokens (primitive > semantic > component layers with button/input/card/badge/alert/dialog/table token maps), responsive grid layouts (mobile-first, 375/768/1024/1440 breakpoints, 4/8dp spacing rhythm, min-h-dvh, no horizontal scroll, 60-75ch line length), and WCAG accessibility standards (4.5:1 contrast, 2-4px focus rings, 44x44pt/48x48dp touch targets, keyboard nav, focus-not-obscured, label-above-input, aria-live). Use when designing, building, reviewing, or fixing interfaces, pages, components, design systems, landing pages, or dashboards that must meet a professional UX and accessibility bar.",
       "path": "skills/ui-ux-pro-max/SKILL.md",
-      "domains": ["ui-ux-design", "conversion-optimization", "design-tokens", "responsive-layout", "accessibility", "micro-interactions"],
+      "domains": [
+        "ui-ux-design",
+        "conversion-optimization",
+        "design-tokens",
+        "responsive-layout",
+        "accessibility",
+        "micro-interactions"
+      ],
       "triggers": [
         "ui ux design",
         "ux review",
@@ -377,7 +533,50 @@
         "usability",
         "professional looking ui"
       ],
-      "required_parameters": ["interface_context", "target_platform"],
+      "required_parameters": [
+        "interface_context",
+        "target_platform"
+      ],
+      "sub_skills": []
+    },
+    {
+      "name": "impeccable-design",
+      "description": "Design-quality engine running interface work through the Impeccable design system (adapted from pbakaus/impeccable). Establishes durable product context in PRODUCT.md and a reusable tokenized visual system in DESIGN.md; runs systematic design critiques (heuristic scoring of visual hierarchy, cognitive load, accessibility, responsive behavior, design specificity) and technical audits (a11y, performance, theming, responsive, implementation integrity) scored /20 with P0-P3 severities; enforces a mandatory quality floor and absolute bans on AI-tell anti-patterns (thin borders + wide shadows, radial spotlights, glow, oversized H1s, hero eyebrows, kickers, numbered section labels, italic serif intros, pulsing dots, marquee keyframes, grid backgrounds, em-dash overuse, emoji-only text); executes bounded visual polish passes and supporting commands (bolder, quieter, distill, harden, onboard, animate, colorize, typeset, layout, clarify, adapt, optimize, extract, document, live). Use when designing, redesigning, shaping, critiquing, auditing, polishing, documenting, or extracting tokens from a frontend interface - landing pages, dashboards, product UI, components, forms, empty states, onboarding, responsive behavior, typography, spacing, layout, color, motion, accessibility. Not for backend-only or non-UI tasks.",
+      "path": "skills/impeccable-design/SKILL.md",
+      "domains": [
+        "ui-ux-design",
+        "ux-review",
+        "design-system",
+        "accessibility",
+        "responsive-layout",
+        "visual-polish"
+      ],
+      "triggers": [
+        "design critique",
+        "ux review",
+        "heuristic evaluation",
+        "audit my ui",
+        "accessibility audit",
+        "make it accessible",
+        "polish the ui",
+        "final design pass",
+        "ship quality",
+        "design system",
+        "design tokens",
+        "product.md",
+        "design.md",
+        "impeccable",
+        "premium ui",
+        "pixel perfect",
+        "pixel polish",
+        "bland design",
+        "redesign",
+        "certified fresh design"
+      ],
+      "required_parameters": [
+        "interface_context",
+        "target"
+      ],
       "sub_skills": []
     }
   ]
