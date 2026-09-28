@@ -1,0 +1,746 @@
+defmodule PlausibleWeb.AuthController do
+  use PlausibleWeb, :controller
+  use Plausible.Repo
+  use Plausible
+
+  alias Plausible.Auth
+  alias Plausible.Teams
+  alias PlausibleWeb.TwoFactor
+  alias PlausibleWeb.UserAuth
+  alias PlausibleWeb.LoginPreference
+
+  require Logger
+
+  plug(
+    PlausibleWeb.RequireLoggedOutPlug
+    when action in [
+           :register,
+           :register_from_invitation,
+           :login_form,
+           :login,
+           :verify_2fa_form,
+           :verify_2fa,
+           :verify_2fa_recovery_code_form,
+           :verify_2fa_recovery_code
+         ]
+  )
+
+  plug(
+    PlausibleWeb.RequireAccountPlug
+    when action in [
+           :delete_me,
+           :activate_form,
+           :activate,
+           :request_activation_code,
+           :force_initiate_2fa_setup,
+           :initiate_2fa_setup,
+           :verify_2fa_setup_form,
+           :verify_2fa_setup,
+           :disable_2fa,
+           :generate_2fa_recovery_codes,
+           :switch_team
+         ]
+  )
+
+  plug Plausible.Plugs.RestrictUserType,
+       [deny: :sso] when action in [:delete_me, :disable_2fa]
+
+  plug(
+    :clear_2fa_user
+    when action not in [
+           :verify_2fa_form,
+           :verify_2fa,
+           :verify_2fa_recovery_code_form,
+           :verify_2fa_recovery_code
+         ]
+  )
+
+  # Plug purging 2FA user session cookie outsite 2FA flow
+  defp clear_2fa_user(conn, _opts) do
+    TwoFactor.Session.clear_2fa_user(conn)
+  end
+
+  def activate_form(conn, params) do
+    user = conn.assigns.current_user
+    flow = params["flow"] || PlausibleWeb.Flows.register()
+
+    render_activate_form(conn, flow,
+      has_email_code?: Plausible.Users.has_email_code?(user),
+      has_any_memberships?: Plausible.Teams.Users.has_sites?(user)
+    )
+  end
+
+  defp activate_heading(true), do: "Check your email"
+  defp activate_heading(false), do: "Activate your account"
+
+  defp render_activate_form(conn, flow, opts) do
+    assigns =
+      [
+        legacy_layout?: false,
+        error: nil,
+        form_submit_url: "/activate?flow=#{flow}",
+        team_identifier: conn.params["team_identifier"]
+      ]
+      |> Keyword.merge(opts)
+
+    render(
+      conn,
+      "activate.html",
+      Keyword.put(assigns, :heading, activate_heading(assigns[:has_email_code?]))
+    )
+  end
+
+  def activate(conn, %{"code" => code}) do
+    user = conn.assigns[:current_user]
+
+    with :ok <- Auth.rate_limit(:activation_ip, conn),
+         :ok <- Auth.rate_limit(:activation_user, user) do
+      do_activate(conn, user, code)
+    else
+      {:error, {:rate_limit, _}} ->
+        render_activate_form(conn, conn.params["flow"],
+          error: "Too many attempts. Please wait a few minutes before trying again.",
+          has_email_code?: true,
+          has_any_memberships?: Plausible.Teams.Users.has_sites?(user, include_pending?: false)
+        )
+    end
+  end
+
+  defp do_activate(conn, user, code) do
+    has_any_invitations? = Plausible.Teams.Users.has_sites?(user, include_pending?: true)
+    has_any_memberships? = Plausible.Teams.Users.has_sites?(user, include_pending?: false)
+
+    flow = conn.params["flow"]
+    team_identifier = conn.params["team_identifier"]
+
+    case Auth.EmailVerification.verify_code(user, code) do
+      :ok ->
+        cond do
+          team_identifier not in ["", nil] ->
+            redirect_path = accept_team_invitation(conn, team_identifier, user, flow: flow)
+            redirect(conn, to: redirect_path)
+
+          has_any_memberships? ->
+            handle_email_updated(conn)
+
+          has_any_invitations? ->
+            redirect_path = accept_team_invitation(conn, team_identifier, user, flow: flow)
+            redirect(conn, to: redirect_path)
+
+          true ->
+            redirect(conn, to: ~p"/sites/new?#{[flow: flow]}")
+        end
+
+      {:error, :incorrect} ->
+        render_activate_form(conn, flow,
+          error: "That code didn't work. Please try again.",
+          has_email_code?: true,
+          has_any_memberships?: has_any_memberships?
+        )
+
+      {:error, :expired} ->
+        render_activate_form(conn, flow,
+          error: "The code has expired. Please request another one.",
+          has_email_code?: false,
+          has_any_memberships?: has_any_memberships?
+        )
+    end
+  end
+
+  def request_activation_code(conn, _params) do
+    user = conn.assigns.current_user
+
+    with :ok <- Auth.rate_limit(:activation_request_ip, conn),
+         :ok <- Auth.rate_limit(:activation_request_user, user) do
+      Auth.EmailVerification.issue_code(user)
+
+      conn
+      |> put_flash(:success, "Activation code was sent to #{user.email}")
+      |> redirect(to: ~p"/activate")
+    else
+      {:error, {:rate_limit, _}} ->
+        conn
+        |> put_flash(:error, "Too many code requests. Please wait before requesting another.")
+        |> redirect(to: ~p"/activate")
+    end
+  end
+
+  def password_reset_request_form(conn, _) do
+    render(conn, "password_reset_request_form.html", legacy_layout?: false)
+  end
+
+  def password_reset_request(conn, %{"email" => ""}) do
+    render(conn, "password_reset_request_form.html",
+      legacy_layout?: false,
+      error: "Please enter an email address"
+    )
+  end
+
+  def password_reset_request(conn, %{"email" => email} = params) do
+    if PlausibleWeb.Captcha.verify(params["frc-captcha-response"]) do
+      case Auth.lookup(email) do
+        {:ok, _user} ->
+          token = Auth.Token.sign_password_reset(email)
+          url = PlausibleWeb.Endpoint.url() <> "/password/reset?token=#{token}"
+          email_template = PlausibleWeb.Email.password_reset_email(email, url)
+          Plausible.Mailer.deliver_later(email_template)
+
+          Logger.debug(
+            "Password reset e-mail sent. In dev environment GET /sent-emails for details."
+          )
+
+          render(conn, "password_reset_request_success.html",
+            legacy_layout?: false,
+            email: email
+          )
+
+        {:error, _} ->
+          render(conn, "password_reset_request_success.html",
+            legacy_layout?: false,
+            email: email
+          )
+      end
+    else
+      render(conn, "password_reset_request_form.html",
+        legacy_layout?: false,
+        captcha_error: "Please complete the captcha to reset your password"
+      )
+    end
+  end
+
+  def password_reset_form(conn, params) do
+    case Auth.Token.verify_password_reset(params["token"]) do
+      {:ok, %{email: email}} ->
+        render(conn, "password_reset_form.html",
+          legacy_layout?: false,
+          connect_live_socket: true,
+          email: email
+        )
+
+      {:error, :expired} ->
+        conn
+        |> put_status(401)
+        |> render("password_reset_error.html",
+          legacy_layout?: false,
+          heading: "Password reset link expired"
+        )
+
+      {:error, _} ->
+        conn
+        |> put_status(401)
+        |> render("password_reset_error.html",
+          legacy_layout?: false,
+          heading: "Password reset link invalid"
+        )
+    end
+  end
+
+  def password_reset(conn, _params) do
+    conn
+    |> UserAuth.log_out_user()
+    |> put_flash(:login_title, "Password updated successfully")
+    |> put_flash(:login_instructions, "Please sign in with your new credentials")
+    |> redirect(to: ~p"/login")
+  end
+
+  on_ee do
+    def login_form(conn, params) do
+      login_preference = LoginPreference.get(conn)
+      error = Phoenix.Flash.get(conn.assigns.flash, :login_error)
+
+      case {login_preference, params["prefer"], error} do
+        {"sso", nil, nil} ->
+          redirect(conn, to: ~p"/sso/login?#{[return_to: params["return_to"]]}")
+
+        _ ->
+          render_login_form(conn)
+      end
+    end
+  else
+    def login_form(conn, _params) do
+      render_login_form(conn)
+    end
+  end
+
+  defp render_login_form(conn) do
+    heading = Phoenix.Flash.get(conn.assigns.flash, :login_title) || "Sign in to your account"
+    subtitle = Phoenix.Flash.get(conn.assigns.flash, :login_instructions)
+
+    render(conn, "login_form.html",
+      legacy_layout?: false,
+      heading: heading,
+      subtitle: subtitle
+    )
+  end
+
+  def login(conn, %{"user" => params}) do
+    login(conn, params)
+  end
+
+  def login(conn, %{"email" => email, "password" => password} = params) do
+    with :ok <- Auth.rate_limit(:login_ip, conn),
+         {:ok, user} <- Auth.lookup(email),
+         :ok <- Auth.rate_limit(:login_user, user),
+         :ok <- Auth.check_password(user, password),
+         :ok <- check_2fa_verified(conn, user) do
+      redirect_path =
+        cond do
+          not is_nil(params["register_action"]) and not user.email_verified ->
+            Auth.EmailVerification.issue_code(user)
+
+            flow =
+              if params["register_action"] == "register_form" do
+                PlausibleWeb.Flows.register()
+              else
+                PlausibleWeb.Flows.invitation()
+              end
+
+            ~p"/activate?#{[flow: flow, team_identifier: params["team_identifier"]]}"
+
+          params["register_action"] == "register_from_invitation_form" ->
+            accept_team_invitation(conn, params["team_identifier"], user)
+
+          params["register_action"] == "register_form" ->
+            ~p"/sites/new"
+
+          true ->
+            params["return_to"]
+        end
+
+      conn
+      |> LoginPreference.clear()
+      |> UserAuth.log_in_user(user, redirect_path)
+    else
+      {:error, :wrong_password} ->
+        Auth.log_failed_login_attempt("wrong password for #{email}")
+
+        conn
+        |> put_flash(:login_error, "Incorrect email or password. Please try again.")
+        |> render_login_form()
+
+      {:error, :user_not_found} ->
+        Auth.log_failed_login_attempt("user not found for #{email}")
+        Plausible.Auth.Password.dummy_calculation()
+
+        conn
+        |> put_flash(:login_error, "Incorrect email or password. Please try again.")
+        |> render_login_form()
+
+      {:error, {:rate_limit, _}} ->
+        Auth.log_failed_login_attempt("too many login attempts for #{email}")
+
+        render_error(
+          conn,
+          429,
+          "Too many login attempts. Wait a minute before trying again."
+        )
+
+      {:error, {:unverified_2fa, user}} ->
+        query_params =
+          if params["return_to"] not in [nil, ""], do: [return_to: params["return_to"]], else: []
+
+        conn
+        |> TwoFactor.Session.set_2fa_user(user)
+        |> redirect(to: ~p"/2fa/verify?#{query_params}")
+    end
+  end
+
+  def login(conn, _params) do
+    conn |> send_resp(403, "") |> halt()
+  end
+
+  def invitation_expired(conn, _params) do
+    render(conn, "invitation_expired.html",
+      legacy_layout?: false,
+      heading: "Invitation no longer valid",
+      subtitle:
+        "This invitation has expired or was revoked. Ask your team admin to send you a new invitation. "
+    )
+  end
+
+  defp accept_team_invitation(conn, team_identifier, user, params \\ [])
+
+  defp accept_team_invitation(_conn, no_identifier, _user, params)
+       when no_identifier in ["", nil] do
+    ~p"/sites?#{params}"
+  end
+
+  defp accept_team_invitation(_conn, team_identifier, user, extra_params) do
+    params = Keyword.merge([__team: team_identifier], extra_params)
+
+    # We try switching to the team no matter the invitation presence or acceptance outcome.
+    case Teams.Invitations.find_by_team_identifier(team_identifier, user) do
+      {:ok, invitation} ->
+        {_, _} = Teams.Invitations.accept_team_invitation(invitation, user)
+        ~p"/sites?#{params}"
+
+      {:error, :invitation_not_found} ->
+        ~p"/sites?#{params}"
+    end
+  end
+
+  defp check_2fa_verified(conn, user) do
+    if Auth.TOTP.enabled?(user) and not TwoFactor.Session.remember_2fa?(conn, user) do
+      {:error, {:unverified_2fa, user}}
+    else
+      :ok
+    end
+  end
+
+  def force_initiate_2fa_setup(conn, _params) do
+    render(conn, "force_initiate_2fa_setup.html")
+  end
+
+  def initiate_2fa_setup(conn, params) do
+    case Auth.TOTP.initiate(conn.assigns.current_user) do
+      {:ok, user, %{totp_uri: totp_uri, secret: secret}} ->
+        render(conn, "initiate_2fa_setup.html",
+          user: user,
+          totp_uri: totp_uri,
+          secret: secret,
+          forced?: params["force"] == "true"
+        )
+
+      {:error, :already_setup} ->
+        conn
+        |> put_flash(:error, "Two-Factor Authentication is already setup for this account.")
+        |> redirect(to: ~p"/settings/security#update-2fa")
+    end
+  end
+
+  def verify_2fa_setup_form(conn, _params) do
+    if Auth.TOTP.initiated?(conn.assigns.current_user) do
+      render(conn, "verify_2fa_setup.html")
+    else
+      redirect(conn, to: ~p"/settings/security#update-2fa")
+    end
+  end
+
+  def verify_2fa_setup(conn, %{"code" => code}) do
+    user = conn.assigns.current_user
+
+    with :ok <- Auth.rate_limit(:totp_setup_ip, conn),
+         :ok <- Auth.rate_limit(:totp_setup_user, user),
+         {:ok, _, %{recovery_codes: codes}} <- Auth.TOTP.enable(user, code) do
+      conn
+      |> put_flash(:success, "Two-Factor Authentication is fully enabled")
+      |> render("generate_2fa_recovery_codes.html", recovery_codes: codes, from_setup: true)
+    else
+      {:error, {:rate_limit, _}} ->
+        render_error(
+          conn,
+          429,
+          "Too many attempts. Wait a minute before trying again."
+        )
+
+      {:error, :invalid_code} ->
+        conn
+        |> put_flash(:error, "The provided code is invalid. Please try again")
+        |> render("verify_2fa_setup.html")
+
+      {:error, :not_initiated} ->
+        conn
+        |> put_flash(:error, "Please enable Two-Factor Authentication for this account first.")
+        |> redirect(to: ~p"/settings/security#update-2fa")
+    end
+  end
+
+  def disable_2fa(conn, %{"password" => password}) do
+    case Auth.TOTP.disable(conn.assigns.current_user, password) do
+      {:ok, _} ->
+        conn
+        |> TwoFactor.Session.clear_remember_2fa()
+        |> put_flash(:success, "Two-Factor Authentication is disabled")
+        |> redirect(to: ~p"/settings/security#update-2fa")
+
+      {:error, :invalid_password} ->
+        conn
+        |> put_flash(:error, "Incorrect password provided")
+        |> redirect(to: ~p"/settings/security#update-2fa")
+    end
+  end
+
+  def generate_2fa_recovery_codes(conn, %{"password" => password}) do
+    case Auth.TOTP.generate_recovery_codes(conn.assigns.current_user, password) do
+      {:ok, codes} ->
+        conn
+        |> put_flash(:success, "New Recovery Codes generated")
+        |> render("generate_2fa_recovery_codes.html", recovery_codes: codes, from_setup: false)
+
+      {:error, :invalid_password} ->
+        conn
+        |> put_flash(:error, "Incorrect password provided")
+        |> redirect(to: ~p"/settings/security#update-2fa")
+
+      {:error, :not_enabled} ->
+        conn
+        |> put_flash(:error, "Please enable Two-Factor Authentication for this account first.")
+        |> redirect(to: ~p"/settings/security#update-2fa")
+    end
+  end
+
+  def verify_2fa_form(conn, _params) do
+    case TwoFactor.Session.get_2fa_user(conn) do
+      {:ok, user} ->
+        if Auth.TOTP.enabled?(user) do
+          render(conn, "verify_2fa.html", legacy_layout?: false, error: nil)
+        else
+          redirect_to_login(conn)
+        end
+
+      {:error, :not_found} ->
+        redirect_to_login(conn)
+    end
+  end
+
+  def verify_2fa(conn, %{"code" => code} = params) do
+    with {:ok, user} <- get_2fa_user_limited(conn) do
+      case Auth.TOTP.validate_code(user, code) do
+        {:ok, user} ->
+          conn
+          |> TwoFactor.Session.maybe_set_remember_2fa(user, params["remember_2fa"])
+          |> UserAuth.log_in_user(user, params["return_to"])
+
+        {:error, :invalid_code} ->
+          Auth.log_failed_login_attempt("wrong 2FA verification code provided for #{user.email}")
+
+          render(conn, "verify_2fa.html",
+            legacy_layout?: false,
+            error: "The provided code is invalid. Please try again"
+          )
+
+        {:error, :not_enabled} ->
+          UserAuth.log_in_user(conn, user, params["return_to"])
+      end
+    end
+  end
+
+  def verify_2fa_recovery_code_form(conn, _params) do
+    case TwoFactor.Session.get_2fa_user(conn) do
+      {:ok, user} ->
+        if Auth.TOTP.enabled?(user) do
+          render(conn, "verify_2fa_recovery_code.html", legacy_layout?: false, error: nil)
+        else
+          redirect_to_login(conn)
+        end
+
+      {:error, :not_found} ->
+        redirect_to_login(conn)
+    end
+  end
+
+  def verify_2fa_recovery_code(conn, %{"recovery_code" => recovery_code}) do
+    with {:ok, user} <- get_2fa_user_limited(conn) do
+      case Auth.TOTP.use_recovery_code(user, recovery_code) do
+        :ok ->
+          UserAuth.log_in_user(conn, user)
+
+        {:error, :invalid_code} ->
+          Auth.log_failed_login_attempt("wrong 2FA recovery code provided for #{user.email}")
+
+          render(conn, "verify_2fa_recovery_code.html",
+            legacy_layout?: false,
+            error: "The provided recovery code is invalid. Please try another one"
+          )
+
+        {:error, :not_enabled} ->
+          UserAuth.log_in_user(conn, user)
+      end
+    end
+  end
+
+  defp get_2fa_user_limited(conn) do
+    case TwoFactor.Session.get_2fa_user(conn) do
+      {:ok, user} ->
+        with :ok <- Auth.rate_limit(:login_ip, conn),
+             :ok <- Auth.rate_limit(:login_user, user) do
+          {:ok, user}
+        else
+          {:error, {:rate_limit, _}} ->
+            Auth.log_failed_login_attempt("too many login attempts for #{user.email}")
+
+            conn
+            |> TwoFactor.Session.clear_2fa_user()
+            |> render_error(
+              429,
+              "Too many login attempts. Wait a minute before trying again."
+            )
+        end
+
+      {:error, :not_found} ->
+        conn
+        |> redirect(to: ~p"/login")
+    end
+  end
+
+  defp handle_email_updated(conn) do
+    conn
+    |> put_flash(:success, "Email updated successfully")
+    |> redirect(to: ~p"/settings/security#update-email")
+  end
+
+  def delete_me(conn, params) do
+    case Plausible.Auth.delete_user(conn.assigns[:current_user]) do
+      {:ok, :deleted} ->
+        logout(conn, params)
+
+      {:error, :active_subscription} ->
+        conn
+        |> put_flash(
+          :error,
+          "You have an active subscription which must be canceled first."
+        )
+        |> redirect(to: ~p"/settings/danger-zone")
+
+      {:error, :is_only_team_owner} ->
+        conn
+        |> put_flash(
+          :error,
+          "You can't delete your account when you are the only owner on a team."
+        )
+        |> redirect(to: ~p"/settings/danger-zone")
+    end
+  end
+
+  def logout(conn, params) do
+    redirect_to = Map.get(params, "redirect", "/")
+
+    conn
+    |> UserAuth.log_out_user()
+    |> redirect(to: redirect_to)
+  end
+
+  def google_auth_callback(conn, %{"error" => error, "state" => state} = params) do
+    case Plausible.Google.API.verify_oauth_state(state) do
+      {:ok, %{site: site, context: context}} ->
+        redirect_url =
+          if context == "import" do
+            ~p"/#{site.domain}/settings/imports-exports"
+          else
+            ~p"/#{site.domain}/settings/integrations"
+          end
+
+        cond do
+          error == "access_denied" ->
+            conn
+            |> put_flash(
+              :error,
+              "We were unable to authenticate your Google Analytics account. Please check that you have granted us permission to 'See and download your Google Analytics data' and try again."
+            )
+            |> redirect(to: redirect_url)
+
+          error in ["server_error", "temporarily_unavailable"] ->
+            conn
+            |> put_flash(
+              :error,
+              "We are unable to authenticate your Google Analytics account because Google's authentication service is temporarily unavailable. Please try again in a few moments."
+            )
+            |> redirect(to: redirect_url)
+
+          true ->
+            Sentry.capture_message("Google OAuth callback failed. Params: #{inspect(params)}")
+            generic_oauth_error_response(conn, redirect_url)
+        end
+
+      {:error, reason} ->
+        Sentry.capture_message(
+          "Google OAuth callback failed. Reason: #{inspect(reason)}. Params: #{inspect(params)}"
+        )
+
+        generic_oauth_error_response(conn)
+    end
+  end
+
+  def google_auth_callback(conn, %{"code" => code, "state" => state} = params) do
+    current_user = conn.assigns[:current_user]
+
+    with {:ok, %{site: site, context: context}} <- Plausible.Google.API.verify_oauth_state(state),
+         :ok <- check_callback_site_permission(site, current_user) do
+      token_data = Plausible.Google.API.fetch_access_token!(code)
+      expires_in = Map.fetch!(token_data, "expires_in")
+      expires_at = NaiveDateTime.add(NaiveDateTime.utc_now(), expires_in)
+
+      if context == "import" do
+        google_import_callback(conn, site, token_data, expires_at)
+      else
+        google_search_console_callback(conn, site, token_data, expires_at)
+      end
+    else
+      {:error, reason} ->
+        Sentry.capture_message(
+          "Google OAuth callback failed. Reason: #{inspect(reason)}. Params: #{inspect(params)}"
+        )
+
+        generic_oauth_error_response(conn)
+    end
+  end
+
+  defp google_import_callback(conn, site, token_data, expires_at) do
+    redirect(conn,
+      to:
+        ~p"/#{site.domain}/import/google-analytics/property?#{[access_token: Map.fetch!(token_data, "access_token"), refresh_token: Map.fetch!(token_data, "refresh_token"), expires_at: NaiveDateTime.to_iso8601(expires_at)]}"
+    )
+  end
+
+  defp google_search_console_callback(conn, site, token_data, expires_at) do
+    current_user = conn.assigns.current_user
+
+    id_token = Map.fetch!(token_data, "id_token")
+    [_, body, _] = String.split(id_token, ".")
+    id = body |> Base.decode64!(padding: false) |> Jason.decode!()
+    email = Map.fetch!(id, "email")
+    refresh_token = Map.fetch!(token_data, "refresh_token")
+    access_token = Map.fetch!(token_data, "access_token")
+
+    Plausible.Site.GoogleAuth.changeset(%Plausible.Site.GoogleAuth{}, %{
+      email: email,
+      refresh_token: refresh_token,
+      access_token: access_token,
+      expires: expires_at,
+      user_id: current_user.id
+    })
+    |> Ecto.Changeset.put_assoc(:site, site)
+    |> Ecto.Changeset.put_assoc(:user, current_user)
+    |> Repo.insert!(
+      on_conflict: [
+        set: [
+          email: email,
+          refresh_token: refresh_token,
+          access_token: access_token,
+          expires: expires_at,
+          user_id: current_user.id,
+          updated_at: NaiveDateTime.utc_now(:second),
+          property: nil
+        ]
+      ],
+      conflict_target: :site_id
+    )
+
+    redirect(conn, to: ~p"/#{site.domain}/settings/integrations")
+  end
+
+  defp check_callback_site_permission(site, current_user) do
+    if Plausible.Sites.get_for_user(current_user, site.domain,
+         roles: [:owner, :admin, :editor, :super_admin]
+       ) do
+      :ok
+    else
+      {:error, :permission_denied}
+    end
+  end
+
+  defp generic_oauth_error_response(conn, redirect_url \\ nil) do
+    redirect_url = redirect_url || ~p"/login"
+
+    conn
+    |> put_flash(
+      :error,
+      "We were unable to authenticate your Google Analytics account. If the problem persists, please contact support for assistance."
+    )
+    |> redirect(to: redirect_url)
+  end
+
+  defp redirect_to_login(conn) do
+    redirect(conn, to: ~p"/login")
+  end
+end

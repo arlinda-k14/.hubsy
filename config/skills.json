@@ -658,6 +658,34 @@
         "target_source"
       ],
       "sub_skills": []
+    },
+    {
+      "name": "plausible-analytics",
+      "description": "Open-source, privacy-friendly web analytics codebase (plausible/analytics, AGPL-3.0), cloned into analytics/. A lightweight Elixir/Phoenix alternative to Google Analytics with no cookies and full GDPR/CCPA compliance. Owns the full analytics stack: script-based pageview collection (script.js), a ClickHouse-backed ingestion and query layer (Plausible.Clickhouse, SQLATS), goal conversions and custom events, UTM/campaign attribution, ecommerce events, real-time visitor dashboard, site and team management, shared links, privacy-focused reporting (unique visitors via HLL sketches, time-on-page), API access, and Slack/email/Webhook-style notifications. Includes the React/Preact frontend in assets/, e2e tests, config/ for environment-driven settings, and fixture/ test data. Use when building, extending, self-hosting, or understanding a full-featured open-source web analytics platform - pageview tracking scripts, event ingestion, ClickHouse queries, dashboards, goal/revenue tracking, or privacy compliance. Not for design, media, or content-production tasks.",
+      "path": "analytics/",
+      "domains": [
+        "analytics",
+        "data-insights",
+        "product-analytics",
+        "elixir",
+        "clickhouse"
+      ],
+      "triggers": [
+        "web analytics",
+        "analytics dashboard",
+        "pageview tracking",
+        "event ingestion",
+        "clickhouse query",
+        "privacy analytics",
+        "goal tracking",
+        "utm attribution",
+        "real-time dashboard",
+        "self-hosted analytics",
+        "plausible",
+        "analytics script"
+      ],
+      "required_parameters": [],
+      "sub_skills": []
     }
   ]
 }

@@ -1,0 +1,159 @@
+defmodule PlausibleWeb do
+  @moduledoc false
+
+  use Plausible
+
+  def live_view(opts \\ []) do
+    quote do
+      use Plausible
+      use Phoenix.LiveView, global_prefixes: ~w(x-)
+      use PlausibleWeb.Live.Flash
+      use PlausibleWeb.VerifiedRoutes
+      use PlausibleWeb.Live.AuthContext
+
+      unless :no_sentry_context in unquote(opts) do
+        use PlausibleWeb.Live.SentryContext
+      end
+
+      on_ee do
+        use Plausible.Audit.LiveContext
+      end
+
+      alias Phoenix.LiveView.JS
+
+      import PlausibleWeb.Components.Generic
+      import PlausibleWeb.Components.Settings
+      import PlausibleWeb.Live.Components.Form
+    end
+  end
+
+  def live_component do
+    quote do
+      use Phoenix.LiveComponent, global_prefixes: ~w(x-)
+      use PlausibleWeb.VerifiedRoutes
+      import PlausibleWeb.Components.Generic
+      import PlausibleWeb.Components.Settings
+      import PlausibleWeb.Live.Components.Form
+      alias Phoenix.LiveView.JS
+    end
+  end
+
+  def component do
+    quote do
+      use Phoenix.Component, global_prefixes: ~w(x-)
+      use PlausibleWeb.VerifiedRoutes
+      import PlausibleWeb.Components.Generic
+      import PlausibleWeb.Components.Settings
+      import PlausibleWeb.Live.Components.Form
+      alias Phoenix.LiveView.JS
+    end
+  end
+
+  def controller do
+    quote do
+      use Phoenix.Controller, formats: [html: "View", json: "View"]
+      use PlausibleWeb.VerifiedRoutes
+
+      import Plug.Conn
+      import PlausibleWeb.ControllerHelpers
+    end
+  end
+
+  def view do
+    quote do
+      use Phoenix.View,
+        root: "lib/plausible_web/templates"
+
+      # Import convenience functions from controllers
+      import Phoenix.Controller, only: [view_module: 1]
+
+      use Phoenix.Component, global_prefixes: ~w(x-)
+      use PlausibleWeb.VerifiedRoutes
+
+      import PlausibleWeb.Components.Generic
+      import PlausibleWeb.Components.Settings
+      import PlausibleWeb.Live.Components.Form
+    end
+  end
+
+  on_ee do
+    def extra_view do
+      quote do
+        use Phoenix.View,
+          root: "extra/lib/plausible_web/templates"
+
+        # Import convenience functions from controllers
+        import Phoenix.Controller, only: [view_module: 1]
+
+        use Phoenix.Component
+        use PlausibleWeb.VerifiedRoutes
+
+        import PlausibleWeb.Components.Generic
+        import PlausibleWeb.Components.Settings
+        import PlausibleWeb.Live.Components.Form
+      end
+    end
+  end
+
+  def router do
+    quote do
+      use Phoenix.Router, helpers: false
+      import Plug.Conn
+      import Phoenix.Controller
+    end
+  end
+
+  def channel do
+    quote do
+      use Phoenix.Channel
+    end
+  end
+
+  def plugins_api_controller do
+    quote do
+      use Phoenix.Controller, formats: [:json]
+      use PlausibleWeb.VerifiedRoutes
+
+      import Plug.Conn
+
+      alias PlausibleWeb.Plugins.API.Schemas
+      alias PlausibleWeb.Plugins.API.Views
+      alias PlausibleWeb.Plugins.API.Errors
+      alias Plausible.Plugins.API
+
+      plug(OpenApiSpex.Plug.CastAndValidate, json_render_error_v2: true, replace_params: false)
+
+      use OpenApiSpex.ControllerSpecs
+    end
+  end
+
+  def plugins_api_view do
+    quote do
+      use Phoenix.View, root: ""
+      use PlausibleWeb.VerifiedRoutes
+
+      import PlausibleWeb.Plugins.API.Views.Pagination, only: [render_metadata_links: 3]
+    end
+  end
+
+  def open_api_schema do
+    quote do
+      use PlausibleWeb.VerifiedRoutes
+
+      require OpenApiSpex
+      alias OpenApiSpex.Schema
+      alias PlausibleWeb.Plugins.API.Schemas
+    end
+  end
+
+  @doc """
+  When used, dispatch to the appropriate controller/view/etc.
+  """
+  defmacro __using__(which) when is_atom(which) do
+    apply(__MODULE__, which, [])
+  end
+
+  defmacro __using__([{which, opts}]) when is_atom(which) do
+    apply(__MODULE__, which, [List.wrap(opts)])
+  end
+end

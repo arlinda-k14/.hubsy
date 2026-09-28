@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full plausible">
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Plausible is a lightweight and open-source web analytics tool. Your website data is 100% yours and the privacy of your visitors is respected."
+    />
+    <%= if assigns[:connect_live_socket] do %>
+      <meta name="csrf-token" content={Plug.CSRFProtection.get_csrf_token()} />
+      <meta name="websocket-url" content={websocket_url()} />
+    <% end %>
+    <meta name="robots" content={@conn.private.robots} />
+    <meta
+      name="x-api-version"
+      content={Plausible.InternalStatsApiVersion.api_version()}
+    />
+
+    <PlausibleWeb.Components.Layout.favicon conn={@conn} />
+
+    <title>
+      {assigns[:title] ||
+        "Plausible · Simple, privacy-friendly alternative to Google Analytics"}
+    </title>
+    <link rel="stylesheet" href={~p"/css/app.css"} />
+    <PlausibleWeb.Components.Layout.theme_script {Map.take(assigns, [:current_user, :theme])} />
+    {render("_tracking.html", assigns)}
+  </head>
+  <body
+    class={[
+      if(!assigns[:embedded], do: "h-full"),
+      assigns[:bg_class] || "bg-gray-50 dark:bg-gray-950"
+    ]}
+    style={if assigns[:background], do: "background-color: #{assigns[:background]}"}
+  >
+    <%= if Map.get(assigns, :legacy_layout?, true) do %>
+      <Layouts.legacy {assigns}>
+        {@inner_content}
+      </Layouts.legacy>
+    <% else %>
+      {@inner_content}
+    <% end %>
+  </body>
+</html>
