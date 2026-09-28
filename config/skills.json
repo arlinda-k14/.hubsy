@@ -195,6 +195,26 @@
       ],
       "required_parameters": ["operation", "bank_id"],
       "sub_skills": []
+    },
+    {
+      "name": "autoresearch-optimizer",
+      "description": "Autonomous experiment loop that turns Hubsy into a self-improving researcher. Form a hypothesis, modify a target asset or prompt, run a fixed evaluation metric, and keep the change only if the score improves or revert if it is worse. Modeled on karpathy/autoresearch (edits train.py against a fixed val_bpb evaluator while a program.md direction file steers the loop), generalized to prompts, configs, and code. Use for overnight/autonomous optimization, iterative experimentation, prompt tuning, and benchmark-driven change review.",
+      "path": "skills/autoresearch-optimizer/SKILL.md",
+      "domains": ["optimization-and-testing", "experimentation", "benchmarking", "autonomous-research"],
+      "triggers": [
+        "experiment overnight",
+        "run experiments on this",
+        "autoresearch",
+        "optimize this prompt automatically",
+        "iteratively improve",
+        "hypothesis",
+        "evaluation metric",
+        "keep it if it improved",
+        "revert if worse",
+        "benchmark my changes"
+      ],
+      "required_parameters": ["target_asset", "metric"],
+      "sub_skills": []
     }
   ]
 }
