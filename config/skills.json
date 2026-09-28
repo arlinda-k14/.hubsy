@@ -353,6 +353,32 @@
       ],
       "required_parameters": ["tool", "action"],
       "sub_skills": []
+    },
+    {
+      "name": "ui-ux-pro-max",
+      "description": "Advanced UI/UX design intelligence for web, mobile, and desktop interfaces, adapted from ui-ux-pro-max-skill (github.com/nextlevelbuilder/ui-ux-pro-max-skill). Covers user conversion flows (hero+features+CTA, funnel, pricing, lead-magnet, waitlist, social-proof and 34 landing patterns with CTA placement), micro-interaction guidelines (press feedback in 80-150ms, spring physics, 30-50ms staggers, exit-faster-than-enter, interruptible and cancel-safe motion, transform/opacity only, reduced-motion), component design tokens (primitive > semantic > component layers with button/input/card/badge/alert/dialog/table token maps), responsive grid layouts (mobile-first, 375/768/1024/1440 breakpoints, 4/8dp spacing rhythm, min-h-dvh, no horizontal scroll, 60-75ch line length), and WCAG accessibility standards (4.5:1 contrast, 2-4px focus rings, 44x44pt/48x48dp touch targets, keyboard nav, focus-not-obscured, label-above-input, aria-live). Use when designing, building, reviewing, or fixing interfaces, pages, components, design systems, landing pages, or dashboards that must meet a professional UX and accessibility bar.",
+      "path": "skills/ui-ux-pro-max/SKILL.md",
+      "domains": ["ui-ux-design", "conversion-optimization", "design-tokens", "responsive-layout", "accessibility", "micro-interactions"],
+      "triggers": [
+        "ui ux design",
+        "ux review",
+        "conversion landing page",
+        "micro-interactions",
+        "design tokens",
+        "component tokens",
+        "responsive grid",
+        "wcag",
+        "accessibility audit",
+        "make it accessible",
+        "pricing page layout",
+        "landing page structure",
+        "user conversion flow",
+        "interaction feedback",
+        "usability",
+        "professional looking ui"
+      ],
+      "required_parameters": ["interface_context", "target_platform"],
+      "sub_skills": []
     }
   ]
 }
