@@ -578,6 +578,47 @@
         "target"
       ],
       "sub_skills": []
+    },
+    {
+      "name": "video-editing-agent",
+      "description": "Video editing engine running footage work through the video-use pipeline (adapted from browser-use/video-use). Transcribes sources with word-level timestamps, packs all takes into a single takes_packed.md reading view, reasons over transcript text plus on-demand timeline visuals, and emits an EDL of transcript-driven speech cuts - every cut snapped to a word boundary with 30-200ms padding, filler words (umm, uh, false starts) and dead space eliminated, best-take assembly per beat. Auto color grades each segment (ASC-CDL model, warm_cinematic and neutral_punch presets plus custom ffmpeg chains, applied per-segment not post-concat), burns stylized subtitles (2-word UPPERCASE bold chunks or invented styles, applied last in the filter chain with output-timeline offsets), renders animation overlays (HyperFrames, Remotion, Manim, or PIL) via parallel one-shot sub-agents, and runs cut-boundary self-evaluation loops on the rendered output (timeline_view at every cut with fades/overlay/subtitle checks, ebur128 loudness and true-peak measurement, ffprobe duration verification, critic sub-agents, capped at 3 passes) before showing a preview. Persists session memory in project.md. Use when editing, assembling, grading, captioning, cutting, trimming, or polishing video - talking heads, montages, tutorials, travel, interviews, launch videos, social shorts. Not for audio-transcription-only or non-video tasks.",
+      "path": "skills/video-editing-agent/SKILL.md",
+      "domains": [
+        "media-production",
+        "video-editing",
+        "transcription",
+        "color-grading",
+        "subtitles",
+        "motion-graphics"
+      ],
+      "triggers": [
+        "edit this video",
+        "edit these clips",
+        "cut a video",
+        "remove umms and ums",
+        "filler words",
+        "video montage",
+        "launch video",
+        "talking head edit",
+        "color grade",
+        "auto color grade",
+        "burn subtitles",
+        "stylized captions",
+        "video captions",
+        "transcript editing",
+        "make a short",
+        "vertical video",
+        "social clip",
+        "best takes",
+        "assemble clips",
+        "interview edit",
+        "tutorial video"
+      ],
+      "required_parameters": [
+        "source_videos",
+        "target_style"
+      ],
+      "sub_skills": []
     }
   ]
 }
