@@ -580,6 +580,57 @@
       "sub_skills": []
     },
     {
+      "name": "luxury-static-site",
+      "description": "Build production-ready luxury and high-end brand websites as static HTML and CSS that deploy to Netlify with no build step. Runs a per-site intake, proposes a design direction for approval, then writes semantic HTML5, custom-property CSS, and at most one small deferred JS file, finishing with a self-audit for WCAG contrast, placeholder leaks, CTA discipline, and banned AI-tell styling. Use whenever the user wants a luxury, premium, high-end, elegant, boutique, artisanal, heritage, atelier, or bespoke brand site — a services page, consultancy site, private-client landing page, studio portfolio, or Netlify-ready static marketing site — even if they never say the word 'luxury'. Not for app UIs, dashboards, carts, or anything requiring a framework or build step.",
+      "path": "skills/luxury-static-site/SKILL.md",
+      "domains": [
+        "luxury-branding",
+        "static-sites",
+        "netlify",
+        "web-design",
+        "accessibility",
+        "copywriting"
+      ],
+      "triggers": [
+        "luxury site",
+        "luxury brand website",
+        "premium website",
+        "high-end brand site",
+        "elegant landing page",
+        "boutique brand site",
+        "artisanal brand site",
+        "bespoke website",
+        "atelier website",
+        "heritage brand site",
+        "netlify-ready static site",
+        "no build step website",
+        "static html css site"
+      ],
+      "required_parameters": [
+        "brand_name",
+        "industry",
+        "offering_description"
+      ],
+      "resolvable_defaults": {
+        "wcag_level": "WCAG 2.2 AA",
+        "lighthouse_target": 95,
+        "pages": [
+          "index.html"
+        ],
+        "js_features": [],
+        "heading_font": "system serif stack",
+        "body_font": "system sans stack",
+        "breakpoints": [
+          375,
+          768,
+          1440
+        ],
+        "inquiry_form_backend": "netlify-forms",
+        "imagery_assets": "local SVG placeholders"
+      },
+      "sub_skills": []
+    },
+    {
       "name": "video-editing-agent",
       "description": "Video editing engine running footage work through the video-use pipeline (adapted from browser-use/video-use). Transcribes sources with word-level timestamps, packs all takes into a single takes_packed.md reading view, reasons over transcript text plus on-demand timeline visuals, and emits an EDL of transcript-driven speech cuts - every cut snapped to a word boundary with 30-200ms padding, filler words (umm, uh, false starts) and dead space eliminated, best-take assembly per beat. Auto color grades each segment (ASC-CDL model, warm_cinematic and neutral_punch presets plus custom ffmpeg chains, applied per-segment not post-concat), burns stylized subtitles (2-word UPPERCASE bold chunks or invented styles, applied last in the filter chain with output-timeline offsets), renders animation overlays (HyperFrames, Remotion, Manim, or PIL) via parallel one-shot sub-agents, and runs cut-boundary self-evaluation loops on the rendered output (timeline_view at every cut with fades/overlay/subtitle checks, ebur128 loudness and true-peak measurement, ffprobe duration verification, critic sub-agents, capped at 3 passes) before showing a preview. Persists session memory in project.md. Use when editing, assembling, grading, captioning, cutting, trimming, or polishing video - talking heads, montages, tutorials, travel, interviews, launch videos, social shorts. Not for audio-transcription-only or non-video tasks.",
       "path": "skills/video-editing-agent/SKILL.md",
