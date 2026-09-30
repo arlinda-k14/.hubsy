@@ -711,6 +711,67 @@
       "sub_skills": []
     },
     {
+      "name": "social-thread-writer",
+      "description": "Converts a technical article URL, GitHub repository, or raw markdown into a five-post educational social thread for X or LinkedIn, in English or Albanian. Written from a first-person practitioner perspective for junior developers, career switchers, and beginner-to-intermediate learners. Runs a strict nine-step contract - preflight, ingestion, safety check, extract, code translation, five-post draft, platform caps, attribution, accuracy gate - and refuses to continue when a source cannot be fetched or when a figure in a post does not appear in the source. The core skill of the ViralScript AI runtime.",
+      "path": "skills/social-thread-writer/SKILL.md",
+      "domains": [
+        "content-drafting",
+        "social-media",
+        "technical-writing",
+        "educational-content",
+        "localization"
+      ],
+      "triggers": [
+        "turn this article into a thread",
+        "make a social thread from this repo",
+        "five posts about this",
+        "write a linkedin post from this",
+        "carousel copy",
+        "social thread",
+        "educational post series",
+        "break this down into posts",
+        "viral script",
+        "viralscript"
+      ],
+      "required_parameters": [
+        "source",
+        "target_platform",
+        "target_language"
+      ],
+      "sub_skills": [
+        {
+          "name": "source-ingestion",
+          "description": "Preflight, fetch, and safety-check a URL, repository, or raw text. Stops the run rather than reconstructing unreadable source content.",
+          "required_parameters": [
+            "source"
+          ]
+        },
+        {
+          "name": "five-post-drafting",
+          "description": "Draft the Hook, Discovery, Mechanism, Application, and Action posts with plain-language glosses on technical terms and optional bracketed image prompts.",
+          "required_parameters": [
+            "extracted_content",
+            "creator_attribution"
+          ]
+        },
+        {
+          "name": "platform-verification",
+          "description": "Check every post against the X 280-character and LinkedIn 800-character caps, the one-emoji budget, the two-hashtag rule on Post 5, and the no-promotion-in-Posts-1-to-4 rule.",
+          "required_parameters": [
+            "target_platform"
+          ]
+        },
+        {
+          "name": "accuracy-gate",
+          "description": "Verify every metric appears in the source, that no career outcome or timeline is promised, and that corporate filler and hype are absent.",
+          "required_parameters": [
+            "source",
+            "draft_posts"
+          ]
+        }
+      ]
+    },
+    {
       "name": "plausible-analytics",
       "description": "Open-source, privacy-friendly web analytics codebase (plausible/analytics, AGPL-3.0), cloned into analytics/. A lightweight Elixir/Phoenix alternative to Google Analytics with no cookies and full GDPR/CCPA compliance. Owns the full analytics stack: script-based pageview collection (script.js), a ClickHouse-backed ingestion and query layer (Plausible.Clickhouse, SQLATS), goal conversions and custom events, UTM/campaign attribution, ecommerce events, real-time visitor dashboard, site and team management, shared links, privacy-focused reporting (unique visitors via HLL sketches, time-on-page), API access, and Slack/email/Webhook-style notifications. Includes the React/Preact frontend in assets/, e2e tests, config/ for environment-driven settings, and fixture/ test data. Use when building, extending, self-hosting, or understanding a full-featured open-source web analytics platform - pageview tracking scripts, event ingestion, ClickHouse queries, dashboards, goal/revenue tracking, or privacy compliance. Not for design, media, or content-production tasks.",
       "path": "analytics/",
