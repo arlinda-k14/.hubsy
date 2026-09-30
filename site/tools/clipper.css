@@ -1,0 +1,180 @@
+/* ---------- ViralClipAI tool page ----------
+   Extends ../styles.css. Tokens are inherited, never redefined. */
+
+.toolpage .tool-hero { padding-block: clamp(2.75rem, 6vw, 5rem) var(--sp); }
+.tool-hero h1 { font-size: clamp(2.1rem, 5.2vw, 3.5rem); max-width: 18ch; }
+.tool-hero .lede { max-width: 58ch; }
+.tool-actions { display: flex; flex-wrap: wrap; gap: .85rem; margin-top: 2rem; }
+
+/* ---------- the five rules ---------- */
+
+.rules { display: grid; grid-template-columns: repeat(5, 1fr); gap: var(--gap); counter-reset: r; }
+.rules li {
+  position: relative; padding: 1.5rem 1.35rem 1.6rem;
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-lg);
+  box-shadow: var(--shadow);
+  transition: transform .2s ease, box-shadow .2s ease;
+}
+.rules li:hover { transform: translateY(-5px); box-shadow: var(--shadow-lift); }
+.rule-n {
+  display: grid; place-items: center;
+  width: 38px; height: 38px; border-radius: 11px; flex: none;
+  background: var(--ink); color: var(--on-ink);
+  font-family: var(--font-display); font-weight: 700; font-size: 1rem;
+  margin-bottom: 1rem;
+}
+.rules li:nth-child(1) .rule-n { background: var(--violet); color: #fff; }
+.rules li:nth-child(2) .rule-n { background: var(--coral); color: var(--ink); }
+.rules li:nth-child(3) .rule-n { background: var(--teal); color: #062B27; }
+.rules li:nth-child(4) .rule-n { background: var(--amber); color: #3A2400; }
+.rules li:nth-child(5) .rule-n { background: var(--pink); color: var(--ink); }
+.rules h3 { font-size: 1.125rem; margin-bottom: .5rem; }
+.rules p { font-size: .9063rem; color: var(--text-muted); }
+
+/* ---------- source line ---------- */
+
+.source-line {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem 1rem;
+  padding: 1rem 1.25rem; margin-bottom: var(--gap);
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--r);
+  font-size: .9375rem; font-weight: 500;
+}
+.source-label {
+  font-size: .6875rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--violet-ink);
+}
+.source-dur {
+  margin-left: auto; font-family: var(--font-display);
+  color: var(--text-muted); font-size: .875rem; font-variant-numeric: tabular-nums;
+}
+
+/* ---------- blueprint cards ---------- */
+
+.blueprints { display: grid; gap: var(--gap); }
+
+.bp {
+  --tint: var(--violet);
+  background: var(--card); border: 1px solid var(--line); border-radius: var(--r-lg);
+  box-shadow: var(--shadow); overflow: hidden;
+  padding: clamp(1.5rem, 3vw, 2.25rem);
+  display: grid; gap: 1.35rem;
+}
+
+.bp-head {
+  display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between;
+  gap: 1.25rem; padding-bottom: 1.25rem; border-bottom: 1px solid var(--line);
+}
+.bp-id { min-width: 0; }
+.bp-n {
+  display: inline-block; font-size: .6875rem; font-weight: 600;
+  letter-spacing: .1em; text-transform: uppercase; color: var(--violet-ink);
+  margin-bottom: .5rem;
+}
+.bp-id h3 { font-size: clamp(1.25rem, 2.2vw, 1.5rem); }
+
+.bp-score { display: flex; flex-direction: column; align-items: flex-end; flex: none; }
+.score-num {
+  font-family: var(--font-display); font-weight: 700; line-height: 1;
+  font-size: 2.25rem; letter-spacing: -.03em; color: var(--ink);
+  font-variant-numeric: tabular-nums;
+}
+.score-label {
+  font-size: .6875rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-muted); margin-top: .3rem;
+}
+.score-bar {
+  display: block; width: 108px; height: 6px; margin-top: .55rem;
+  background: var(--line); border-radius: 100px; overflow: hidden;
+}
+.score-bar > span { display: block; height: 100%; background: var(--violet); border-radius: 100px; }
+.bp:nth-child(2) { --tint: var(--teal); }
+.bp:nth-child(2) .score-bar > span { background: var(--teal); }
+.bp:nth-child(3) { --tint: var(--coral); }
+.bp:nth-child(3) .score-bar > span { background: var(--coral); }
+
+.bp-facts { display: flex; flex-wrap: wrap; gap: .75rem 2.5rem; }
+.bp-facts div { display: flex; align-items: baseline; gap: .55rem; }
+.bp-facts dt {
+  font-size: .6875rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-muted);
+}
+.bp-facts dd {
+  font-family: var(--font-display); font-weight: 600; font-size: 1.0625rem;
+  color: var(--ink); font-variant-numeric: tabular-nums;
+}
+
+.bp-why p:last-child { font-size: .9688rem; color: var(--text-muted); max-width: 62ch; }
+
+.bp-label {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: .5rem;
+  font-size: .6875rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase;
+  color: var(--text-muted); margin-bottom: .6rem;
+}
+.bp-hint {
+  font-weight: 500; letter-spacing: .04em; text-transform: none;
+  color: var(--violet-ink); background: #EDE9FF;
+  padding: .12rem .5rem; border-radius: 100px;
+}
+
+.hook-overlay {
+  font-family: var(--font-display); font-weight: 700;
+  font-size: clamp(1.0625rem, 2.2vw, 1.375rem); line-height: 1.25;
+  letter-spacing: -.01em; color: var(--on-violet);
+  background: var(--ink); padding: 1rem 1.15rem; border-radius: var(--r-sm);
+  border-left: 3px solid var(--tint, var(--violet));
+  overflow-wrap: anywhere;
+}
+
+.caption {
+  font-size: .9688rem; color: var(--text);
+  background: var(--paper); border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: .95rem 1.1rem; max-width: 62ch;
+}
+.tags { display: flex; flex-wrap: wrap; gap: .4rem; margin-top: .7rem; }
+.tags span {
+  font-size: .8125rem; font-weight: 500; color: var(--violet-ink);
+  background: #EDE9FF; padding: .22rem .6rem; border-radius: 100px;
+}
+
+.signal-list { display: grid; gap: .5rem; }
+.signal-list li {
+  display: grid; grid-template-columns: 5.5rem 1fr 2.75rem;
+  align-items: center; gap: .85rem;
+  font-size: .875rem; color: var(--text-muted);
+}
+.signal-list b {
+  font-family: var(--font-display); font-weight: 600; color: var(--ink);
+  text-align: right; font-variant-numeric: tabular-nums;
+}
+.meter { display: block; height: 6px; background: var(--line); border-radius: 100px; overflow: hidden; }
+.meter > span { display: block; height: 100%; background: var(--violet-soft); border-radius: 100px; }
+
+/* ---------- limits ---------- */
+
+.limits { --tint: var(--coral); max-width: 78ch; gap: .85rem; }
+
+/* ---------- inline code in steps ---------- */
+
+.steps code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .875em;
+  background: var(--paper); border: 1px solid var(--line);
+  padding: .1rem .35rem; border-radius: 5px;
+}
+
+/* ---------- responsive ---------- */
+
+@media (max-width: 1000px) {
+  .rules { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 860px) {
+  .bp-head { flex-direction: column; }
+  .bp-score { align-items: flex-start; }
+}
+
+@media (max-width: 560px) {
+  .rules { grid-template-columns: 1fr; }
+  .tool-actions .btn { width: 100%; }
+  .source-dur { margin-left: 0; }
+  .signal-list li { grid-template-columns: 4.5rem 1fr 2.5rem; gap: .6rem; }
+}

@@ -1,0 +1,372 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ViralClipAI — Clip Blueprint Tool — Arlinda Kaloshi</title>
+<meta name="description" content="ViralClipAI reads a video transcript and returns three timestamped short-form clip blueprints — viral score, visual hook overlay, and a ready-to-post caption. Built by Arlinda Kaloshi.">
+<meta name="author" content="Arlinda Kaloshi">
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#16141F">
+
+<meta property="og:type" content="website">
+<meta property="og:title" content="ViralClipAI — Clip Blueprint Tool">
+<meta property="og:description" content="Paste a transcript. Get three timestamped clip blueprints with viral scores, hook overlays, and captions.">
+<meta property="og:image" content="../assets/images/og-image.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="ViralClipAI — Clip Blueprint Tool">
+<meta name="twitter:description" content="Paste a transcript. Get three timestamped clip blueprints with viral scores, hook overlays, and captions.">
+<meta name="twitter:image" content="../assets/images/og-image.png">
+
+<link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../styles.css">
+<link rel="stylesheet" href="clipper.css">
+</head>
+<body class="toolpage">
+
+<a class="skip-link" href="#main">Skip to content</a>
+
+<header class="masthead">
+  <div class="wrap bar">
+    <a class="mark" href="../index.html" aria-label="Arlinda Kaloshi, home">
+      <span class="mark-badge" aria-hidden="true">AK</span>
+      <span class="mark-text">
+        <strong>Arlinda Kaloshi</strong>
+        <em>Growth &amp; Marketing</em>
+      </span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="../index.html#work">Work</a>
+      <a href="../index.html#about">About</a>
+      <a class="btn btn-sm" href="../index.html#contact">Let's talk</a>
+    </nav>
+  </div>
+</header>
+
+<main id="main">
+
+  <section class="tool-hero">
+    <div class="wrap">
+      <p class="kicker">Tool — ViralClipAI</p>
+      <h1>One long video in. <em>Three clips</em> you can actually post.</h1>
+      <p class="lede">Give it a transcript. It scans for hook moments, emotional beats, and tactical
+      takeaways, then returns the three segments most likely to hold a viewer — each with a start and
+      end timestamp, a viral score with a reason, a hook overlay for the first three seconds, and a
+      caption with hashtags. Nothing is invented: every timestamp and every word comes from your
+      transcript.</p>
+      <p class="tool-actions">
+        <a class="btn" href="#blueprints">See a real output</a>
+        <a class="btn ghost" href="../index.html#work">Back to selected work</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="band" id="rules">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="kicker">01 — The rules it runs on</p>
+        <h2>Five parts. Three of them are guardrails.</h2>
+        <p class="sec-sub">The agent prompt is deliberately short. Most of it is spent saying what it
+        is <em>not</em> allowed to do, which is what keeps the output trustworthy enough to publish.</p>
+      </header>
+      <ol class="rules">
+        <li>
+          <span class="rule-n">1</span>
+          <h3>Role</h3>
+          <p>Short-form video strategist for TikTok, Shorts, and Reels. It knows the shape of a clip
+          before it reads a word of the transcript.</p>
+        </li>
+        <li>
+          <span class="rule-n">2</span>
+          <h3>Job</h3>
+          <p>Find high-hook moments, emotionally resonant statements, tactical takeaways, and
+          surprising insights. Pick the top three. Score, timestamp, caption, and overlay each one.</p>
+        </li>
+        <li>
+          <span class="rule-n">3</span>
+          <h3>Output format</h3>
+          <p>Fixed structure, every time: clip title, start, end, duration, viral score, visual hook
+          text, social caption. Same shape on every run means the output is diffable.</p>
+        </li>
+        <li>
+          <span class="rule-n">4</span>
+          <h3>Constraints</h3>
+          <p>A hard 15–60 second band. No fabricated dialogue. No shifted timestamps — every one
+          lands on a real cue boundary in the source transcript.</p>
+        </li>
+        <li>
+          <span class="rule-n">5</span>
+          <h3>Refusal rule</h3>
+          <p>Empty, corrupted, or transcript-free input gets one fixed sentence and no output. It
+          never improvises to fill a gap.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="work" id="blueprints">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="kicker">02 — Real output</p>
+        <h2>What it actually returns.</h2>
+        <p class="sec-sub">Run against a real 25-minute video — a marketing strategist building a plan
+        out loud. Nothing below is a mock-up. The three clips come from three different parts of the
+        video, spaced so they don't repeat the same passage.</p>
+      </header>
+
+      <p class="source-line">
+        <span class="source-label">Source</span>
+        Watch Me Build a Marketing Strategy in 20 Minutes For a Completely Random Business
+        <span class="source-dur">25:15</span>
+      </p>
+
+      <div class="blueprints">
+
+        <article class="bp">
+          <header class="bp-head">
+            <div class="bp-id">
+              <span class="bp-n">Clip 1</span>
+              <h3>Deliver the Brand Message so Here’s</h3>
+            </div>
+            <div class="bp-score" style="--score:62">
+              <span class="score-num">62</span>
+              <span class="score-label">Viral score</span>
+              <span class="score-bar" aria-hidden="true"><span style="width:62%"></span></span>
+            </div>
+          </header>
+
+          <dl class="bp-facts">
+            <div><dt>Start</dt><dd><time datetime="PT1M22S">00:01:22</time></dd></div>
+            <div><dt>End</dt><dd><time datetime="PT1M55S">00:01:55</time></dd></div>
+            <div><dt>Duration</dt><dd>32 seconds</dd></div>
+          </dl>
+
+          <div class="bp-why">
+            <p class="bp-label">Why it scored 62</p>
+            <p>It sets up “here's what” and holds 32s without a dead stretch, so the payoff lands
+            before the scroll.</p>
+          </div>
+
+          <div class="bp-block">
+            <p class="bp-label">Visual hook text <span class="bp-hint">first 3 seconds</span></p>
+            <p class="hook-overlay">DELIVER THE BRAND MESSAGE SO HERE’S</p>
+          </div>
+
+          <div class="bp-block">
+            <p class="bp-label">Social caption</p>
+            <p class="caption">So, here's what we're going to do next.</p>
+            <p class="tags"><span>#Build</span><span>#Business</span><span>#Marketing</span><span>#shorts</span></p>
+          </div>
+
+          <div class="bp-block">
+            <p class="bp-label">Signals detected</p>
+            <ul class="signal-list">
+              <li><span>Hook</span><span class="meter" aria-hidden="true"><span style="width:68%"></span></span><b>0.68</b></li>
+              <li><span>Emotion</span><span class="meter" aria-hidden="true"><span style="width:0%"></span></span><b>0.00</b></li>
+              <li><span>Tactical</span><span class="meter" aria-hidden="true"><span style="width:43%"></span></span><b>0.43</b></li>
+              <li><span>Surprise</span><span class="meter" aria-hidden="true"><span style="width:49%"></span></span><b>0.49</b></li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="bp">
+          <header class="bp-head">
+            <div class="bp-id">
+              <span class="bp-n">Clip 2</span>
+              <h3>Nicer They’re Calling Them Cakes</h3>
+            </div>
+            <div class="bp-score" style="--score:67">
+              <span class="score-num">67</span>
+              <span class="score-label">Viral score</span>
+              <span class="score-bar" aria-hidden="true"><span style="width:67%"></span></span>
+            </div>
+          </header>
+
+          <dl class="bp-facts">
+            <div><dt>Start</dt><dd><time datetime="PT6M3S">00:06:03</time></dd></div>
+            <div><dt>End</dt><dd><time datetime="PT6M35S">00:06:35</time></dd></div>
+            <div><dt>Duration</dt><dd>32 seconds</dd></div>
+          </dl>
+
+          <div class="bp-why">
+            <p class="bp-label">Why it scored 67</p>
+            <p>A 32s window that runs one thought start to finish — modest hook density, but nothing
+            to trim.</p>
+          </div>
+
+          <div class="bp-block">
+            <p class="bp-label">Visual hook text <span class="bp-hint">first 3 seconds</span></p>
+            <p class="hook-overlay">NICER THEY’RE CALLING THEM CAKES</p>
+          </div>
+
+          <div class="bp-block">
+            <p class="bp-label">Social caption</p>
+            <p class="caption">I mean, these things are terrifying.</p>
+            <p class="tags"><span>#Build</span><span>#Business</span><span>#Marketing</span><span>#shorts</span></p>
+          </div>
+
+          <div class="bp-block">
+            <p class="bp-label">Signals detected</p>
+            <ul class="signal-list">
+              <li><span>Hook</span><span class="meter" aria-hidden="true"><span style="width:100%"></span></span><b>1.00</b></li>
+              <li><span>Emotion</span><span class="meter" aria-hidden="true"><span style="width:50%"></span></span><b>0.50</b></li>
+              <li><span>Tactical</span><span class="meter" aria-hidden="true"><span style="width:0%"></span></span><b>0.00</b></li>
+              <li><span>Surprise</span><span class="meter" aria-hidden="true"><span style="width:31%"></span></span><b>0.31</b></li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="bp">
+          <header class="bp-head">
+            <div class="bp-id">
+              <span class="bp-n">Clip 3</span>
+              <h3>See All These Different Products</h3>
+            </div>
+            <div class="bp-score" style="--score:77">
+              <span class="score-num">77</span>
+              <span class="score-label">Viral score</span>
+              <span class="score-bar" aria-hidden="true"><span style="width:77%"></span></span>
+            </div>
+          </header>
+
+          <dl class="bp-facts">
+            <div><dt>Start</dt><dd><time datetime="PT16M27S">00:16:27</time></dd></div>
+            <div><dt>End</dt><dd><time datetime="PT16M59S">00:16:59</time></dd></div>
+            <div><dt>Duration</dt><dd>32 seconds</dd></div>
+          </dl>
+
+          <div class="bp-why">
+            <p class="bp-label">Why it scored 77</p>
+            <p>A 32s window that runs one thought start to finish — modest hook density, but nothing
+            to trim.</p>
+          </div>
+
+          <div class="bp-block">
+            <p class="bp-label">Visual hook text <span class="bp-hint">first 3 seconds</span></p>
+            <p class="hook-overlay">SEE ALL THESE DIFFERENT PRODUCTS</p>
+          </div>
+
+          <div class="bp-block">
+            <p class="bp-label">Social caption</p>
+            <p class="caption">So, we're not talking about massive, massive amounts of money, which
+            means that it's very likely that their success of their</p>
+            <p class="tags"><span>#Build</span><span>#Business</span><span>#Marketing</span><span>#shorts</span></p>
+          </div>
+
+          <div class="bp-block">
+            <p class="bp-label">Signals detected</p>
+            <ul class="signal-list">
+              <li><span>Hook</span><span class="meter" aria-hidden="true"><span style="width:100%"></span></span><b>1.00</b></li>
+              <li><span>Emotion</span><span class="meter" aria-hidden="true"><span style="width:100%"></span></span><b>1.00</b></li>
+              <li><span>Tactical</span><span class="meter" aria-hidden="true"><span style="width:0%"></span></span><b>0.00</b></li>
+              <li><span>Surprise</span><span class="meter" aria-hidden="true"><span style="width:47%"></span></span><b>0.47</b></li>
+            </ul>
+          </div>
+        </article>
+
+      </div>
+
+      <p class="work-foot">
+        Every timestamp above is a real cue boundary from the source transcript, and every quoted
+        phrase is a real verbatim excerpt. The code is on
+        <a href="https://github.com/arlinda-k14/.hubsy" target="_blank" rel="noopener">github.com/arlinda-k14/.hubsy</a>.
+      </p>
+    </div>
+  </section>
+
+  <section class="band process" id="how">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="kicker">03 — How it runs</p>
+        <h2>Transcript in, files on disk.</h2>
+      </header>
+      <ol class="steps">
+        <li>
+          <span class="step-n">1</span>
+          <h3>Fetch</h3>
+          <p>Takes a YouTube URL or a timestamped <code>.txt</code>, <code>.srt</code>, or
+          <code>.vtt</code> transcript. If there is no usable dialogue, it refuses with the exact
+          sentence and stops.</p>
+        </li>
+        <li>
+          <span class="step-n">2</span>
+          <h3>Score</h3>
+          <p>Every 15–60 second window is scored on hook, emotion, tactical, and surprise density,
+          then filtered for sentence boundaries, filler words, and speech rate. Peak retention sits
+          near 32 seconds.</p>
+        </li>
+        <li>
+          <span class="step-n">3</span>
+          <h3>Cut</h3>
+          <p>The top three non-overlapping windows are trimmed with ffmpeg into
+          <code>clips/</code>, optionally cropped to 9:16 for Shorts, Reels, and TikTok. Each render
+          is probed afterwards to confirm the duration matches the blueprint.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="about" id="limits">
+    <div class="wrap">
+      <header class="sec-head">
+        <p class="kicker">04 — Limits</p>
+        <h2>What it can't do.</h2>
+        <p class="sec-sub">A tool that only lists strengths isn't telling you anything useful.</p>
+      </header>
+      <ul class="ticks limits">
+        <li><b>It scores text, not delivery.</b> A great line said flatly still scores on wording
+        alone. Face, pace, and energy on camera are not in the transcript.</li>
+        <li><b>The hashtags are drawn from your own transcript</b> plus one platform tag, so they
+        describe the video rather than the wider niche. That is deliberate — it avoids inventing a
+        trend the source never mentioned.</li>
+        <li><b>It needs a transcript.</b> Videos with captions disabled are refused, not guessed at.
+        Auto-generated captions sometimes punctuate mid-sentence, which can shorten a caption.</li>
+        <li><b>The viral score is relative to that transcript</b>, not a prediction. A 77 here means
+        "the strongest third of this video", not "this will go viral".</li>
+        <li><b>Vertical crops centre on the frame.</b> If the speaker is off to one side, reframe
+        before posting.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="contact" id="contact">
+    <div class="wrap contact-inner">
+      <p class="kicker">05 — Contact</p>
+      <h2>Want one of these built for your team?</h2>
+      <p class="contact-lede">Same pattern, different pipeline — repurposing a webinar, clipping
+      customer interviews, turning a podcast into a month of posts. Tell me what's not working and
+      I'll tell you what it would take.</p>
+      <p class="contact-cta">
+        <a class="btn btn-lg" href="mailto:arlindak75@gmail.com">Send me an email</a>
+        <a class="btn btn-lg ghost" href="../index.html#work">See the other projects</a>
+      </p>
+      <p class="contact-meta">Based in Kosovo · Working in Albanian, English &amp; Norwegian<br>
+        <a class="contact-mail" href="mailto:arlindak75@gmail.com">arlindak75@gmail.com</a></p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <div class="wrap foot-inner">
+    <p>© <span id="year">2026</span> Arlinda Kaloshi</p>
+    <nav aria-label="Footer">
+      <ul>
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="https://github.com/arlinda-k14" target="_blank" rel="noopener">GitHub</a></li>
+        <li><a href="https://www.linkedin.com/in/arlinda-kaloshi/" target="_blank" rel="noopener">LinkedIn</a></li>
+      </ul>
+    </nav>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
