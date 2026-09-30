@@ -1,2 +1,5 @@
 .netlify/
 .DS_Store
+clips/
+__pycache__/
+*.pyc

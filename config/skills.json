@@ -798,6 +798,75 @@
       ],
       "required_parameters": [],
       "sub_skills": []
+    },
+    {
+      "name": "clipper",
+      "description": "Short-form video strategist that turns a long video into three publishable clips. Fetches a YouTube transcript (or reads a timestamped .txt/.srt/.vtt), scores every 15-60 second window for hook, emotion, tactical, and surprise density, then returns the top 3 non-overlapping segments with exact start/end timestamps, a 1-100 viral score with a one-sentence justification, a bold visual hook overlay for the first 3 seconds, and a platform caption with 3-5 hashtags. Enforces three hard constraints: no clip under 15s or over 60s, no fabricated transcript dialogue, and no timestamp that does not land on a real cue boundary. Refuses with one fixed sentence when the input is missing, empty, corrupted, or has no usable dialogue. scripts/clip.py also renders the selected segments to 9:16 .mp4 with ffmpeg. Use when clipping long videos, finding viral moments, making Shorts/Reels/TikTok cuts, or repurposing a webinar, podcast, or interview. Not for full-length editing, color grading, or subtitle rendering.",
+      "path": ".agent/skills/clipper.md",
+      "domains": [
+        "media-production",
+        "video-editing",
+        "content-strategy",
+        "social-media",
+        "transcription"
+      ],
+      "triggers": [
+        "clip this video",
+        "find the viral moments",
+        "make shorts from this",
+        "cut this for tiktok",
+        "reels from this webinar",
+        "three best clips",
+        "viral clip finder",
+        "short form video",
+        "transcript to clips",
+        "viralclip",
+        "viral clip ai",
+        "trim to vertical clips"
+      ],
+      "required_parameters": [
+        "source",
+        "target_platform"
+      ],
+      "sub_skills": [
+        {
+          "name": "transcript-ingestion",
+          "description": "Fetch a YouTube transcript or parse a timestamped .txt/.srt/.vtt file into cue boundaries. Refuses the run rather than reconstructing missing dialogue.",
+          "required_parameters": [
+            "source"
+          ]
+        },
+        {
+          "name": "window-scoring",
+          "description": "Score every 15-60 second window on hook, emotion, tactical, and surprise signal density, then filter for sentence boundaries, filler words, and speech rate.",
+          "required_parameters": [
+            "cues"
+          ]
+        },
+        {
+          "name": "clip-selection",
+          "description": "Pick the top 3 non-overlapping windows with a minimum separation so the clips do not repeat the same passage.",
+          "required_parameters": [
+            "scored_windows"
+          ]
+        },
+        {
+          "name": "accuracy-gate",
+          "description": "Verify every timestamp sits on a real cue boundary, every duration falls inside 15-60 seconds, and every quoted phrase is a verbatim excerpt from the source transcript.",
+          "required_parameters": [
+            "blueprints",
+            "cues"
+          ]
+        },
+        {
+          "name": "clip-render",
+          "description": "Trim the selected segments to .mp4 with ffmpeg, optionally cropped to 9:16, then probe each render to confirm the duration matches the blueprint.",
+          "required_parameters": [
+            "blueprints",
+            "source_video"
+          ]
+        }
+      ]
     }
   ]
 }
