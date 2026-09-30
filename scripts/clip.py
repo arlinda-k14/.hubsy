@@ -375,6 +375,13 @@ def parse_transcript_file(path, stderr):
     )
     short_stamp = re.compile(r"\[(\d{1,2}):(\d{2})\]")
     line_stamp = re.compile(r"^\s*\[?(\d{1,2}):(\d{2})(?::(\d{2}))?\]?[\s:-]*(.*)$")
+    yt_stamp = re.compile(r"^\s*\[?(\d{1,2}):(\d{2})(?::(\d{2}))?\]?\s*$")
+    yt_span = re.compile(
+        r"^\s*\[?(?:(\d{1,2})\s*(?:hours?|h)\s*[,]?\s*)?"
+        r"(?:(\d{1,2})\s*(?:minutes?|m)\s*[,]?\s*)?"
+        r"(?:(\d{1,2})\s*)?(?:seconds?|secs?|s)\]?\s*$",
+        re.IGNORECASE,
+    )
 
     cues = []
     i = 0
@@ -402,6 +409,21 @@ def parse_transcript_file(path, stderr):
                     cues.append({"text": text, "start": float(start), "duration": 0.0})
             i += 1
             continue
+        yt_match = yt_stamp.match(line)
+        if yt_match and i + 1 < len(lines) and yt_span.match(lines[i + 1]):
+            if yt_match.group(3) is None:
+                start = int(yt_match.group(1)) * 60 + int(yt_match.group(2))
+            else:
+                start = int(yt_match.group(1)) * 3600 + int(yt_match.group(2)) * 60 + int(yt_match.group(3))
+            i += 2
+            text_parts = []
+            while i < len(lines) and lines[i].strip() and not yt_stamp.match(lines[i]) and not yt_span.match(lines[i]):
+                text_parts.append(lines[i])
+                i += 1
+            text = speech(" ".join(text_parts))
+            if text:
+                cues.append({"text": text, "start": float(start), "duration": 0.0})
+            continue
         prefixed = line_stamp.match(line)
         if prefixed and prefixed.group(4) is not None and prefixed.group(1) and prefixed.group(2):
             start = int(prefixed.group(1)) * 3600 + int(prefixed.group(2)) * 60 + int(prefixed.group(3) or 0)
@@ -414,10 +436,49 @@ def parse_transcript_file(path, stderr):
         stderr.write("No usable timestamps found in %s. ViralClipAI needs [MM:SS] or SRT/VTT timings.\n" % path)
         return None
 
+    cues = dedupe_cues(cues, stderr)
+
     for index in range(1, len(cues)):
         if cues[index]["duration"] == 0.0:
             cues[index]["duration"] = max(cues[index + 1]["start"] - cues[index]["start"] if index + 1 < len(cues) else 2.0, 0.6)
     return cues
+
+
+def dedupe_cues(cues, stderr):
+    if len(cues) < 2:
+        return cues
+
+    ordered = sorted(range(len(cues)), key=lambda idx: cues[idx]["start"])
+    kept = []
+    seen = set()
+    for index in ordered:
+        cue = cues[index]
+        if cue["start"] < 0:
+            continue
+        key = (round(cue["start"], 2), normalise(cue["text"]).lower())
+        if key in seen:
+            continue
+        seen.add(key)
+        kept.append(cue)
+
+    # A transcript pasted more than once restarts its timestamps partway through.
+    # Keep only the first full-length pass so scoring does not double-count.
+    dropped = 0
+    if len(kept) > 1:
+        span = kept[-1]["start"] - kept[0]["start"]
+        if span > 0:
+            midpoint = kept[0]["start"] + span / 2.0
+            halfway = [cue for cue in kept if cue["start"] <= midpoint]
+            if len(halfway) >= len(kept) / 2.0 and len(halfway) > 1:
+                if kept[len(halfway)]["start"] < kept[0]["start"] + span / 4.0:
+                    dropped = len(kept) - len(halfway)
+                    stderr.write("Transcript looked repeated; kept first pass and dropped %d duplicate cues.\n" % dropped)
+                    kept = halfway
+
+    if dropped:
+        for cue in kept:
+            cue["start"] = max(cue["start"] - kept[0]["start"], 0.0)
+    return kept
 
 
 def length_preference(duration):
