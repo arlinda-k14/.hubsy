@@ -357,6 +357,34 @@ def fetch_title(video_id, stderr):
         return None
 
 
+METADATA_LINE = re.compile(
+    r"^\s*(?:chapter|part|episode|section|track|intro|outro|prologue|epilogue)\b"
+    r"[\s\d:.\-–—]*(?:.*)?$",
+    re.IGNORECASE,
+)
+METADATA_INLINE = re.compile(
+    r"\s*(?:chapter|part|episode|section|track)\s*\d+\s*[:.\-–—]?\s*[^,.;!?]*[,.;]?",
+    re.IGNORECASE,
+)
+
+
+def is_metadata_line(text):
+    """True for transcript headers such as 'Chapter 31: The perfection myth'."""
+    stripped = (text or "").strip()
+    if not stripped:
+        return False
+    if METADATA_LINE.match(stripped):
+        return True
+    return bool(re.fullmatch(r"[\d\s:.\-–—]+", stripped))
+
+
+def strip_metadata(text):
+    """Remove chapter/header noise from caption or excerpt text."""
+    cleaned = METADATA_INLINE.sub(" ", text or "")
+    cleaned = re.sub(r"\s{2,}", " ", cleaned)
+    return cleaned.strip(" ,;:-")
+
+
 def parse_transcript_file(path, stderr):
     try:
         with open(path, "r", encoding="utf-8", errors="replace") as handle:
@@ -417,7 +445,8 @@ def parse_transcript_file(path, stderr):
                 start = int(yt_match.group(1)) * 3600 + int(yt_match.group(2)) * 60 + int(yt_match.group(3))
             i += 2
             text_parts = []
-            while i < len(lines) and lines[i].strip() and not yt_stamp.match(lines[i]) and not yt_span.match(lines[i]):
+            while (i < len(lines) and lines[i].strip() and not yt_stamp.match(lines[i])
+                   and not yt_span.match(lines[i]) and not is_metadata_line(lines[i])):
                 text_parts.append(lines[i])
                 i += 1
             text = speech(" ".join(text_parts))
@@ -904,10 +933,18 @@ def download_video(url, destination, stderr):
     return None
 
 
-CAPTION_FONT = "Arial"
-CAPTION_FONT_FILE = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+CAPTION_FONT = "Trebuchet MS"
+CAPTION_FONT_FILE = "/System/Library/Fonts/Supplemental/Trebuchet MS Bold.ttf"
 CAPTION_FONT_DIR = "/System/Library/Fonts/Supplemental"
-CAPTION_MAX_CHARS = 34
+CAPTION_WORDS_MIN = 2
+CAPTION_WORDS_MAX = 3
+CAPTION_GAP = 0.75
+CAPTION_MAX_SPAN = 2.6
+CAPTION_MIN_SHOW = 0.28
+CAPTION_FONT_SCALE = 0.052
+CAPTION_TEXT_COLOUR = "&H00FFFFFF"
+CAPTION_OUTLINE_COLOUR = "&H00201A10"
+CAPTION_BACK_COLOUR = "&HA6141F33"
 
 
 def ass_time(seconds):
@@ -925,30 +962,87 @@ def ass_escape(text):
     return text.replace("\n", " ")
 
 
-def group_caption_cues(cues, start, end):
-    """Group transcript cues into caption-sized blocks clipped to a window.
+def timed_words(cue, start, end):
+    """Split one cue into words carrying their own display times.
 
-    Each cue contributes its own words. A cue longer than the character budget
-    is split into consecutive blocks that share the cue's time range, so a
-    long cue never collapses into one word per caption.
+    The source transcript gives a single start and duration per cue, usually
+    covering ~20 words, so there is no true per-word timing to read. Each word
+    is given a slice of the cue proportional to its character weight, which
+    tracks natural speech closely enough for word-synced captions.
     """
-    blocks = []
+    cue_start = max(cue["start"], start)
+    cue_end = min(cue["start"] + max(cue["duration"], 0.0), end)
+    if cue_end <= cue_start:
+        return []
+    words = [w for w in strip_metadata(cue["text"]).split() if w]
+    if not words:
+        return []
+    weights = [len(w) + 1 for w in words]
+    total = float(sum(weights)) or 1.0
+    span = cue_end - cue_start
+    out = []
+    clock = cue_start
+    for index, word in enumerate(words):
+        length = span * (weights[index] / total)
+        out.append({"word": word, "start": clock, "end": clock + length})
+        clock += length
+    return out
+
+
+def group_caption_cues(cues, start, end):
+    """Build short 2-3 word caption blocks with word-accurate timing.
+
+    Blocks break on a pause in the speech so captions do not straddle two
+    separate utterances, and a trailing single word is pulled back into the
+    previous block rather than flashing alone.
+    """
+    words = []
     for cue in cues:
-        cue_start = max(cue["start"], start)
-        cue_end = min(cue["start"] + max(cue["duration"], 0.0), end)
-        if cue_end <= cue_start:
+        if is_metadata_line(cue["text"]):
             continue
-        words = [w for w in cue["text"].split() if w]
-        if not words:
-            continue
-        chunk = []
-        for word in words:
-            if chunk and len(" ".join(chunk)) + len(word) + 1 > CAPTION_MAX_CHARS:
-                blocks.append({"start": cue_start, "end": cue_end, "words": chunk})
-                chunk = []
-            chunk.append(word)
-        if chunk:
-            blocks.append({"start": cue_start, "end": cue_end, "words": chunk})
+        words.extend(timed_words(cue, start, end))
+
+    runs = []
+    current = []
+    for word in words:
+        if current and (word["start"] - current[-1]["end"] > CAPTION_GAP
+                        or word["end"] - current[0]["start"] > CAPTION_MAX_SPAN):
+            runs.append(current)
+            current = []
+        current.append(word)
+    if current:
+        runs.append(current)
+
+    blocks = []
+    index = 0
+    while index < len(runs):
+        run = runs[index]
+        position = 0
+        while position < len(run):
+            take = run[position:position + CAPTION_WORDS_MAX]
+            remaining = len(run) - position - len(take)
+            if remaining == 1:
+                take = run[position:position + CAPTION_WORDS_MAX + 1]
+            if len(take) < CAPTION_WORDS_MIN and blocks:
+                previous = blocks[-1]
+                if previous["end"] >= take[0]["start"] - CAPTION_GAP:
+                    merged = previous["words"] + [w["word"] for w in take]
+                    if len(merged) <= CAPTION_WORDS_MAX + 1:
+                        previous["words"] = merged
+                        previous["end"] = take[-1]["end"]
+                        position += len(take)
+                        continue
+            blocks.append({
+                "start": take[0]["start"],
+                "end": take[-1]["end"],
+                "words": [w["word"] for w in take],
+            })
+            position += len(take)
+        index += 1
+
+    for block in blocks:
+        if block["end"] - block["start"] < CAPTION_MIN_SHOW:
+            block["end"] = block["start"] + CAPTION_MIN_SHOW
     return blocks
 
 
@@ -966,9 +1060,10 @@ def write_ass_file(path, blocks, offset, width, height):
         "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour,"
         " BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle,"
         " BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
-        "Style: Default,%s,%d,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,"
-        "-1,0,0,0,100,100,0,0,1,5,2,2,%d,%d,%d,1" % (
-            CAPTION_FONT, max(int(height * 0.042), 24), int(width * 0.06), int(width * 0.06),
+        "Style: Default,%s,%d,%s,&H000000FF,%s,&H80000000,"
+        "-1,0,0,0,100,100,0,0,1,4,2,2,%d,%d,%d,1" % (
+            CAPTION_FONT, max(int(height * CAPTION_FONT_SCALE), 22), CAPTION_TEXT_COLOUR,
+            CAPTION_OUTLINE_COLOUR, int(width * 0.06), int(width * 0.06),
             max(int(height * 0.085), 48)),
         "",
         "[Events]",
@@ -977,13 +1072,6 @@ def write_ass_file(path, blocks, offset, width, height):
     events = []
     for block in blocks:
         line = " ".join(block["words"])
-        if len(line) > CAPTION_MAX_CHARS:
-            midpoint = len(line) // 2
-            space = line.find(" ", max(midpoint - 12, 1))
-            if space == -1:
-                space = line.find(" ")
-            if space > 0:
-                line = line[:space] + r"\N" + line[space + 1:]
         events.append("Dialogue: 0,%s,%s,Default,,0,0,0,,%s" % (
             ass_time(block["start"] - offset), ass_time(block["end"] - offset), ass_escape(line)))
     with open(path, "w", encoding="utf-8") as handle:
