@@ -904,14 +904,123 @@ def download_video(url, destination, stderr):
     return None
 
 
-def cut_clip(ffmpeg, source, item, output, vertical, stderr):
+CAPTION_FONT = "Arial"
+CAPTION_FONT_FILE = "/System/Library/Fonts/Supplemental/Arial Bold.ttf"
+CAPTION_FONT_DIR = "/System/Library/Fonts/Supplemental"
+CAPTION_MAX_CHARS = 34
+
+
+def ass_time(seconds):
+    seconds = max(float(seconds), 0.0)
+    hours = int(seconds // 3600)
+    minutes = int((seconds % 3600) // 60)
+    secs = seconds % 60
+    return "%d:%02d:%05.2f" % (hours, minutes, secs)
+
+
+def ass_escape(text):
+    text = clean(text)
+    text = text.replace("\\", "\\\\").replace("{", "(").replace("}", ")")
+    text = text.replace("\"", "'")
+    return text.replace("\n", " ")
+
+
+def group_caption_cues(cues, start, end):
+    """Group transcript cues into caption-sized blocks clipped to a window.
+
+    Each cue contributes its own words. A cue longer than the character budget
+    is split into consecutive blocks that share the cue's time range, so a
+    long cue never collapses into one word per caption.
+    """
+    blocks = []
+    for cue in cues:
+        cue_start = max(cue["start"], start)
+        cue_end = min(cue["start"] + max(cue["duration"], 0.0), end)
+        if cue_end <= cue_start:
+            continue
+        words = [w for w in cue["text"].split() if w]
+        if not words:
+            continue
+        chunk = []
+        for word in words:
+            if chunk and len(" ".join(chunk)) + len(word) + 1 > CAPTION_MAX_CHARS:
+                blocks.append({"start": cue_start, "end": cue_end, "words": chunk})
+                chunk = []
+            chunk.append(word)
+        if chunk:
+            blocks.append({"start": cue_start, "end": cue_end, "words": chunk})
+    return blocks
+
+
+def write_ass_file(path, blocks, offset, width, height):
+    header = [
+        "[Script Info]",
+        "ScriptType: v4.00+",
+        "WrapStyle: 2",
+        "ScaledBorderAndShadow: yes",
+        "YCbCr Matrix: TV.709",
+        "PlayResX: %d" % width,
+        "PlayResY: %d" % height,
+        "",
+        "[V4+ Styles]",
+        "Format: Name, Fontname, Fontsize, PrimaryColour, SecondaryColour, OutlineColour,"
+        " BackColour, Bold, Italic, Underline, StrikeOut, ScaleX, ScaleY, Spacing, Angle,"
+        " BorderStyle, Outline, Shadow, Alignment, MarginL, MarginR, MarginV, Encoding",
+        "Style: Default,%s,%d,&H00FFFFFF,&H000000FF,&H00000000,&H80000000,"
+        "-1,0,0,0,100,100,0,0,1,5,2,2,%d,%d,%d,1" % (
+            CAPTION_FONT, max(int(height * 0.042), 24), int(width * 0.06), int(width * 0.06),
+            max(int(height * 0.085), 48)),
+        "",
+        "[Events]",
+        "Format: Layer, Start, End, Style, Name, MarginL, MarginR, MarginV, Effect, Text",
+    ]
+    events = []
+    for block in blocks:
+        line = " ".join(block["words"])
+        if len(line) > CAPTION_MAX_CHARS:
+            midpoint = len(line) // 2
+            space = line.find(" ", max(midpoint - 12, 1))
+            if space == -1:
+                space = line.find(" ")
+            if space > 0:
+                line = line[:space] + r"\N" + line[space + 1:]
+        events.append("Dialogue: 0,%s,%s,Default,,0,0,0,,%s" % (
+            ass_time(block["start"] - offset), ass_time(block["end"] - offset), ass_escape(line)))
+    with open(path, "w", encoding="utf-8") as handle:
+        handle.write("\n".join(header + events) + "\n")
+    return len(events)
+
+
+def escape_filter_path(path):
+    return path.replace("\\", "/").replace(":", r"\:").replace("'", r"\'")
+
+
+def cut_clip(ffmpeg, source, item, output, vertical, stderr, cues=None):
     command = [ffmpeg, "-hide_banner", "-loglevel", "error", "-y",
                "-ss", "%.3f" % item["start_seconds"],
                "-i", source,
                "-t", "%.3f" % (item["end_seconds"] - item["start_seconds"])]
+    filters = []
     if vertical:
         width = int(round(1920 * 9 / 16.0 / 2)) * 2
-        command += ["-vf", "crop=ih*9/16:ih:(iw-ih*9/16)/2:0,scale=%d:1920,setsar=1" % width]
+        filters.append("crop=ih*9/16:ih:(iw-ih*9/16)/2:0,scale=%d:1920,setsar=1" % width)
+    else:
+        width = 1920
+    if cues and CAPTION_FONT_FILE and os.path.isfile(CAPTION_FONT_FILE):
+        blocks = group_caption_cues(cues, item["start_seconds"], item["end_seconds"])
+        if blocks:
+            ass_path = os.path.join(os.path.dirname(output) or ".", ".captions-%d.ass" % item["clip"])
+            try:
+                count = write_ass_file(ass_path, blocks, item["start_seconds"], width, 1920)
+            except OSError as exc:
+                stderr.write("Could not write caption file for clip %d: %s\n" % (item["clip"], exc))
+                ass_path = None
+            if ass_path:
+                filters.append("ass='%s':fontsdir='%s'" % (
+                    escape_filter_path(ass_path), escape_filter_path(CAPTION_FONT_DIR)))
+                stderr.write("Clip %d: burning in %d caption blocks.\n" % (item["clip"], count))
+    if filters:
+        command += ["-vf", ",".join(filters)]
     command += ["-c:v", "libx264", "-preset", "medium", "-crf", "20", "-pix_fmt", "yuv420p",
                 "-c:a", "aac", "-b:a", "192k", "-movflags", "+faststart",
                 "-avoid_negative_ts", "make_zero", output]
@@ -1039,7 +1148,7 @@ def main(argv=None):
 
     for item in blueprint["clips"]:
         output = os.path.join(run_dir, "clip-%d.mp4" % item["clip"])
-        if not cut_clip(ffmpeg, source, item, output, args.vertical, stderr):
+        if not cut_clip(ffmpeg, source, item, output, args.vertical, stderr, cues):
             stderr.write("Clip %d was not written.\n" % item["clip"])
             continue
         actual = probe_duration(ffmpeg, output)
@@ -1051,6 +1160,14 @@ def main(argv=None):
         else:
             stderr.write("Clip %d written: %s (%.1fs, %s)\n" % (
                 item["clip"], output, actual, "9:16" if args.vertical else "source aspect"))
+
+    if run_dir:
+        for name in os.listdir(run_dir):
+            if name.startswith(".captions-") and name.endswith(".ass"):
+                try:
+                    os.remove(os.path.join(run_dir, name))
+                except OSError:
+                    pass
 
     if temp_dir and not args.keep_source:
         shutil.rmtree(temp_dir, ignore_errors=True)
