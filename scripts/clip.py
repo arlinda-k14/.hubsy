@@ -142,6 +142,35 @@ DANGLE = {
 }
 
 ANNOTATION = re.compile(r"[\u266a\u266b\u266c\U0001f3b5\U0001f3b6]|\[[^\]]*\]")
+KARAOKE_TIME = re.compile(r"<\s*(\d{1,2}:\d{2}:\d{2}[.,]\d{1,3})\s*>")
+KARAOKE_TAG = re.compile(r"</?[cvbiu](?:\.[^>]*)?>|</?ruby>|</?rt>|</?v[^>]*>")
+KARAOKE_WORD = re.compile(
+    r"<\s*(\d{1,2}:\d{2}:\d{2}[.,]\d{1,3})\s*>(?:<[^>]*>)*([^<]*)"
+)
+
+
+def karaoke_seconds(stamp):
+    hours = int(stamp[0:2])
+    minutes = int(stamp[3:5])
+    seconds = float(stamp[6:].replace(",", "."))
+    return hours * 3600 + minutes * 60 + seconds
+
+
+def strip_karaoke(text):
+    """Remove VTT/YouTube karaoke markup, keeping the spoken words."""
+    return clean(KARAOKE_TAG.sub("", KARAOKE_TIME.sub("", text or "")))
+
+
+def karaoke_words(text):
+    """Return (word, timestamp) pairs from a karaoke caption line, if present."""
+    if not KARAOKE_TIME.search(text or ""):
+        return []
+    pairs = []
+    for match in KARAOKE_WORD.finditer(text or ""):
+        word = KARAOKE_TAG.sub("", match.group(2)).strip()
+        if word:
+            pairs.append((word, karaoke_seconds(match.group(1))))
+    return pairs
 
 STOPWORDS = {
     "a", "about", "after", "all", "also", "am", "an", "and", "any", "are", "as", "at",
@@ -424,9 +453,16 @@ def parse_transcript_file(path, stderr):
             while i < len(lines) and lines[i].strip() and not stamp.search(lines[i]):
                 text_parts.append(lines[i])
                 i += 1
-            text = speech(" ".join(text_parts))
+            joined = " ".join(text_parts)
+            text = speech(strip_karaoke(joined))
             if text:
-                cues.append({"text": text, "start": float(start), "duration": max(float(end - start), 0.0)})
+                cue = {"text": text, "start": float(start), "duration": max(float(end - start), 0.0)}
+                pairs = []
+                for part in text_parts:
+                    pairs.extend(karaoke_words(part))
+                if pairs:
+                    cue["words"] = pairs
+                cues.append(cue)
             continue
         inline = short_stamp.findall(line)
         if inline:
@@ -989,18 +1025,48 @@ def timed_words(cue, start, end):
     return out
 
 
+def build_word_timeline(cues, start, end):
+    """Build a true word-level timeline from YouTube karaoke caption timings.
+
+    The karaoke tags give each word's real absolute timestamp, but YouTube's
+    rolling captions only tag the later words of each line, so a cue's text and
+    its own tags do not line up. Reading every tagged word in order sidesteps
+    that: each word is held until the next one begins.
+    """
+    pairs = []
+    for cue in cues:
+        for word, when in (cue.get("words") or []):
+            if start <= when < end:
+                pairs.append((word, when))
+    pairs.sort(key=lambda pair: pair[1])
+
+    stream = []
+    for word, when in pairs:
+        if stream and abs(stream[-1]["start"] - when) < 0.001 and stream[-1]["word"] == word:
+            continue
+        stream.append({"word": word, "start": when, "end": when})
+    for index in range(len(stream) - 1):
+        stream[index]["end"] = max(stream[index + 1]["start"], stream[index]["start"] + CAPTION_MIN_SHOW)
+    if stream:
+        stream[-1]["end"] = min(stream[-1]["start"] + CAPTION_MAX_SPAN, end)
+    return stream
+
+
 def group_caption_cues(cues, start, end):
     """Build short 2-3 word caption blocks with word-accurate timing.
 
-    Blocks break on a pause in the speech so captions do not straddle two
-    separate utterances, and a trailing single word is pulled back into the
-    previous block rather than flashing alone.
+    Uses the real karaoke word timeline when the transcript has one, and falls
+    back to interpolating within each cue otherwise. Blocks break on a pause so
+    captions do not straddle two utterances, and a trailing single word is
+    pulled back into the previous block rather than flashing alone.
     """
-    words = []
-    for cue in cues:
-        if is_metadata_line(cue["text"]):
-            continue
-        words.extend(timed_words(cue, start, end))
+    words = build_word_timeline(cues, start, end)
+    if len(words) < CAPTION_WORDS_MIN:
+        words = []
+        for cue in cues:
+            if is_metadata_line(cue["text"]):
+                continue
+            words.extend(timed_words(cue, start, end))
 
     runs = []
     current = []
