@@ -3,3 +3,11 @@
 clips/
 __pycache__/
 *.pyc
+
+# research-assistant skill artifacts (regenerated; search cache)
+skills/research-assistant/data/*.sqlite
+skills/research-assistant/data/last_search.json
+
+# student placement records may contain personal data - never commit
+docs/internal/placements/*
+!docs/internal/placements/README.md

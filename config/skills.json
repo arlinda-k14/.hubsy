@@ -867,6 +867,37 @@
           ]
         }
       ]
+    },
+    {
+      "name": "research-assistant",
+      "description": "Market research assistant for Creative Hub Kosovo. Answers research questions with cited findings, rates each finding High/Medium/Low/Speculative, flags hype and unverified vendor claims, and maps implications to the academy's tracks. Covers tech market trends, emerging AI tools, competitor programs in Kosovo/Europe, tech hiring demand, and curriculum research. Reports save to skills/research-assistant/research/.",
+      "path": "skills/research-assistant/SKILL.md",
+      "domains": [
+        "research",
+        "market-intelligence",
+        "curriculum",
+        "competitive-analysis"
+      ],
+      "triggers": [
+        "market trends",
+        "ai tools",
+        "competitor programs",
+        "hiring demand",
+        "curriculum research",
+        "what should we teach next",
+        "emerging tools for the syllabus",
+        "research this for the academy",
+        "/research-assistant"
+      ],
+      "required_parameters": [
+        "query"
+      ],
+      "optional_parameters": [
+        "focus",
+        "region",
+        "program",
+        "depth"
+      ]
     }
   ]
 }

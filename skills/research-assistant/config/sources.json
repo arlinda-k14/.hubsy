@@ -1,0 +1,99 @@
+{
+  "version": 1,
+  "note": "Search and source configuration. Arrays marked TODO are placeholders: fill them in with the user's confirmed sources - do not invent entries. Keys are read from environment variables only, never hardcoded here.",
+  "search": {
+    "provider": "tavily",
+    "endpoint": "https://api.tavily.com/search",
+    "env_key": "TAVILY_API_KEY",
+    "max_results": 8,
+    "search_depth": "advanced",
+    "retry_on_failure": 1,
+    "fallback": {
+      "provider": "brave",
+      "endpoint": "https://api.search.brave.com/res/v1/web/search",
+      "env_key": "BRAVE_API_KEY",
+      "status": "disabled",
+      "note": "Enable by setting status to 'enabled' once BRAVE_API_KEY exists."
+    }
+  },
+  "job_platforms": [
+    {
+      "name": "LinkedIn Jobs",
+      "url": "https://www.linkedin.com/jobs/",
+      "region": "global",
+      "status": "confirmed"
+    },
+    {
+      "name": "TODO: confirm Kosovo/Balkan job platforms with Creative Hub staff",
+      "url": "",
+      "region": "Kosovo and Balkans",
+      "status": "todo",
+      "note": "Suggested slots: a Kosovo-specific board, an Albanian-language board, a Balkan regional board. Add only after the user confirms which boards their partners actually use."
+    }
+  ],
+  "news_feeds": [
+    {
+      "name": "TODO: confirm tech news feeds",
+      "url": "",
+      "status": "todo",
+      "note": "Phase 1 relies on Tavily search results; dedicated feed URLs to be added when the user confirms preferred outlets."
+    }
+  ],
+  "curriculum_repositories": [
+    {
+      "name": "TODO: confirm curriculum repositories",
+      "url": "",
+      "status": "todo",
+      "note": "Public syllabi / course-outline sources to be confirmed by the user."
+    }
+  ],
+  "academic_sources": [
+    {
+      "name": "arXiv",
+      "url": "https://arxiv.org/",
+      "status": "confirmed",
+      "note": "Preprints - treat as unreviewed until corroborated."
+    },
+    {
+      "name": "TODO: confirm additional academic sources or search API",
+      "url": "",
+      "status": "todo"
+    }
+  ],
+  "credibility_anchors": [
+    {
+      "name": "GitHub Octoverse",
+      "url": "https://octoverse.github.com/",
+      "use": "repository/language adoption trends"
+    },
+    {
+      "name": "Stack Overflow Developer Survey",
+      "url": "https://survey.stackoverflow.co/",
+      "use": "tool adoption and developer demographics"
+    },
+    {
+      "name": "Eurostat",
+      "url": "https://ec.europa.eu/eurostat/",
+      "use": "European digital economy and ICT statistics"
+    },
+    {
+      "name": "World Economic Forum Future of Jobs",
+      "url": "https://www.weforum.org/publications/the-future-of-jobs-report-2025/",
+      "use": "skills and hiring demand benchmarks"
+    }
+  ],
+  "internal_repositories": [
+    {
+      "name": "Primary internal docs",
+      "path": "~/.hubsy/docs/internal",
+      "status": "confirmed",
+      "note": "syllabi/, placements/, employer-feedback/ - read-only."
+    },
+    {
+      "name": "TODO: additional internal document repositories",
+      "path": "",
+      "status": "todo",
+      "note": "Placeholder for any further databases or document repositories the user specifies later. Do not invent paths."
+    }
+  ]
+}

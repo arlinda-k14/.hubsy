@@ -1,0 +1,107 @@
+{
+  "version": 1,
+  "note": "Topic registry for research-assistant. Add new research categories here (append an entry with status 'active'); SKILL.md never needs rewriting. Entries with status 'reserved' are phase-2 placeholders and are skipped by scripts.",
+  "default_region": "Kosovo and Balkans",
+  "programs": [
+    "Digital Marketing",
+    "Full-stack",
+    "Vibe Coding",
+    "Data Science & Analytics",
+    "Data Engineering",
+    "Cloud",
+    "HR",
+    "Product & Project Management"
+  ],
+  "topics": [
+    {
+      "id": "trends",
+      "label": "Tech industry market trends",
+      "status": "active",
+      "query_templates": [
+        "{query} {region} tech industry trend evidence",
+        "{query} adoption data developer survey 2026",
+        "tech hiring and skills trends {region} {query}"
+      ],
+      "credibility_anchors": [
+        "GitHub Octoverse / State of the Octoverse",
+        "Stack Overflow Developer Survey",
+        "Eurostat digital economy statistics",
+        "WEF Future of Jobs Report"
+      ],
+      "programs": ["Full-stack", "Cloud", "Data Science & Analytics", "Data Engineering", "Vibe Coding"]
+    },
+    {
+      "id": "ai-tools",
+      "label": "Emerging AI tools",
+      "status": "active",
+      "query_templates": [
+        "{query} {region} training",
+        "{query} adoption usage statistics GitHub stars downloads",
+        "{query} vs alternatives benchmark independent review"
+      ],
+      "credibility_anchors": [
+        "GitHub repository activity (stars, commits, contributors)",
+        "Package registry download figures (PyPI, npm)",
+        "Independent benchmarks and technical write-ups",
+        "Vendor blogs are vendor claims - label them as such"
+      ],
+      "programs": ["Vibe Coding", "Data Science & Analytics", "Data Engineering", "Digital Marketing", "Cloud"]
+    },
+    {
+      "id": "competitors",
+      "label": "Competitor training programs in Kosovo and Europe",
+      "status": "active",
+      "query_templates": [
+        "{query} Kosovo bootcamp academy courses",
+        "{query} {region} training providers curriculum price",
+        "coding bootcamp data science course Europe curriculum {query}"
+      ],
+      "credibility_anchors": [
+        "Provider official course pages (primary)",
+        "Accreditation and public outcome reports",
+        "Third-party comparisons and reviews"
+      ],
+      "programs": ["Digital Marketing", "Full-stack", "Vibe Coding", "Data Science & Analytics", "Data Engineering", "Cloud", "HR", "Product & Project Management"]
+    },
+    {
+      "id": "hiring",
+      "label": "Tech hiring demand",
+      "status": "active",
+      "query_templates": [
+        "{query} jobs {region} vacancy demand",
+        "{query} job postings skills requirement {region}",
+        "tech recruitment demand {region} {query} salary"
+      ],
+      "credibility_anchors": [
+        "Job platforms (see config/sources.json job_platforms)",
+        "National employment / statistical agency data",
+        "Recruiter salary and vacancy reports with published methodology"
+      ],
+      "programs": ["Full-stack", "Cloud", "Data Science & Analytics", "Data Engineering", "Digital Marketing", "HR", "Product & Project Management"]
+    },
+    {
+      "id": "curriculum",
+      "label": "Curriculum research",
+      "status": "active",
+      "query_templates": [
+        "{query} course syllabus learning outcomes",
+        "{query} curriculum modules certification outline",
+        "what should a {query} course teach 2026 syllabus"
+      ],
+      "credibility_anchors": [
+        "University and academy public syllabi",
+        "Official certification exam objectives",
+        "Curriculum repositories (see config/sources.json curriculum_repositories)"
+      ],
+      "programs": ["Digital Marketing", "Full-stack", "Vibe Coding", "Data Science & Analytics", "Data Engineering", "Cloud", "HR", "Product & Project Management"]
+    },
+    {
+      "id": "general-news",
+      "label": "General news and market hype (phase 2)",
+      "status": "reserved",
+      "query_templates": [],
+      "credibility_anchors": [],
+      "programs": []
+    }
+  ]
+}

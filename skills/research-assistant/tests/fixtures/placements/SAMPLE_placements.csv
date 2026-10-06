@@ -1,0 +1,6 @@
+program,completion_date,placement_outcome,employer_sector,role_title,months_to_placement,student_name,student_email
+Data Science & Analytics,2026-03,placed,Software,Junior Data Analyst,2,Jane Doe,jane@example.com
+Data Science & Analytics,2026-03,not_placed,,,,
+Cloud,2026-06,placed,Telecom,Cloud Support Trainee,3,John Roe,john@example.com
+Cloud,2026-06,placed,Banking,Junior DevOps Engineer,4,Sara Test,sara@example.com
+Vibe Coding,2026-07,placed,Agency,Junior Web Developer,1,Peter Sample,peter@example.com
