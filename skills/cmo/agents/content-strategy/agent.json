@@ -1,0 +1,14 @@
+{
+  "name": "content-strategy",
+  "owns": "campaign concepts, the rolling content calendar, messaging pillars",
+  "signals": [
+    "content calendar",
+    "editorial plan",
+    "campaign concept",
+    "messaging pillars",
+    "what should we post",
+    "plan the month"
+  ],
+  "required_parameters": ["objective", "program", "deadline"],
+  "backing_skills": ["research-assistant", "humanizer"]
+}

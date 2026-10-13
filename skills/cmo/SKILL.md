@@ -47,6 +47,15 @@ Each sub-agent has its own definition in `agents/<name>/SKILL.md`. Read the one 
 to brief so the brief matches what it can actually produce. Do not brief a sub-agent for work
 outside its stated ownership.
 
+The table above is a summary. The authoritative routing lookup - owns / intent signals /
+required parameters / backing skills - lives in `references/routing-table.md`. Load it before
+classifying an intent, and follow its querying rules.
+
+The sub-agent list is **derived, not typed**. Every skill built for marketing is created under
+`agents/<name>/` and auto-registered by `scripts/sync_subskills.py`, which regenerates this
+routing table and the `sub_skills` array in `config/skills.json` from the `agents/` folder. To
+add a marketing skill: drop the folder in, run the sync. Never hand-edit the registry.
+
 ## What you must never do
 
 - Do not write or edit campaign copy, hooks, captions, carousels, calendars, or outreach.
@@ -148,6 +157,13 @@ python3 scripts/cmo_store.py summary [<week>]
 
 Schema is documented in `references/brief-schema.md`. Do not add tables outside this script.
 
+Sub-agent registration is derived from `agents/` by `scripts/sync_subskills.py`:
+
+```sh
+python3 scripts/sync_subskills.py           # register/refresh sub-agents + routing table
+python3 scripts/sync_subskills.py --check   # exit 1 if the registry is out of date
+```
+
 ## Success criteria
 
 - Every marketing task from the orchestrator is routed, with no orphaned work outside `.hubsy`.
@@ -161,7 +177,9 @@ Schema is documented in `references/brief-schema.md`. Do not add tables outside 
 Add these to your todo list before starting:
 
 - Read `references/orchestrator-handoff.md` and the sub-agent definition you intend to brief.
-- Classify the objective and score confidence; clarify below 0.80.
+- Load `references/routing-table.md` and classify the objective; score confidence, clarify below 0.80.
+- After creating or changing any sub-agent, run `scripts/sync_subskills.py` so the registry
+  and routing table stay derived, then `--check` to confirm no drift.
 - Build the brief from `templates/brief.md`; validate against `references/brief-schema.md`.
 - Announce the route in one sentence for human review.
 - Dispatch and record status in `memory/cmo.db`.

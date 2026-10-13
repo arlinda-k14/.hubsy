@@ -1,0 +1,15 @@
+{
+  "name": "lead-generation",
+  "owns": "prospect discovery, scoring, dedup, staged outreach drafts",
+  "signals": [
+    "find leads",
+    "lead generation",
+    "prospect",
+    "qualify candidates",
+    "open to work",
+    "career pivot leads",
+    "staged outreach"
+  ],
+  "required_parameters": ["source", "limit"],
+  "backing_skills": ["career-switch-lead-scout", "scrapegraphai"]
+}

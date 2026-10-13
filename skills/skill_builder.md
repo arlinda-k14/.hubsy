@@ -327,6 +327,52 @@ To share a skill, zip the skill folder (or copy it directly). To install, the us
 
 ---
 
+## Registering a skill in this repo (`.hubsy`)
+
+This repo is an AIOS with parent agents. Where a new skill goes decides how it gets routed, and
+registration is **derived, not typed by hand**. Two rules:
+
+**1. Marketing skills go under the CMO, automatically.**
+Any skill built for the marketing function does not become a top-level registry entry of its
+own. It becomes a CMO sub-agent:
+
+- Create it at `skills/cmo/agents/<name>/SKILL.md` (frontmatter `name` + `description`, body per
+  the format above).
+- Add a sidecar `skills/cmo/agents/<name>/agent.json` with the routing metadata:
+
+  ```json
+  {
+    "name": "email-campaigns",
+    "owns": "drip and lifecycle email campaigns",
+    "signals": ["email sequence", "drip", "lifecycle email", "nurture"],
+    "required_parameters": ["program", "audience", "goal"],
+    "backing_skills": ["humanizer", "google-workspace-cli"]
+  }
+  ```
+
+- Run the sync:
+
+  ```sh
+  python3 skills/cmo/scripts/sync_subskills.py
+  ```
+
+  That auto-registers it in `config/skills.json` under the `cmo` record's `sub_skills` and
+  regenerates `skills/cmo/references/routing-table.md`. Nothing else to edit - the folder is
+  the source of truth. Verify with `sync_subskills.py --check`.
+
+The orchestrator then sees `cmo` as one route target; the CMO reads its routing table and finds
+the best sub-agent for the original input. A newly added marketing skill is reachable the moment
+the sync runs, with no manual registry surgery.
+
+**2. Non-marketing skills register normally in `config/skills.json`.**
+Follow `skills/orchestrator/references/registry-schema.md`: add the `skills/<name>/SKILL.md` and
+a matching registry entry with `name`, `description`, `path`, `domains`, `triggers`,
+`required_parameters`, and `sub_skills`. Only this skill-builder workflow may register entries.
+
+Sales is the same pattern as marketing (the CSO); see `skills/cso/references/routing-table.md`.
+
+---
+
 Repeating the core loop for emphasis:
 
 - Figure out what the skill is about
