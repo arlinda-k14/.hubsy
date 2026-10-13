@@ -1,6 +1,11 @@
 {
   "agent": "cmo",
   "title": "Chief Marketing Officer",
+  "role": "parent-router",
+  "executes_tasks": false,
+  "position": "orchestrator -> cmo -> sub-agents",
+  "inbound_from": "orchestrator",
+  "input_contract": "references/orchestrator-handoff.md",
   "business": "Creative Hub Kosovo",
   "business_type": "US-licensed tech and AI training academy",
   "target_audience": "career switchers in Kosovo and worldwide-remote",
