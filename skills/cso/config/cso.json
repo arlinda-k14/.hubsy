@@ -1,91 +1,106 @@
 {
   "agent": "cso",
   "title": "Chief Sales Officer",
+  "role": "parent-agent",
+  "responsibility": "routing only: classify, confirm, decompose, dispatch, relay",
+  "upstream_agent": "orchestrator",
   "business": "Creative Hub Kosovo",
-  "business_type": "US-licensed tech and AI training academy",
-  "target_audience": "career switchers in Kosovo and worldwide-remote",
-  "approver": "arlinda",
+  "domain": "sales",
   "storage": "memory/cso.db",
   "storage_engine": "sqlite",
-  "rubric_min_score": 8,
-  "upstream_agent": "cmo",
-  "upstream_handoff": "qualified leads (score >= 70) staged by cmo/lead-generation",
+  "direct_match_confidence": 0.8,
+  "max_clarification_turns": 2,
+  "boundary": {
+    "cmo": "owns awareness -> qualified lead; hands off score >= 70 leads; cso owns qualified lead -> enrolled student"
+  },
   "programs": [
     "digital-marketing",
     "vibe-coding",
     "full-stack",
     "data-science"
   ],
-  "message_anchors": [
-    "US-licensed credentials",
-    "flexible study schedules",
-    "hands-on skill building",
-    "expert lecturers"
-  ],
-  "channels": {
-    "email": "primary sales channel, sequenced and personal, one ask per message",
-    "linkedin_dm": "warm follow-up to an engaged lead, short and human",
-    "phone": "discovery and closing calls, agenda before and notes after",
-    "whatsapp": "only where the lead initiated and consent exists"
-  },
-  "stages": [
-    "new",
-    "contacted",
-    "discovery-booked",
-    "discovery-held",
-    "offer-sent",
-    "won",
-    "lost"
-  ],
-  "metrics": [
-    "accepted",
-    "calls",
-    "offers",
-    "won",
-    "revenue",
-    "cac"
-  ],
-  "planning_cycle": {
-    "schedule": "Monday 08:00 CET",
-    "manual_trigger": true,
-    "stalled_deal_trigger": true
-  },
   "sub_agents": [
     {
       "name": "pipeline",
       "path": "agents/pipeline/SKILL.md",
       "owns": "CMO-lead intake, CRM records, stage tracking, dedup, ownership, pipeline hygiene",
-      "autonomy": "draft"
+      "triggers": [
+        "intake leads",
+        "accept leads",
+        "dedup",
+        "move a deal",
+        "stale pipeline"
+      ],
+      "required_parameters": [
+        "leads",
+        "program"
+      ]
     },
     {
       "name": "outreach",
       "path": "agents/outreach/SKILL.md",
       "owns": "multi-touch outreach and follow-up sequence drafts",
-      "autonomy": "draft"
+      "triggers": [
+        "first touch",
+        "follow-up",
+        "sequence",
+        "reply",
+        "re-engage"
+      ],
+      "required_parameters": [
+        "lead_refs",
+        "channel",
+        "program"
+      ]
     },
     {
       "name": "discovery",
       "path": "agents/discovery/SKILL.md",
       "owns": "call booking and prep, qualification, no-show recovery",
-      "autonomy": "draft"
+      "triggers": [
+        "book a call",
+        "discovery call",
+        "qualify fit",
+        "no-show"
+      ],
+      "required_parameters": [
+        "lead_refs",
+        "program"
+      ]
     },
     {
       "name": "closing",
       "path": "agents/closing/SKILL.md",
       "owns": "offers, objection handling, proposal drafts, enrollment conversion, referrals",
-      "autonomy": "draft"
+      "triggers": [
+        "offer",
+        "objection",
+        "enrollment",
+        "close a deal",
+        "referral"
+      ],
+      "required_parameters": [
+        "lead_refs",
+        "program",
+        "cohort"
+      ]
     },
     {
       "name": "revenue-analytics",
       "path": "agents/revenue-analytics/SKILL.md",
-      "owns": "accept/call/offer/close rates, CAC, revenue, forecast, stalled-deal flags",
-      "autonomy": "report"
+      "owns": "rates, CAC, revenue, forecast, weekly roll-up, stalled-deal flags",
+      "triggers": [
+        "conversion rate",
+        "cac",
+        "revenue",
+        "forecast",
+        "stalled deals",
+        "weekly sales roll-up"
+      ],
+      "required_parameters": [
+        "campaign|program",
+        "window"
+      ]
     }
-  ],
-  "human_sign_off_required": [
-    "send any outbound message",
-    "make an offer or any price concession",
-    "change pricing or payment terms",
-    "commit a cohort seat or enrollment term"
   ]
 }
