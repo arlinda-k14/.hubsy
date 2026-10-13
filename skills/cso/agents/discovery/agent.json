@@ -1,0 +1,12 @@
+{
+  "name": "discovery",
+  "owns": "call booking and prep, qualification, no-show recovery",
+  "signals": [
+    "book a call",
+    "discovery call",
+    "qualify fit",
+    "no-show"
+  ],
+  "required_parameters": ["lead_refs", "program"],
+  "backing_skills": ["google-workspace-cli", "task-scheduling"]
+}

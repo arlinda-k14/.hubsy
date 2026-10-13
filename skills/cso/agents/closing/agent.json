@@ -1,0 +1,13 @@
+{
+  "name": "closing",
+  "owns": "offers, objection handling, proposal drafts, enrollment conversion, referrals",
+  "signals": [
+    "offer",
+    "objection",
+    "enrollment",
+    "close a deal",
+    "referral"
+  ],
+  "required_parameters": ["lead_refs", "program", "cohort"],
+  "backing_skills": ["humanizer", "google-workspace-cli"]
+}

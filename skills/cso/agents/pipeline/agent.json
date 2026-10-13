@@ -1,0 +1,14 @@
+{
+  "name": "pipeline",
+  "owns": "CMO-lead intake, CRM records, stage tracking, dedup, ownership, pipeline hygiene",
+  "signals": [
+    "intake leads",
+    "accept a lead",
+    "disqualify a lead",
+    "deduplicate",
+    "move a deal",
+    "stale pipeline"
+  ],
+  "required_parameters": ["leads", "program"],
+  "backing_skills": ["google-workspace-cli", "hindsight-memory"]
+}

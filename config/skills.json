@@ -166,7 +166,8 @@
       "sub_skills": [
         {
           "name": "pipeline",
-          "description": "CMO-lead intake, CRM records, stage tracking, dedup, ownership, pipeline hygiene.",
+          "description": "CMO-lead intake, CRM records, stage tracking, dedup, ownership, pipeline hygiene",
+          "path": "skills/cso/agents/pipeline/SKILL.md",
           "required_parameters": [
             "leads",
             "program"
@@ -174,7 +175,8 @@
         },
         {
           "name": "outreach",
-          "description": "Multi-touch outreach and follow-up sequence drafts across email, LinkedIn, and DM.",
+          "description": "Multi-touch outreach and follow-up sequence drafts across email, LinkedIn, and DM",
+          "path": "skills/cso/agents/outreach/SKILL.md",
           "required_parameters": [
             "lead_refs",
             "channel",
@@ -183,7 +185,8 @@
         },
         {
           "name": "discovery",
-          "description": "Discovery and enrollment call booking, qualification, prep, and no-show recovery.",
+          "description": "Call booking and prep, qualification, no-show recovery",
+          "path": "skills/cso/agents/discovery/SKILL.md",
           "required_parameters": [
             "lead_refs",
             "program"
@@ -191,7 +194,8 @@
         },
         {
           "name": "closing",
-          "description": "Offers, objection handling, proposal drafts, enrollment conversion, referrals.",
+          "description": "Offers, objection handling, proposal drafts, enrollment conversion, referrals",
+          "path": "skills/cso/agents/closing/SKILL.md",
           "required_parameters": [
             "lead_refs",
             "program",
@@ -200,9 +204,10 @@
         },
         {
           "name": "revenue-analytics",
-          "description": "Accept/call/offer/close rates, CAC, revenue, forecast, stalled-deal flags.",
+          "description": "Rates, CAC, revenue, forecast, weekly roll-up, stalled-deal flags",
+          "path": "skills/cso/agents/revenue-analytics/SKILL.md",
           "required_parameters": [
-            "campaign",
+            "campaign|program",
             "window"
           ]
         }

@@ -1,0 +1,13 @@
+{
+  "name": "outreach",
+  "owns": "multi-touch outreach and follow-up sequence drafts across email, LinkedIn, and DM",
+  "signals": [
+    "first touch",
+    "follow-up",
+    "sequence",
+    "reply to a lead",
+    "re-engage"
+  ],
+  "required_parameters": ["lead_refs", "channel", "program"],
+  "backing_skills": ["humanizer", "social-post", "google-workspace-cli"]
+}

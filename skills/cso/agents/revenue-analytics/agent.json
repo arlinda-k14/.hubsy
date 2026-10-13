@@ -1,0 +1,14 @@
+{
+  "name": "revenue-analytics",
+  "owns": "rates, CAC, revenue, forecast, weekly roll-up, stalled-deal flags",
+  "signals": [
+    "conversion rate",
+    "cac",
+    "revenue",
+    "forecast",
+    "stalled deals",
+    "weekly sales roll-up"
+  ],
+  "required_parameters": ["campaign|program", "window"],
+  "backing_skills": ["plausible-analytics", "google-workspace-cli"]
+}
