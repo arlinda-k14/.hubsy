@@ -112,11 +112,13 @@
     },
     {
       "name": "cso",
-      "description": "Chief Sales Officer of the AIOS. Owns the revenue side for Creative Hub Kosovo, a US-licensed tech and AI training academy for career switchers. Consumes qualified leads handed over by the CMO, runs a Monday-morning pipeline review, decomposes the sales objective into written briefs, dispatches to five reporting sub-agents (pipeline, outreach, discovery, closing, revenue-analytics), scores every draft against an 8/10 rubric, resolves stalled deals on verified pipeline data, and merges results into one weekly sales summary. Autonomous on pipeline hygiene, outreach drafts, and call prep; sending outbound, changing price, or committing a seat requires human sign-off from Arlinda.",
+      "description": "Parent agent and router for the sales function of the AIOS. Receives sales tasks dispatched by the orchestrator, classifies the intent against its own sub-agent registry, confirms the route, decomposes multi-part requests into ordered sub-tasks, dispatches to the owning sub-agent (pipeline, outreach, discovery, closing, revenue-analytics), and relays the result back. Never executes a task itself - no drafting, scoring, metrics, or summaries. Owns the qualified-lead-to-enrolled-student half of the funnel for Creative Hub Kosovo; marketing (awareness to qualified lead) belongs to the CMO.",
       "path": "skills/cso/SKILL.md",
       "domains": [
         "sales",
         "cso",
+        "routing",
+        "parent-agent",
         "pipeline",
         "outreach",
         "discovery",
@@ -142,40 +144,20 @@
         "objective"
       ],
       "resolvable_defaults": {
+        "role": "parent-agent",
+        "upstream_agent": "orchestrator",
+        "handoff_from": "cmo/lead-generation (score >= 70 leads)",
         "programs": [
           "digital-marketing",
           "vibe-coding",
           "full-stack",
           "data-science"
         ],
-        "message_anchors": [
-          "US-licensed credentials",
-          "flexible study schedules",
-          "hands-on skill building",
-          "expert lecturers"
-        ],
-        "stages": [
-          "new",
-          "contacted",
-          "discovery-booked",
-          "discovery-held",
-          "offer-sent",
-          "won",
-          "lost"
-        ],
-        "metrics": [
-          "accepted",
-          "calls",
-          "offers",
-          "won",
-          "revenue",
-          "cac"
-        ],
-        "rubric_min_score": 8,
         "storage": "memory/cso.db",
-        "approver": "arlinda",
-        "planning_cycle": "Monday 08:00 CET",
-        "upstream_agent": "cmo"
+        "worker_storage": "memory/cso_sales.db",
+        "direct_match_confidence": 0.8,
+        "max_clarification_turns": 2,
+        "approver": "arlinda"
       },
       "sub_skills": [
         {
