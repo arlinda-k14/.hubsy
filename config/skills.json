@@ -18,6 +18,99 @@
       "required_parameters": []
     },
     {
+      "name": "cmo",
+      "description": "Chief Marketing Officer of the AIOS. Owns all marketing for Creative Hub Kosovo, a US-licensed tech and AI training academy for career switchers. Runs a Monday-morning planning cycle, decomposes campaigns into written briefs, dispatches to four reporting sub-agents (content-strategy, social-media, lead-generation, analytics), scores every draft against an 8/10 rubric, resolves conflicts on verified enrollment data, and merges results into one weekly marketing summary. Autonomous on content schedules and social copy; paid ads and budget changes require human sign-off from Arlinda.",
+      "path": "skills/cmo/SKILL.md",
+      "domains": [
+        "marketing",
+        "cmo",
+        "campaign-planning",
+        "content-strategy",
+        "social-media",
+        "lead-generation",
+        "analytics"
+      ],
+      "triggers": [
+        "marketing",
+        "campaign",
+        "content calendar",
+        "social copy",
+        "linkedin post",
+        "instagram post",
+        "carousel",
+        "lead generation",
+        "cost per lead",
+        "enrollment funnel",
+        "promote the program",
+        "brand voice",
+        "what should marketing do next",
+        "weekly marketing summary",
+        "cmo"
+      ],
+      "required_parameters": [
+        "objective"
+      ],
+      "resolvable_defaults": {
+        "programs": [
+          "digital-marketing",
+          "vibe-coding",
+          "full-stack",
+          "data-science"
+        ],
+        "message_anchors": [
+          "US-licensed credentials",
+          "flexible study schedules",
+          "hands-on skill building",
+          "expert lecturers"
+        ],
+        "metrics": [
+          "leads",
+          "forms",
+          "cpl"
+        ],
+        "rubric_min_score": 8,
+        "storage": "memory/cmo.db",
+        "approver": "arlinda",
+        "planning_cycle": "Monday 07:00 CET"
+      },
+      "sub_skills": [
+        {
+          "name": "content-strategy",
+          "description": "Campaign concepts, content calendar, messaging pillars, themed briefs.",
+          "required_parameters": [
+            "objective",
+            "program",
+            "deadline"
+          ]
+        },
+        {
+          "name": "social-media",
+          "description": "LinkedIn and Instagram posts, carousels, captions, threads, short clips.",
+          "required_parameters": [
+            "platform",
+            "format",
+            "program"
+          ]
+        },
+        {
+          "name": "lead-generation",
+          "description": "Prospect discovery, scoring, dedup, and staged outreach drafts.",
+          "required_parameters": [
+            "source",
+            "limit"
+          ]
+        },
+        {
+          "name": "analytics",
+          "description": "Lead volume, inquiry form completions, cost per lead, underperformer flags.",
+          "required_parameters": [
+            "campaign",
+            "window"
+          ]
+        }
+      ]
+    },
+    {
       "name": "skill-builder",
       "description": "Create new skills, modify and improve existing skills, measure skill performance with evals.",
       "path": "skills/skill_builder.md",
