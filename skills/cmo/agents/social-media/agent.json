@@ -1,0 +1,16 @@
+{
+  "name": "social-media",
+  "owns": "LinkedIn and Instagram posts, carousels, captions, threads, short clips",
+  "signals": [
+    "linkedin post",
+    "instagram post",
+    "carousel",
+    "caption",
+    "social thread",
+    "reel",
+    "short clip",
+    "hashtags"
+  ],
+  "required_parameters": ["platform", "format", "program"],
+  "backing_skills": ["social-post", "social-thread-writer", "carousel-render", "clipper"]
+}

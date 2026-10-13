@@ -76,7 +76,8 @@
       "sub_skills": [
         {
           "name": "content-strategy",
-          "description": "Campaign concepts, content calendar, messaging pillars, themed briefs.",
+          "description": "Campaign concepts, the rolling content calendar, messaging pillars",
+          "path": "skills/cmo/agents/content-strategy/SKILL.md",
           "required_parameters": [
             "objective",
             "program",
@@ -85,7 +86,8 @@
         },
         {
           "name": "social-media",
-          "description": "LinkedIn and Instagram posts, carousels, captions, threads, short clips.",
+          "description": "LinkedIn and Instagram posts, carousels, captions, threads, short clips",
+          "path": "skills/cmo/agents/social-media/SKILL.md",
           "required_parameters": [
             "platform",
             "format",
@@ -94,7 +96,8 @@
         },
         {
           "name": "lead-generation",
-          "description": "Prospect discovery, scoring, dedup, and staged outreach drafts.",
+          "description": "Prospect discovery, scoring, dedup, staged outreach drafts",
+          "path": "skills/cmo/agents/lead-generation/SKILL.md",
           "required_parameters": [
             "source",
             "limit"
@@ -102,7 +105,8 @@
         },
         {
           "name": "analytics",
-          "description": "Lead volume, inquiry form completions, cost per lead, underperformer flags.",
+          "description": "Lead volume, inquiry form completions, cost per lead, underperformer flags",
+          "path": "skills/cmo/agents/analytics/SKILL.md",
           "required_parameters": [
             "campaign",
             "window"

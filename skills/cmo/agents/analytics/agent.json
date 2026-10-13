@@ -1,0 +1,14 @@
+{
+  "name": "analytics",
+  "owns": "lead volume, inquiry form completions, cost per lead, underperformer flags",
+  "signals": [
+    "cost per lead",
+    "lead volume",
+    "form completions",
+    "campaign metrics",
+    "underperformer",
+    "weekly marketing metrics"
+  ],
+  "required_parameters": ["campaign", "window"],
+  "backing_skills": ["plausible-analytics"]
+}
