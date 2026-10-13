@@ -321,6 +321,47 @@ Take the best description and update the skill's SKILL.md frontmatter. Show the 
 
 ---
 
+### Register in the AIOS domain tree
+
+This workspace is an AIOS with a registry (`config/skills.json`) and parent agents that own
+domains. A skill is not finished until it is registered in the right place - an unregistered skill
+the router cannot see does not exist.
+
+Register by domain:
+
+- **Sales skills** (pipeline, outreach, discovery, closing, revenue, and anything else in the
+  qualified-lead -> enrolled-student funnel) are **CSO sub-agents**. Create the skill at
+  `skills/cso/agents/<name>/SKILL.md`, then register it so the CSO routes to it automatically:
+
+  ```sh
+  python3 skills/cso/scripts/register_subagent.py add \
+    --name <name> \
+    --owns "<one line: what it owns>" \
+    --triggers "phrase one,phrase two,phrase three" \
+    --params "param_one,param_two" \
+    --backing "skill-a,skill-b"
+  ```
+
+  That single command updates `skills/cso/agents/registry.json` (the manifest the CSO reads to
+  route) **and** the `cso` entry's `sub_skills` in `config/skills.json`. Never hand-edit either
+  file; re-running `add` with the same `--name` updates in place. Verify with
+  `register_subagent.py list`.
+
+  This is what makes the pipeline work end to end: the orchestrator routes a sales intent to
+  `cso`, and `cso` reads its registry to find the best sub-agent for the original user input - so
+  every sales skill you build becomes routable the moment it is registered.
+
+- **Marketing skills** (content, social, lead-generation, campaign analytics) are **CMO
+  sub-agents**; place them under `skills/cmo/agents/<name>/SKILL.md` and add a matching entry to
+  the `cmo` record in `config/skills.json`.
+
+- **Everything else** is top-level: add an entry to the `skills[]` array in `config/skills.json`
+  with `name`, `description`, `path`, `domains`, `triggers`, `required_parameters`, and
+  `sub_skills` (empty list if none).
+
+Always re-read `config/skills.json` after registering to keep the taxonomy coherent, and add this
+registration step to your todo list so it is never skipped.
+
 ### Package and Present
 
 To share a skill, zip the skill folder (or copy it directly). To install, the user drops the folder into wherever their agent looks for skills: the skills/ directory of their agent folder, `.claude/skills/`, or their agent's equivalent, and registers it if their setup uses a registry file (like skills.json).
@@ -382,6 +423,7 @@ Repeating the core loop for emphasis:
   - Present the results side by side for the user to review
   - Run quantitative evals
 - Repeat until you and the user are satisfied
+- Register the final skill in the AIOS domain tree (CSO sub-agent, CMO sub-agent, or top-level)
 - Package the final skill and return it to the user.
 
 Please add steps to your todo list to make sure you don't forget. Specifically put "Present eval results for human review" in your todo list to make sure it happens.
