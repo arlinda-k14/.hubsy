@@ -19,7 +19,7 @@
     },
     {
       "name": "cmo",
-      "description": "Chief Marketing Officer of the AIOS. Owns all marketing for Creative Hub Kosovo, a US-licensed tech and AI training academy for career switchers. Runs a Monday-morning planning cycle, decomposes campaigns into written briefs, dispatches to four reporting sub-agents (content-strategy, social-media, lead-generation, analytics), scores every draft against an 8/10 rubric, resolves conflicts on verified enrollment data, and merges results into one weekly marketing summary. Autonomous on content schedules and social copy; paid ads and budget changes require human sign-off from Arlinda.",
+      "description": "Parent routing agent for the marketing subtree of the AIOS. Receives marketing tasks from the central orchestrator and routes each to the correct reporting sub-agent (content-strategy, social-media, lead-generation, analytics). Classifies intent, builds the dispatch brief, confirms the route, enforces guardrails and the draft-approval gate, tracks status, and rolls results into one weekly summary. Never executes marketing work itself - the sub-agents do all tasks. Paid ads and budget changes require human sign-off from Arlinda. Routes here rather than answering marketing requests inline.",
       "path": "skills/cmo/SKILL.md",
       "domains": [
         "marketing",
