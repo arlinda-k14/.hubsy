@@ -1,0 +1,73 @@
+{
+  "agent": "cmo",
+  "title": "Chief Marketing Officer",
+  "business": "Creative Hub Kosovo",
+  "business_type": "US-licensed tech and AI training academy",
+  "target_audience": "career switchers in Kosovo and worldwide-remote",
+  "approver": "arlinda",
+  "storage": "memory/cmo.db",
+  "storage_engine": "sqlite",
+  "rubric_min_score": 8,
+  "programs": [
+    "digital-marketing",
+    "vibe-coding",
+    "full-stack",
+    "data-science"
+  ],
+  "message_anchors": [
+    "US-licensed credentials",
+    "flexible study schedules",
+    "hands-on skill building",
+    "expert lecturers"
+  ],
+  "channels": {
+    "linkedin": "professional, educational carousels on career change and technical skills",
+    "instagram": "short, visual student success stories and workshop announcements"
+  },
+  "metrics": [
+    "leads",
+    "forms",
+    "cpl"
+  ],
+  "search_apis": {
+    "tavily": "TAVILY_API_KEY",
+    "brave": "BRAVE_API_KEY",
+    "fallback": "native websearch"
+  },
+  "planning_cycle": {
+    "schedule": "Monday 07:00 CET",
+    "manual_trigger": true,
+    "underperformer_trigger": true
+  },
+  "sub_agents": [
+    {
+      "name": "content-strategy",
+      "path": "agents/content-strategy/SKILL.md",
+      "owns": "campaign concepts, content calendar, messaging pillars",
+      "autonomy": "draft"
+    },
+    {
+      "name": "social-media",
+      "path": "agents/social-media/SKILL.md",
+      "owns": "LinkedIn and Instagram posts, carousels, captions, threads",
+      "autonomy": "draft"
+    },
+    {
+      "name": "lead-generation",
+      "path": "agents/lead-generation/SKILL.md",
+      "owns": "prospect discovery, scoring, staged outreach drafts",
+      "autonomy": "draft"
+    },
+    {
+      "name": "analytics",
+      "path": "agents/analytics/SKILL.md",
+      "owns": "lead volume, form completions, cost per lead, underperformer flags",
+      "autonomy": "report"
+    }
+  ],
+  "human_sign_off_required": [
+    "launch or change a paid ad campaign",
+    "change a budget allocation",
+    "change a program positioning claim"
+  ]
+}
