@@ -111,6 +111,118 @@
       ]
     },
     {
+      "name": "cso",
+      "description": "Chief Sales Officer of the AIOS. Owns the revenue side for Creative Hub Kosovo, a US-licensed tech and AI training academy for career switchers. Consumes qualified leads handed over by the CMO, runs a Monday-morning pipeline review, decomposes the sales objective into written briefs, dispatches to five reporting sub-agents (pipeline, outreach, discovery, closing, revenue-analytics), scores every draft against an 8/10 rubric, resolves stalled deals on verified pipeline data, and merges results into one weekly sales summary. Autonomous on pipeline hygiene, outreach drafts, and call prep; sending outbound, changing price, or committing a seat requires human sign-off from Arlinda.",
+      "path": "skills/cso/SKILL.md",
+      "domains": [
+        "sales",
+        "cso",
+        "pipeline",
+        "outreach",
+        "discovery",
+        "closing",
+        "revenue-analytics"
+      ],
+      "triggers": [
+        "sales",
+        "pipeline",
+        "follow up on leads",
+        "book a discovery call",
+        "qualify prospects",
+        "close enrollment",
+        "objection handling",
+        "conversion rate",
+        "cost per acquisition",
+        "revenue",
+        "what should sales do next",
+        "weekly sales summary",
+        "cso"
+      ],
+      "required_parameters": [
+        "objective"
+      ],
+      "resolvable_defaults": {
+        "programs": [
+          "digital-marketing",
+          "vibe-coding",
+          "full-stack",
+          "data-science"
+        ],
+        "message_anchors": [
+          "US-licensed credentials",
+          "flexible study schedules",
+          "hands-on skill building",
+          "expert lecturers"
+        ],
+        "stages": [
+          "new",
+          "contacted",
+          "discovery-booked",
+          "discovery-held",
+          "offer-sent",
+          "won",
+          "lost"
+        ],
+        "metrics": [
+          "accepted",
+          "calls",
+          "offers",
+          "won",
+          "revenue",
+          "cac"
+        ],
+        "rubric_min_score": 8,
+        "storage": "memory/cso.db",
+        "approver": "arlinda",
+        "planning_cycle": "Monday 08:00 CET",
+        "upstream_agent": "cmo"
+      },
+      "sub_skills": [
+        {
+          "name": "pipeline",
+          "description": "CMO-lead intake, CRM records, stage tracking, dedup, ownership, pipeline hygiene.",
+          "required_parameters": [
+            "leads",
+            "program"
+          ]
+        },
+        {
+          "name": "outreach",
+          "description": "Multi-touch outreach and follow-up sequence drafts across email, LinkedIn, and DM.",
+          "required_parameters": [
+            "lead_refs",
+            "channel",
+            "program"
+          ]
+        },
+        {
+          "name": "discovery",
+          "description": "Discovery and enrollment call booking, qualification, prep, and no-show recovery.",
+          "required_parameters": [
+            "lead_refs",
+            "program"
+          ]
+        },
+        {
+          "name": "closing",
+          "description": "Offers, objection handling, proposal drafts, enrollment conversion, referrals.",
+          "required_parameters": [
+            "lead_refs",
+            "program",
+            "cohort"
+          ]
+        },
+        {
+          "name": "revenue-analytics",
+          "description": "Accept/call/offer/close rates, CAC, revenue, forecast, stalled-deal flags.",
+          "required_parameters": [
+            "campaign",
+            "window"
+          ]
+        }
+      ]
+    },
+    {
       "name": "skill-builder",
       "description": "Create new skills, modify and improve existing skills, measure skill performance with evals.",
       "path": "skills/skill_builder.md",
