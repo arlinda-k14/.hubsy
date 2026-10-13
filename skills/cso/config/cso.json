@@ -19,6 +19,41 @@
     "full-stack",
     "data-science"
   ],
-  "sub_agent_registry": "agents/registry.json",
-  "sub_agent_registrar": "scripts/register_subagent.py"
+  "sub_agents": [
+    {
+      "name": "pipeline",
+      "path": "agents/pipeline/SKILL.md",
+      "owns": "lead intake, CRM records, stages, dedup, pipeline hygiene",
+      "autonomy": "record"
+    },
+    {
+      "name": "outreach",
+      "path": "agents/outreach/SKILL.md",
+      "owns": "first touch, follow-ups, sequences, replies, re-engagement",
+      "autonomy": "draft"
+    },
+    {
+      "name": "discovery",
+      "path": "agents/discovery/SKILL.md",
+      "owns": "call booking and prep, qualification, no-show recovery",
+      "autonomy": "draft"
+    },
+    {
+      "name": "closing",
+      "path": "agents/closing/SKILL.md",
+      "owns": "offers, objections, enrollment, referrals",
+      "autonomy": "draft"
+    },
+    {
+      "name": "revenue-analytics",
+      "path": "agents/revenue-analytics/SKILL.md",
+      "owns": "rates, CAC, revenue, forecast, weekly roll-up, stalled deals",
+      "autonomy": "report"
+    }
+  ],
+  "human_sign_off_required": [
+    "send any outbound message",
+    "change a price or seat availability",
+    "make any enrollment or placement commitment"
+  ]
 }
