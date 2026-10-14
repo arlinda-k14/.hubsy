@@ -22,6 +22,7 @@ const ICONS = {
   bookmark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3.5L6 21V4.5Z"/></svg>',
   bookmarked: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3.5L6 21V4.5Z"/></svg>',
   link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
+  instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>',
 };
 
 const feed = document.getElementById("feed");
@@ -190,14 +191,13 @@ function parseMediaUrl(rawUrl) {
     if (id) return { type: "youtube", id, embedUrl: youtubeEmbed(id), original: url };
   }
 
-  // Instagram — posts, reels, tv
+  // Instagram — embeds are blocked by X-Frame-Options, render as an outbound card
   if (host === "instagram.com" || host === "instagr.am") {
     const m = path.match(/\/(p|reel|reels|tv)\/([^/?#]+)/);
     if (m) {
       return {
         type: "instagram",
         id: m[2],
-        embedUrl: `https://www.instagram.com/p/${m[2]}/embed/`,
         original: url,
       };
     }
@@ -257,6 +257,11 @@ function buildCard(v) {
     card.appendChild(buildPlayToggle(card));
     card.appendChild(buildPlayBadge());
     card.appendChild(buildScrim());
+  } else if (media.type === "instagram") {
+    card.appendChild(buildInstagramCard(v, media.original));
+    card.appendChild(buildContent(v, true));
+    card.appendChild(buildRail(v));
+    return card;
   } else if (media.type === "unknown") {
     card.appendChild(buildLinkFallback(media.original));
   } else {
@@ -267,6 +272,33 @@ function buildCard(v) {
   card.appendChild(buildContent(v));
   card.appendChild(buildRail(v));
   return card;
+}
+
+function buildInstagramCard(v, url) {
+  const wrap = document.createElement("div");
+  wrap.className = "ig-card";
+
+  const logo = document.createElement("span");
+  logo.className = "ig-logo";
+  logo.innerHTML = ICONS.instagram;
+
+  const handle = document.createElement("span");
+  handle.className = "ig-handle";
+  handle.textContent = v.creatorHandle || "@unknown";
+
+  const title = document.createElement("h3");
+  title.className = "ig-title";
+  title.textContent = v.title || "Untitled clip";
+
+  const cta = document.createElement("a");
+  cta.className = "btn btn-primary ig-cta";
+  cta.href = url;
+  cta.target = "_blank";
+  cta.rel = "noopener noreferrer";
+  cta.textContent = "Watch Reel on Instagram \u2192";
+
+  wrap.append(logo, handle, title, cta);
+  return wrap;
 }
 
 function buildVideo(src, card) {
@@ -341,16 +373,24 @@ function buildScrim() {
   return scrim;
 }
 
-function buildContent(v) {
+function buildContent(v, compact = false) {
   const content = document.createElement("div");
   content.className = "card-content";
-  content.innerHTML = `
-    <span class="badge">#${escapeHtml(v.category || "General")}</span>
-    <h2 class="video-title">${escapeHtml(v.title || "Untitled clip")}</h2>
-    <div class="meta">
-      <span class="handle">${escapeHtml(v.creatorHandle || "@unknown")}</span>
-      <span class="credit-tag">${escapeHtml(v.creatorCredit || "Curio Original")}</span>
-    </div>`;
+  if (compact) {
+    content.innerHTML = `
+      <span class="badge">#${escapeHtml(v.category || "General")}</span>
+      <div class="meta">
+        <span class="credit-tag">${escapeHtml(v.creatorCredit || "Curio Original")}</span>
+      </div>`;
+  } else {
+    content.innerHTML = `
+      <span class="badge">#${escapeHtml(v.category || "General")}</span>
+      <h2 class="video-title">${escapeHtml(v.title || "Untitled clip")}</h2>
+      <div class="meta">
+        <span class="handle">${escapeHtml(v.creatorHandle || "@unknown")}</span>
+        <span class="credit-tag">${escapeHtml(v.creatorCredit || "Curio Original")}</span>
+      </div>`;
+  }
   return content;
 }
 

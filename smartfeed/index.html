@@ -217,6 +217,35 @@
   .link-fallback .lf-title { font-size: 16px; font-weight: 700; }
   .link-fallback .lf-sub { font-size: 13px; color: var(--text-muted); }
 
+  .ig-card {
+    position: absolute;
+    inset: 8px;
+    border-radius: 15px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 32px 28px 128px;
+    text-align: center;
+    background:
+      radial-gradient(80% 50% at 50% 0%, #eef2ff, transparent 70%),
+      linear-gradient(160deg, #ffffff, #f8f7f4);
+    border: 1px solid var(--border-light);
+  }
+  .ig-card .ig-logo { width: 42px; height: 42px; color: var(--accent-indigo); }
+  .ig-card .ig-logo svg { width: 100%; height: 100%; }
+  .ig-card .ig-handle { font-size: 13.5px; font-weight: 600; color: var(--accent-indigo); }
+  .ig-card .ig-title {
+    font-size: 19px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: var(--text-main);
+    max-width: 30ch;
+  }
+  .ig-card .ig-cta { margin-top: 8px; }
+
   .scrim {
     position: absolute;
     inset: 8px;
