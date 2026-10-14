@@ -21,6 +21,7 @@ const ICONS = {
   play: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5.5v13l11-6.5-11-6.5Z"/></svg>',
   bookmark: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3.5L6 21V4.5Z"/></svg>',
   bookmarked: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3.5L6 21V4.5Z"/></svg>',
+  link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
 };
 
 const feed = document.getElementById("feed");
@@ -159,6 +160,74 @@ function refreshBookmarkUI() {
   });
 }
 
+/* ---------------- Link parsing ---------------- */
+
+function parseMediaUrl(rawUrl) {
+  const url = (rawUrl || "").trim();
+  if (!url) return { type: "unknown", original: url };
+
+  let u;
+  try {
+    u = new URL(url);
+  } catch {
+    return { type: "unknown", original: url };
+  }
+
+  const host = u.hostname.replace(/^www\./, "").toLowerCase();
+  const path = u.pathname;
+
+  // YouTube — Shorts, watch, embed, youtu.be
+  if (host === "youtube.com" || host === "m.youtube.com" || host === "music.youtube.com") {
+    let id = "";
+    if (path.startsWith("/shorts/")) id = path.split("/shorts/")[1].split("/")[0];
+    else if (path === "/watch") id = u.searchParams.get("v") || "";
+    else if (path.startsWith("/embed/")) id = path.split("/embed/")[1].split("/")[0];
+    else if (path.startsWith("/live/")) id = path.split("/live/")[1].split("/")[0];
+    if (id) return { type: "youtube", id, embedUrl: youtubeEmbed(id), original: url };
+  }
+  if (host === "youtu.be") {
+    const id = path.slice(1).split("/")[0];
+    if (id) return { type: "youtube", id, embedUrl: youtubeEmbed(id), original: url };
+  }
+
+  // Instagram — posts, reels, tv
+  if (host === "instagram.com" || host === "instagr.am") {
+    const m = path.match(/\/(p|reel|reels|tv)\/([^/?#]+)/);
+    if (m) {
+      return {
+        type: "instagram",
+        id: m[2],
+        embedUrl: `https://www.instagram.com/p/${m[2]}/embed/`,
+        original: url,
+      };
+    }
+  }
+
+  // TikTok — full video URLs (short vm./vt. links cannot be resolved client-side)
+  if (host === "tiktok.com" || host === "m.tiktok.com") {
+    const m = path.match(/\/video\/(\d+)/);
+    if (m) {
+      return {
+        type: "tiktok",
+        id: m[1],
+        embedUrl: `https://www.tiktok.com/embed/v2/${m[1]}`,
+        original: url,
+      };
+    }
+  }
+
+  // Direct video files
+  if (/\.(mp4|webm|ogg|ogv|mov|m4v)(\?.*)?$/i.test(path)) {
+    return { type: "video", srcUrl: url, original: url };
+  }
+
+  return { type: "unknown", original: url };
+}
+
+function youtubeEmbed(id) {
+  return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&playsinline=1&rel=0&modestbranding=1`;
+}
+
 /* ---------------- Feed ---------------- */
 
 function renderFeed() {
@@ -176,11 +245,33 @@ function renderFeed() {
 
 function buildCard(v) {
   const card = document.createElement("article");
-  card.className = "video-card paused";
+  card.className = "video-card";
   card.dataset.id = v.id;
 
+  const media = parseMediaUrl(v.videoUrl);
+  card.dataset.type = media.type;
+
+  if (media.type === "video") {
+    card.classList.add("paused");
+    card.appendChild(buildVideo(media.srcUrl, card));
+    card.appendChild(buildPlayToggle(card));
+    card.appendChild(buildPlayBadge());
+    card.appendChild(buildScrim());
+  } else if (media.type === "unknown") {
+    card.appendChild(buildLinkFallback(media.original));
+  } else {
+    card.appendChild(buildEmbed(media));
+    card.appendChild(buildScrim());
+  }
+
+  card.appendChild(buildContent(v));
+  card.appendChild(buildRail(v));
+  return card;
+}
+
+function buildVideo(src, card) {
   const video = document.createElement("video");
-  video.src = v.videoUrl;
+  video.src = src;
   video.muted = true;
   video.loop = true;
   video.playsInline = true;
@@ -189,24 +280,68 @@ function buildCard(v) {
     const scrim = card.querySelector(".scrim");
     if (scrim) scrim.style.background = "linear-gradient(to top, #e5e7eb, #f8f7f4)";
   });
-  card.appendChild(video);
+  return video;
+}
 
+function buildEmbed(media) {
+  const shell = document.createElement("div");
+  shell.className = "embed-shell";
+
+  const frame = document.createElement("iframe");
+  frame.className = "embed-frame";
+  frame.dataset.src = media.embedUrl; // loaded only when the card is in view
+  frame.title = `Embedded ${media.type} clip`;
+  frame.loading = "lazy";
+  frame.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write");
+  frame.setAttribute("allowfullscreen", "");
+  frame.setAttribute("scrolling", "no");
+  frame.setAttribute("frameborder", "0");
+  shell.appendChild(frame);
+  return shell;
+}
+
+function buildLinkFallback(url) {
+  const wrap = document.createElement("div");
+  wrap.className = "link-fallback";
+
+  const a = document.createElement("a");
+  a.className = "link-fallback-card";
+  if (url) {
+    a.href = url;
+    a.target = "_blank";
+    a.rel = "noopener noreferrer";
+  }
+  a.innerHTML = `
+    <span class="lf-icon">${ICONS.link}</span>
+    <span class="lf-title">Link embedded</span>
+    <span class="lf-sub">Tap to open in new tab</span>`;
+  wrap.appendChild(a);
+  return wrap;
+}
+
+function buildPlayToggle(card) {
   const tap = document.createElement("button");
   tap.className = "play-toggle";
   tap.type = "button";
   tap.setAttribute("aria-label", "Play or pause");
   tap.addEventListener("click", () => togglePlay(card));
-  card.appendChild(tap);
+  return tap;
+}
 
+function buildPlayBadge() {
   const badge = document.createElement("div");
   badge.className = "play-badge";
   badge.innerHTML = ICONS.play;
-  card.appendChild(badge);
+  return badge;
+}
 
+function buildScrim() {
   const scrim = document.createElement("div");
   scrim.className = "scrim";
-  card.appendChild(scrim);
+  return scrim;
+}
 
+function buildContent(v) {
   const content = document.createElement("div");
   content.className = "card-content";
   content.innerHTML = `
@@ -216,8 +351,10 @@ function buildCard(v) {
       <span class="handle">${escapeHtml(v.creatorHandle || "@unknown")}</span>
       <span class="credit-tag">${escapeHtml(v.creatorCredit || "Curio Original")}</span>
     </div>`;
-  card.appendChild(content);
+  return content;
+}
 
+function buildRail(v) {
   const rail = document.createElement("div");
   rail.className = "rail";
   const bm = document.createElement("button");
@@ -226,13 +363,12 @@ function buildCard(v) {
   bm.addEventListener("click", () => toggleBookmark(v.id, bm));
   paintBookmark(bm, v.id);
   rail.appendChild(bm);
-  card.appendChild(rail);
-
-  return card;
+  return rail;
 }
 
 function togglePlay(card) {
   const video = card.querySelector("video");
+  if (!video) return;
   if (video.paused) {
     video.play().then(() => card.classList.remove("paused")).catch(() => {});
   } else {
@@ -245,15 +381,24 @@ function onVisibility(entries) {
   entries.forEach((entry) => {
     const card = entry.target;
     const video = card.querySelector("video");
+    const frame = card.querySelector(".embed-frame");
+
     if (entry.isIntersecting) {
-      video.play().then(() => card.classList.remove("paused")).catch(() => card.classList.add("paused"));
-      const idle = card._idle;
-      clearTimeout(idle);
-      card._idle = setTimeout(() => video.pause(), 60000);
+      if (video) {
+        video.play().then(() => card.classList.remove("paused")).catch(() => card.classList.add("paused"));
+        clearTimeout(card._idle);
+        card._idle = setTimeout(() => video.pause(), 60000);
+      }
+      if (frame && frame.dataset.src && frame.getAttribute("src") !== frame.dataset.src) {
+        frame.src = frame.dataset.src;
+      }
     } else {
-      video.pause();
-      video.currentTime = 0;
-      card.classList.add("paused");
+      if (video) {
+        video.pause();
+        video.currentTime = 0;
+        card.classList.add("paused");
+      }
+      if (frame) frame.src = "about:blank";
       clearTimeout(card._idle);
     }
   });
