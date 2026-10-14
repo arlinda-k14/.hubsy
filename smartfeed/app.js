@@ -23,6 +23,12 @@ const ICONS = {
   bookmarked: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 4.5A1.5 1.5 0 0 1 7.5 3h9A1.5 1.5 0 0 1 18 4.5V21l-6-3.5L6 21V4.5Z"/></svg>',
   link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
   instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>',
+  tiktok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4c.5 2.5 2 4 4.5 4.3v3c-1.6 0-3-.5-4.3-1.4v6.3a5.6 5.6 0 1 1-5.6-5.6c.3 0 .6 0 .9.1v3.1a2.6 2.6 0 1 0 1.8 2.5V4H15Z"/></svg>',
+};
+
+const SOCIAL = {
+  instagram: { name: "Instagram", cta: "Watch on Instagram", icon: ICONS.instagram },
+  tiktok: { name: "TikTok", cta: "Watch on TikTok", icon: ICONS.tiktok },
 };
 
 const feed = document.getElementById("feed");
@@ -191,7 +197,7 @@ function parseMediaUrl(rawUrl) {
     if (id) return { type: "youtube", id, embedUrl: youtubeEmbed(id), original: url };
   }
 
-  // Instagram — embeds are blocked by X-Frame-Options, render as an outbound card
+  // Instagram — iframes are blocked by X-Frame-Options, render as an outbound social card
   if (host === "instagram.com" || host === "instagr.am") {
     const m = path.match(/\/(p|reel|reels|tv)\/([^/?#]+)/);
     if (m) {
@@ -203,14 +209,13 @@ function parseMediaUrl(rawUrl) {
     }
   }
 
-  // TikTok — full video URLs (short vm./vt. links cannot be resolved client-side)
+  // TikTok — render as an outbound social card (short vm./vt. links cannot be resolved client-side)
   if (host === "tiktok.com" || host === "m.tiktok.com") {
     const m = path.match(/\/video\/(\d+)/);
     if (m) {
       return {
         type: "tiktok",
         id: m[1],
-        embedUrl: `https://www.tiktok.com/embed/v2/${m[1]}`,
         original: url,
       };
     }
@@ -257,8 +262,8 @@ function buildCard(v) {
     card.appendChild(buildPlayToggle(card));
     card.appendChild(buildPlayBadge());
     card.appendChild(buildScrim());
-  } else if (media.type === "instagram") {
-    card.appendChild(buildInstagramCard(v, media.original));
+  } else if (media.type === "instagram" || media.type === "tiktok") {
+    card.appendChild(buildSocialPreview(v, media.type, media.original));
     card.appendChild(buildContent(v, true));
     card.appendChild(buildRail(v));
     return card;
@@ -274,28 +279,31 @@ function buildCard(v) {
   return card;
 }
 
-function buildInstagramCard(v, url) {
+function buildSocialPreview(v, platform, url) {
+  const meta = SOCIAL[platform];
+
   const wrap = document.createElement("div");
-  wrap.className = "ig-card";
+  wrap.className = "social-card";
+  wrap.dataset.platform = platform;
 
   const logo = document.createElement("span");
-  logo.className = "ig-logo";
-  logo.innerHTML = ICONS.instagram;
+  logo.className = "social-logo";
+  logo.innerHTML = meta.icon;
 
   const handle = document.createElement("span");
-  handle.className = "ig-handle";
+  handle.className = "social-handle";
   handle.textContent = v.creatorHandle || "@unknown";
 
   const title = document.createElement("h3");
-  title.className = "ig-title";
+  title.className = "social-title";
   title.textContent = v.title || "Untitled clip";
 
   const cta = document.createElement("a");
-  cta.className = "btn btn-primary ig-cta";
+  cta.className = "btn btn-primary social-cta";
   cta.href = url;
   cta.target = "_blank";
   cta.rel = "noopener noreferrer";
-  cta.textContent = "Watch Reel on Instagram \u2192";
+  cta.textContent = `${meta.cta} \u2192`;
 
   wrap.append(logo, handle, title, cta);
   return wrap;
