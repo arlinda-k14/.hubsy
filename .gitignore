@@ -1,4 +1,5 @@
 .netlify/
+.firebase/
 .DS_Store
 clips/
 __pycache__/
