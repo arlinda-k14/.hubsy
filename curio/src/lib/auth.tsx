@@ -3,6 +3,7 @@ import {
   GoogleAuthProvider,
   OAuthProvider,
   browserLocalPersistence,
+  browserPopupRedirectResolver,
   createUserWithEmailAndPassword,
   getReactNativePersistence,
   initializeAuth,
@@ -55,6 +56,9 @@ export const appStorage = Platform.OS === "web" ? webStorage : nativeStorage;
 export const curioAuth = initializeAuth(app, {
   persistence:
     Platform.OS === "web" ? browserLocalPersistence : getReactNativePersistence(appStorage),
+  // signInWithPopup/signInWithRedirect throw auth/argument-error if the Auth
+  // instance has no popup resolver. Required on web only.
+  popupRedirectResolver: Platform.OS === "web" ? browserPopupRedirectResolver : undefined,
 });
 
 const ACTION_CODE_SETTINGS = {
