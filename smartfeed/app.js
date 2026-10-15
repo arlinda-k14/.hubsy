@@ -245,7 +245,7 @@ function parseMediaUrl(rawUrl) {
 }
 
 function youtubeEmbed(id) {
-  return `https://www.youtube.com/embed/${id}?enablejsapi=1&autoplay=1&mute=0&playsinline=1`;
+  return `https://www.youtube.com/embed/${id}?autoplay=1&mute=0&controls=1&playsinline=1&enablejsapi=1`;
 }
 
 /* ---------------- Feed ---------------- */
@@ -460,22 +460,6 @@ function buildEmbed(media) {
     frame.addEventListener("load", () => {
       if (soundOn) ytUnmute(frame);
     });
-
-    // Transparent first-tap layer: sends unMute + playVideo, then steps aside
-    // so the YouTube player's own controls become interactive.
-    const tap = document.createElement("button");
-    tap.className = "embed-tap";
-    tap.type = "button";
-    tap.setAttribute("aria-label", "Play and unmute video");
-    tap.addEventListener("click", (e) => {
-      e.stopPropagation();
-      soundOn = true;
-      ytUnmute(frame);
-      updateSoundButtons();
-      disableFirstClick();
-      tap.remove();
-    });
-    shell.appendChild(tap);
   }
 
   return shell;

@@ -189,15 +189,7 @@
     height: 100%;
     border: 0;
     background: #0c0d12;
-  }
-  .embed-tap {
-    position: absolute;
-    inset: 0;
-    z-index: 3;
-    border: 0;
-    padding: 0;
-    background: transparent;
-    cursor: pointer;
+    pointer-events: auto;
   }
 
   .link-fallback {
@@ -318,6 +310,14 @@
     box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.28);
   }
 
+  .card-content {
+    pointer-events: none;
+  }
+  .card-content a,
+  .card-content button {
+    pointer-events: auto;
+  }
+
   .video-title {
     font-size: clamp(18px, 4.4vw, 22px);
     font-weight: 700;
@@ -361,6 +361,7 @@
     flex-direction: column;
     gap: 12px;
     z-index: 5;
+    pointer-events: none;
   }
   .rail button {
     width: 46px; height: 46px;
@@ -376,6 +377,7 @@
     cursor: pointer;
     box-shadow: 0 8px 20px -12px rgba(17, 24, 39, 0.4);
     transition: transform .15s ease, border-color .2s ease, color .2s ease, background .2s ease;
+    pointer-events: auto;
   }
   .rail button:hover { border-color: var(--accent-indigo); color: var(--accent-indigo); }
   .rail button:active { transform: scale(0.92); }
