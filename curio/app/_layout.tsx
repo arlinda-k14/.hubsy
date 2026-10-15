@@ -13,6 +13,7 @@ export default function RootLayout() {
           <Stack screenOptions={{ headerShown: false }}>
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="sign-in" options={{ presentation: "modal" }} />
+            <Stack.Screen name="login" options={{ headerShown: false }} />
             <Stack.Screen name="onboarding/topics" options={{ presentation: "modal" }} />
             <Stack.Screen
               name="comments/[id]"

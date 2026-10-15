@@ -9,7 +9,7 @@ import {
   TextInput,
   View,
 } from "react-native";
-import { useAuth } from "../src/lib/auth";
+import { useAuth, isValidEmail, authErrorText } from "../src/lib/auth";
 
 export default function SignInScreen() {
   const { signInGoogle, signInApple, signInGitHub, sendMagicLink } = useAuth();
@@ -26,10 +26,24 @@ export default function SignInScreen() {
       await fn();
       after?.();
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong.");
+      setError(authErrorText(e));
     } finally {
       setBusy(null);
     }
+  };
+
+  const submitMagicLink = () => {
+    const trimmed = email.trim();
+    if (!isValidEmail(trimmed)) {
+      setMessage("");
+      setError("Please enter a valid email address");
+      return;
+    }
+    void run(
+      "email",
+      () => sendMagicLink(trimmed),
+      () => setMessage("Check your inbox for a sign-in link."),
+    );
   };
 
   return (
@@ -86,14 +100,19 @@ export default function SignInScreen() {
         style={styles.input}
         placeholder="you@example.com"
         autoCapitalize="none"
+        autoCorrect={false}
         keyboardType="email-address"
+        textContentType="emailAddress"
+        autoComplete="email"
+        returnKeyType="go"
         value={email}
         onChangeText={setEmail}
+        onSubmitEditing={submitMagicLink}
       />
       <Pressable
         style={styles.btn}
-        onPress={() => run("email", () => sendMagicLink(email.trim()), () => setMessage("Check your inbox for a sign-in link."))}
-        disabled={!!busy || !email.trim()}
+        onPress={submitMagicLink}
+        disabled={!!busy}
       >
         {busy === "email" ? (
           <ActivityIndicator color="#111827" />
