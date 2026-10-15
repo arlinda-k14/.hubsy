@@ -31,6 +31,17 @@ const SOCIAL = {
   tiktok: { name: "TikTok", cta: "Watch on TikTok", icon: ICONS.tiktok },
 };
 
+// Open video-stream resolver (Cobalt API).
+// The public instance now requires an API key and its Cloudflare layer is
+// unreliable from the browser, so point `endpoint` at a self-hosted instance
+// (or add your own proxy) and set `apiKey` when the instance needs one.
+// Resolution failures fall back to the social-preview card, never a black frame.
+const COBALT = {
+  endpoint: "https://api.cobalt.tools/",
+  apiKey: "",
+  timeout: 12000,
+};
+
 const feed = document.getElementById("feed");
 const authBtn = document.getElementById("authBtn");
 const adminBtn = document.getElementById("adminBtn");
@@ -263,9 +274,10 @@ function buildCard(v) {
     card.appendChild(buildPlayBadge());
     card.appendChild(buildScrim());
   } else if (media.type === "instagram" || media.type === "tiktok") {
-    card.appendChild(buildSocialPreview(v, media.type, media.original));
+    card.appendChild(buildLoadingShell());
     card.appendChild(buildContent(v, true));
     card.appendChild(buildRail(v));
+    hydrateStream(card, v, media);
     return card;
   } else if (media.type === "unknown") {
     card.appendChild(buildLinkFallback(media.original));
@@ -277,6 +289,91 @@ function buildCard(v) {
   card.appendChild(buildContent(v));
   card.appendChild(buildRail(v));
   return card;
+}
+
+/* Resolve a social link to a direct stream, then swap the card to a native
+   <video>. Falls back to the outbound social-preview card on any failure. */
+async function hydrateStream(card, v, media) {
+  let src = "";
+  try {
+    src = await resolveStream(media.original);
+  } catch {
+    src = "";
+  }
+
+  card.innerHTML = "";
+
+  if (src) {
+    card.dataset.type = "video";
+    card.classList.add("paused");
+    card.append(
+      buildVideo(src, card),
+      buildPlayToggle(card),
+      buildPlayBadge(),
+      buildScrim(),
+      buildContent(v),
+      buildRail(v),
+    );
+  } else {
+    card.dataset.type = media.type;
+    card.classList.remove("paused");
+    card.append(
+      buildSocialPreview(v, media.type, media.original),
+      buildContent(v, true),
+      buildRail(v),
+    );
+  }
+
+  // Re-observe so the freshly built media plays if the card is already in view.
+  cardObserver.unobserve(card);
+  cardObserver.observe(card);
+}
+
+/* POST the social URL to the Cobalt API and return a direct media URL.
+   Handles the v11 response shapes: redirect / tunnel / picker. */
+async function resolveStream(url) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), COBALT.timeout);
+
+  try {
+    const headers = { Accept: "application/json", "Content-Type": "application/json" };
+    if (COBALT.apiKey) headers.Authorization = `Api-Key ${COBALT.apiKey}`;
+
+    const res = await fetch(COBALT.endpoint, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({
+        url,
+        videoQuality: "720",
+        filenameStyle: "basic",
+        downloadMode: "auto",
+      }),
+      signal: controller.signal,
+    });
+
+    if (!res.ok) throw new Error(`Cobalt HTTP ${res.status}`);
+
+    const data = await res.json();
+    if (data.status === "error") throw new Error(data.error?.code || "cobalt error");
+
+    if (data.status === "picker" && Array.isArray(data.picker)) {
+      const pick = data.picker.find((p) => p.type === "video") || data.picker[0];
+      if (pick?.url) return pick.url;
+      throw new Error("no video in picker");
+    }
+
+    if (data.url) return data.url;
+    throw new Error("no stream url");
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function buildLoadingShell() {
+  const wrap = document.createElement("div");
+  wrap.className = "stream-loading";
+  wrap.innerHTML = `<div class="spinner"></div><span>Resolving video\u2026</span>`;
+  return wrap;
 }
 
 function buildSocialPreview(v, platform, url) {
