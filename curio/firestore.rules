@@ -1,0 +1,65 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isAdmin() {
+      return signedIn()
+        && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.isAdmin == true;
+    }
+
+    match /videos/{videoId} {
+      allow read: if resource.data.status == 'ready'
+        || (signedIn() && resource.data.authorUid == request.auth.uid)
+        || isAdmin();
+
+      // Video docs are created and finalised by Cloud Functions (admin SDK).
+      // The only client-side writes allowed are engagement counters.
+      allow create, delete: if false;
+      allow update: if signedIn()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'commentCount']);
+
+      match /comments/{commentId} {
+        allow read: if true;
+        allow create: if signedIn()
+          && request.resource.data.authorUid == request.auth.uid
+          && request.resource.data.text is string
+          && request.resource.data.text.size() > 0
+          && request.resource.data.text.size() <= 1000;
+        allow update: if signedIn()
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['pinned'])
+          && (resource.data.authorUid == request.auth.uid || isAdmin());
+        allow delete: if signedIn() && (resource.data.authorUid == request.auth.uid || isAdmin());
+      }
+
+      match /likes/{uid} {
+        allow read: if true;
+        allow create, delete: if signedIn() && uid == request.auth.uid;
+        allow update: if false;
+      }
+    }
+
+    match /users/{uid} {
+      allow read: if true;
+      allow create, update: if signedIn() && uid == request.auth.uid;
+
+      match /saves/{videoId} {
+        allow read, write: if signedIn() && uid == request.auth.uid;
+      }
+    }
+
+    match /reports/{reportId} {
+      allow create: if signedIn() && request.resource.data.reporterUid == request.auth.uid;
+      allow read, update, delete: if isAdmin();
+    }
+
+    match /collections/{collectionId} {
+      allow read: if true;
+      allow create, update, delete: if signedIn() && request.resource.data.ownerUid == request.auth.uid;
+    }
+  }
+}

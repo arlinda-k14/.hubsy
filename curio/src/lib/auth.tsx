@@ -11,6 +11,7 @@ import {
   signInWithEmailAndPassword,
   signInWithEmailLink,
   signInWithCredential,
+  signInWithPopup,
   signOut as fbSignOut,
   type User,
 } from "firebase/auth";
@@ -154,6 +155,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInGoogle = useCallback(async () => {
+    if (Platform.OS === "web") {
+      const provider = new GoogleAuthProvider();
+      provider.setCustomParameters({ prompt: "select_account" });
+      await signInWithPopup(curioAuth, provider);
+      return;
+    }
     await GoogleSignin.hasPlayServices({ showPlayServicesUpdateDialog: true });
     const res = await GoogleSignin.signIn();
     const idToken = res.data?.idToken;
@@ -163,6 +170,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInApple = useCallback(async () => {
+    if (Platform.OS === "web") {
+      const provider = new OAuthProvider("apple.com");
+      provider.addScope("email");
+      provider.addScope("name");
+      await signInWithPopup(curioAuth, provider);
+      return;
+    }
     const apple = await AppleAuthentication.signInAsync({
       requestedScopes: [
         AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
@@ -179,6 +193,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const signInGitHub = useCallback(async () => {
+    if (Platform.OS === "web") {
+      const provider = new GithubAuthProvider();
+      provider.addScope("read:user");
+      provider.addScope("user:email");
+      await signInWithPopup(curioAuth, provider);
+      return;
+    }
     const redirectUri = Linking.createURL("/oauth/github");
     const clientId = process.env.EXPO_PUBLIC_GITHUB_CLIENT_ID ?? "";
     const authUrl =

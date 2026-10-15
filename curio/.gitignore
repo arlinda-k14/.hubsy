@@ -13,3 +13,7 @@ web-build/
 *.mobileprovision
 ios/
 android/
+
+functions/node_modules/
+functions/lib/
+functions/.env

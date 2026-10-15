@@ -1,9 +1,18 @@
 import { createVideoPlayer, type VideoPlayer } from "expo-video";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { Platform } from "react-native";
 import type { Video } from "../types/models";
 import { ensureAudioSession, releaseAudioSession } from "../lib/audioSession";
 
 export type SlotRole = "current" | "next" | "prev" | "idle";
+
+// Browsers can't play Mux HLS without hls.js, so the web build uses the MP4
+// rendition; native uses HLS.
+function sourceFor(video: Video): string | null {
+  return Platform.OS === "web"
+    ? video.mp4Url ?? video.playbackUrl
+    : video.playbackUrl ?? video.mp4Url;
+}
 
 interface Slot {
   player: VideoPlayer;
@@ -96,7 +105,7 @@ export function usePlayerPool(videos: Video[]) {
         if (!slot || !video) return;
         slot.videoId = video.id;
         slot.role = roleForIndex(indexOfId(id));
-        slot.player.replace(video.playbackUrl ?? null);
+        slot.player.replace(sourceFor(video));
         slot.player.muted = true;
         slot.player.loop = true;
         void prebuffer(slot.player);
