@@ -24,6 +24,8 @@ const ICONS = {
   link: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>',
   instagram: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>',
   tiktok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 4c.5 2.5 2 4 4.5 4.3v3c-1.6 0-3-.5-4.3-1.4v6.3a5.6 5.6 0 1 1-5.6-5.6c.3 0 .6 0 .9.1v3.1a2.6 2.6 0 1 0 1.8 2.5V4H15Z"/></svg>',
+  volumeOn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>',
+  volumeOff: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="m16 9 5 6"/><path d="m21 9-5 6"/></svg>',
 };
 
 const SOCIAL = {
@@ -67,6 +69,8 @@ const adminCancel = document.getElementById("adminCancel");
 let currentUser = null;
 let videos = [];
 const bookmarks = new Set();
+let activeCard = null;
+let soundOn = false;
 let authMode = "signin";
 const cardObserver = new IntersectionObserver(onVisibility, { threshold: 0.6 });
 
@@ -287,7 +291,7 @@ function buildCard(v) {
   }
 
   card.appendChild(buildContent(v));
-  card.appendChild(buildRail(v));
+  card.appendChild(buildRail(v, media.type === "video"));
   return card;
 }
 
@@ -312,7 +316,7 @@ async function hydrateStream(card, v, media) {
       buildPlayBadge(),
       buildScrim(),
       buildContent(v),
-      buildRail(v),
+      buildRail(v, true),
     );
   } else {
     card.dataset.type = media.type;
@@ -409,7 +413,7 @@ function buildSocialPreview(v, platform, url) {
 function buildVideo(src, card) {
   const video = document.createElement("video");
   video.src = src;
-  video.muted = true;
+  video.muted = !soundOn; // muted by default so autoplay is allowed; unmuted once the user has interacted
   video.loop = true;
   video.playsInline = true;
   video.preload = "metadata";
@@ -499,9 +503,19 @@ function buildContent(v, compact = false) {
   return content;
 }
 
-function buildRail(v) {
+function buildRail(v, withSound = false) {
   const rail = document.createElement("div");
   rail.className = "rail";
+
+  if (withSound) {
+    const snd = document.createElement("button");
+    snd.className = "sound-btn";
+    snd.type = "button";
+    snd.addEventListener("click", () => toggleSound());
+    paintSound(snd);
+    rail.appendChild(snd);
+  }
+
   const bm = document.createElement("button");
   bm.className = "bookmark-btn";
   bm.dataset.id = v.id;
@@ -510,6 +524,62 @@ function buildRail(v) {
   rail.appendChild(bm);
   return rail;
 }
+
+/* ---------------- Sound ---------------- */
+
+function toggleSound() {
+  soundOn = !soundOn;
+  applySound();
+  disableFirstClick();
+}
+
+function applySound() {
+  feed.querySelectorAll("video").forEach((video) => {
+    video.muted = !soundOn;
+  });
+  updateSoundButtons();
+}
+
+function updateSoundButtons() {
+  feed.querySelectorAll(".sound-btn").forEach((btn) => paintSound(btn));
+}
+
+function paintSound(btn) {
+  btn.innerHTML = soundOn ? ICONS.volumeOn : ICONS.volumeOff;
+  btn.classList.toggle("active", soundOn);
+  btn.setAttribute("aria-label", soundOn ? "Mute" : "Unmute");
+  btn.setAttribute("title", soundOn ? "Mute" : "Unmute");
+}
+
+/* ---------------- First-click audio opt-in ---------------- */
+
+function onFirstClick(e) {
+  const target = e.target;
+
+  // The sound button owns its own toggle; don't pre-empt it.
+  if (target && target.closest && target.closest(".sound-btn")) {
+    disableFirstClick();
+    return;
+  }
+
+  soundOn = true;
+  applySound();
+
+  // Ignore the tap-to-pause overlay so its own handler isn't fought.
+  const onPlayControl = target && target.closest && target.closest(".play-toggle");
+  if (!onPlayControl) {
+    const video = activeCard?.querySelector("video") || feed.querySelector("video");
+    if (video) video.play().catch(() => {});
+  }
+
+  disableFirstClick();
+}
+
+function disableFirstClick() {
+  window.removeEventListener("click", onFirstClick, true);
+}
+
+window.addEventListener("click", onFirstClick, true);
 
 function togglePlay(card) {
   const video = card.querySelector("video");
@@ -529,7 +599,9 @@ function onVisibility(entries) {
     const frame = card.querySelector(".embed-frame");
 
     if (entry.isIntersecting) {
+      activeCard = card;
       if (video) {
+        video.muted = !soundOn;
         video.play().then(() => card.classList.remove("paused")).catch(() => card.classList.add("paused"));
         clearTimeout(card._idle);
         card._idle = setTimeout(() => video.pause(), 60000);
