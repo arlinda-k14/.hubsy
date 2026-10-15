@@ -4,14 +4,22 @@ let configured = false;
 
 export async function ensureAudioSession() {
   if (configured) return;
-  await setAudioModeAsync({
-    playsInSilentMode: true,
-    interruptionMode: "mixWithOthers",
-    shouldPlayInBackground: false,
-  });
+  try {
+    await setAudioModeAsync({
+      playsInSilentMode: true,
+      interruptionMode: "mixWithOthers",
+      shouldPlayInBackground: false,
+    });
+  } catch {
+    return;
+  }
   configured = true;
 }
 
 export async function releaseAudioSession() {
-  await setAudioModeAsync({ interruptionMode: "doNotMix" });
+  try {
+    await setAudioModeAsync({ interruptionMode: "doNotMix" });
+  } catch {
+    return;
+  }
 }
