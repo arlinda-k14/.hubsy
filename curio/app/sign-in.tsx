@@ -26,10 +26,22 @@ export default function SignInScreen() {
       await fn();
       after?.();
     } catch (e) {
+      console.error(`[auth] ${key} sign-in failed:`, e);
       setError(authErrorText(e));
     } finally {
       setBusy(null);
     }
+  };
+
+  // Web buttons render as DOM nodes in react-native-web; swallow the default
+  // action and never forward the raw event into the Firebase call.
+  const handleProvider = (
+    e: { preventDefault?: () => void } | undefined,
+    key: string,
+    fn: () => Promise<void>,
+  ) => {
+    e?.preventDefault?.();
+    void run(key, () => fn(), () => router.replace("/onboarding/topics"));
   };
 
   const submitMagicLink = () => {
@@ -59,7 +71,7 @@ export default function SignInScreen() {
 
       <Pressable
         style={[styles.btn, styles.github]}
-        onPress={() => run("github", signInGitHub, () => router.replace("/onboarding/topics"))}
+        onPress={(e) => handleProvider(e, "github", signInGitHub)}
         disabled={!!busy}
       >
         {busy === "github" ? (
@@ -74,7 +86,7 @@ export default function SignInScreen() {
 
       <Pressable
         style={styles.btn}
-        onPress={() => run("google", signInGoogle, () => router.replace("/onboarding/topics"))}
+        onPress={(e) => handleProvider(e, "google", signInGoogle)}
         disabled={!!busy}
       >
         <Ionicons name="logo-google" size={18} color="#111827" />
@@ -83,7 +95,7 @@ export default function SignInScreen() {
 
       <Pressable
         style={styles.btn}
-        onPress={() => run("apple", signInApple, () => router.replace("/onboarding/topics"))}
+        onPress={(e) => handleProvider(e, "apple", signInApple)}
         disabled={!!busy}
       >
         <Ionicons name="logo-apple" size={20} color="#111827" />
