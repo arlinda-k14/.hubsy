@@ -245,7 +245,7 @@ function parseMediaUrl(rawUrl) {
 }
 
 function youtubeEmbed(id) {
-  return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&loop=1&playlist=${id}&playsinline=1&rel=0&modestbranding=1`;
+  return `https://www.youtube.com/embed/${id}?enablejsapi=1&autoplay=1&mute=0&playsinline=1`;
 }
 
 /* ---------------- Feed ---------------- */
@@ -288,10 +288,23 @@ function buildCard(v) {
   } else {
     card.appendChild(buildEmbed(media));
     card.appendChild(buildScrim());
+    if (media.type === "youtube") {
+      card.addEventListener("click", (e) => {
+        if (e.target.closest && e.target.closest(".rail")) return;
+        e.stopPropagation();
+        const frame = card.querySelector(".embed-frame");
+        soundOn = true;
+        ytUnmute(frame);
+        updateSoundButtons();
+        disableFirstClick();
+      });
+    }
   }
 
+  const soundKind =
+    media.type === "video" ? "video" : media.type === "youtube" ? "youtube" : false;
   card.appendChild(buildContent(v));
-  card.appendChild(buildRail(v, media.type === "video"));
+  card.appendChild(buildRail(v, soundKind));
   return card;
 }
 
@@ -316,7 +329,7 @@ async function hydrateStream(card, v, media) {
       buildPlayBadge(),
       buildScrim(),
       buildContent(v),
-      buildRail(v, true),
+      buildRail(v, "video"),
     );
   } else {
     card.dataset.type = media.type;
@@ -433,11 +446,38 @@ function buildEmbed(media) {
   frame.dataset.src = media.embedUrl; // loaded only when the card is in view
   frame.title = `Embedded ${media.type} clip`;
   frame.loading = "lazy";
-  frame.setAttribute("allow", "autoplay; encrypted-media; picture-in-picture; fullscreen; clipboard-write");
+  frame.setAttribute(
+    "allow",
+    "accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share",
+  );
   frame.setAttribute("allowfullscreen", "");
   frame.setAttribute("scrolling", "no");
   frame.setAttribute("frameborder", "0");
   shell.appendChild(frame);
+
+  if (media.type === "youtube") {
+    // Re-apply the current sound state once the player has loaded.
+    frame.addEventListener("load", () => {
+      if (soundOn) ytUnmute(frame);
+    });
+
+    // Transparent first-tap layer: sends unMute + playVideo, then steps aside
+    // so the YouTube player's own controls become interactive.
+    const tap = document.createElement("button");
+    tap.className = "embed-tap";
+    tap.type = "button";
+    tap.setAttribute("aria-label", "Play and unmute video");
+    tap.addEventListener("click", (e) => {
+      e.stopPropagation();
+      soundOn = true;
+      ytUnmute(frame);
+      updateSoundButtons();
+      disableFirstClick();
+      tap.remove();
+    });
+    shell.appendChild(tap);
+  }
+
   return shell;
 }
 
@@ -503,15 +543,20 @@ function buildContent(v, compact = false) {
   return content;
 }
 
-function buildRail(v, withSound = false) {
+function buildRail(v, sound = false) {
   const rail = document.createElement("div");
   rail.className = "rail";
 
-  if (withSound) {
+  if (sound) {
     const snd = document.createElement("button");
     snd.className = "sound-btn";
     snd.type = "button";
-    snd.addEventListener("click", () => toggleSound());
+    snd.dataset.kind = sound; // "video" | "youtube"
+    snd.addEventListener("click", (e) => {
+      e.stopPropagation();
+      e.preventDefault();
+      toggleSound();
+    });
     paintSound(snd);
     rail.appendChild(snd);
   }
@@ -519,6 +564,7 @@ function buildRail(v, withSound = false) {
   const bm = document.createElement("button");
   bm.className = "bookmark-btn";
   bm.dataset.id = v.id;
+  bm.addEventListener("click", (e) => e.stopPropagation());
   bm.addEventListener("click", () => toggleBookmark(v.id, bm));
   paintBookmark(bm, v.id);
   rail.appendChild(bm);
@@ -526,6 +572,20 @@ function buildRail(v, withSound = false) {
 }
 
 /* ---------------- Sound ---------------- */
+
+function ytPost(frame, func) {
+  if (!frame || !frame.contentWindow) return;
+  frame.contentWindow.postMessage(`{"event":"command","func":"${func}","args":""}`, "*");
+}
+
+function ytUnmute(frame) {
+  ytPost(frame, "unMute");
+  ytPost(frame, "playVideo");
+}
+
+function ytMute(frame) {
+  ytPost(frame, "mute");
+}
 
 function toggleSound() {
   soundOn = !soundOn;
@@ -536,6 +596,10 @@ function toggleSound() {
 function applySound() {
   feed.querySelectorAll("video").forEach((video) => {
     video.muted = !soundOn;
+  });
+  feed.querySelectorAll(".embed-frame").forEach((frame) => {
+    if (soundOn) ytUnmute(frame);
+    else ytMute(frame);
   });
   updateSoundButtons();
 }
@@ -568,7 +632,7 @@ function onFirstClick(e) {
   // Ignore the tap-to-pause overlay so its own handler isn't fought.
   const onPlayControl = target && target.closest && target.closest(".play-toggle");
   if (!onPlayControl) {
-    const video = activeCard?.querySelector("video") || feed.querySelector("video");
+    const video = activeCard?.querySelector("video");
     if (video) video.play().catch(() => {});
   }
 
@@ -582,6 +646,18 @@ function disableFirstClick() {
 window.addEventListener("click", onFirstClick, true);
 
 function togglePlay(card) {
+  const frame = card.querySelector(".embed-frame");
+  if (frame) {
+    if (card.classList.contains("paused")) {
+      ytPost(frame, "playVideo");
+      card.classList.remove("paused");
+    } else {
+      ytPost(frame, "pauseVideo");
+      card.classList.add("paused");
+    }
+    return;
+  }
+
   const video = card.querySelector("video");
   if (!video) return;
   if (video.paused) {
