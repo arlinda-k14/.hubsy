@@ -245,7 +245,7 @@ function parseMediaUrl(rawUrl) {
 }
 
 function youtubeEmbed(id) {
-  return `https://www.youtube.com/embed/${id}?autoplay=1&mute=0&controls=1&playsinline=1&enablejsapi=1`;
+  return `https://www.youtube.com/embed/${id}?autoplay=1&mute=1&controls=1&playsinline=1&enablejsapi=1`;
 }
 
 /* ---------------- Feed ---------------- */
@@ -668,6 +668,17 @@ function onVisibility(entries) {
       }
       if (frame && frame.dataset.src && frame.getAttribute("src") !== frame.dataset.src) {
         frame.src = frame.dataset.src;
+        const handle = () => {
+          if (soundOn) ytUnmute(frame);
+          else ytPost(frame, "mute");
+          ytPost(frame, "playVideo");
+          frame.removeEventListener("load", handle);
+        };
+        frame.addEventListener("load", handle);
+      } else if (frame && frame.getAttribute("src") && frame.getAttribute("src") !== "about:blank") {
+        // Already loaded, ensure it plays
+        if (soundOn) ytUnmute(frame);
+        ytPost(frame, "playVideo");
       }
     } else {
       if (video) {
