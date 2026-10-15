@@ -1,7 +1,6 @@
-import { useMemo } from "react";
-import { StyleSheet, View } from "react-native";
-import { WebView } from "react-native-webview";
-import type { Platform, Video } from "../types/models";
+import { createElement, useMemo } from "react";
+import { Platform, StyleSheet, View } from "react-native";
+import type { Platform as PlatformName, Video } from "../types/models";
 
 function youtubeId(url: string): string | null {
   try {
@@ -23,29 +22,42 @@ interface Props {
 }
 
 export function EmbedPlayer({ video, muted, active }: Props) {
-  const platform: Platform = video.platform;
+  const platform: PlatformName = video.platform;
 
-  const html = useMemo(() => {
+  const src = useMemo(() => {
     const muteParam = muted ? 1 : 0;
     if (platform === "youtube" && video.originalUrl) {
       const id = youtubeId(video.originalUrl);
       if (!id) return null;
-      return iframeHtml(
-        `https://www.youtube.com/embed/${id}?autoplay=1&mute=${muteParam}&controls=0&playsinline=1&loop=1&playlist=${id}&modestbranding=1&rel=0`,
-      );
+      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=${muteParam}&controls=0&playsinline=1&loop=1&playlist=${id}&modestbranding=1&rel=0`;
     }
     return null;
   }, [platform, video.originalUrl, muted]);
 
-  if (!html) {
+  if (!src) {
     return <View style={styles.fill} />;
   }
 
+  if (Platform.OS === "web") {
+    return (
+      <View style={styles.fill} pointerEvents={active ? "auto" : "none"}>
+        {createElement("iframe", {
+          src,
+          allow: "autoplay; encrypted-media; picture-in-picture",
+          allowFullScreen: true,
+          frameBorder: 0,
+          style: { width: "100%", height: "100%", border: 0 },
+        })}
+      </View>
+    );
+  }
+
+  const WebView = require("react-native-webview").WebView;
   return (
     <View style={styles.fill} pointerEvents={active ? "auto" : "none"}>
       <WebView
         originWhitelist={["*"]}
-        source={{ html }}
+        source={{ uri: src }}
         style={styles.fill}
         allowsInlineMediaPlayback
         mediaPlaybackRequiresUserAction={false}
@@ -55,14 +67,6 @@ export function EmbedPlayer({ video, muted, active }: Props) {
       />
     </View>
   );
-}
-
-function iframeHtml(src: string) {
-  return `<!DOCTYPE html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1"></head>
-<body style="margin:0;background:#000;overflow:hidden">
-<iframe src="${src}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen frameborder="0"
- style="position:fixed;inset:0;width:100%;height:100%"></iframe>
-</body></html>`;
 }
 
 const styles = StyleSheet.create({

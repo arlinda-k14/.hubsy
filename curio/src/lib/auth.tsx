@@ -2,6 +2,7 @@ import {
   GithubAuthProvider,
   GoogleAuthProvider,
   OAuthProvider,
+  browserLocalPersistence,
   createUserWithEmailAndPassword,
   getReactNativePersistence,
   initializeAuth,
@@ -19,6 +20,7 @@ import * as SecureStore from "expo-secure-store";
 import * as Linking from "expo-linking";
 import * as WebBrowser from "expo-web-browser";
 import { GoogleSignin } from "@react-native-google-signin/google-signin";
+import { Platform } from "react-native";
 import {
   createContext,
   useCallback,
@@ -28,17 +30,30 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { auth, db } from "./firebase";
+import { app, db } from "./firebase";
 import type { UserProfile } from "../types/models";
 
-const securePersistence = getReactNativePersistence({
+const webStorage = {
+  getItem: async (key: string) => window.localStorage.getItem(key),
+  setItem: async (key: string, value: string) => {
+    window.localStorage.setItem(key, value);
+  },
+  removeItem: async (key: string) => {
+    window.localStorage.removeItem(key);
+  },
+};
+
+const nativeStorage = {
   getItem: (key: string) => SecureStore.getItemAsync(key),
   setItem: (key: string, value: string) => SecureStore.setItemAsync(key, value),
   removeItem: (key: string) => SecureStore.deleteItemAsync(key),
-});
+};
 
-export const curioAuth = initializeAuth(auth.app, {
-  persistence: securePersistence,
+export const appStorage = Platform.OS === "web" ? webStorage : nativeStorage;
+
+export const curioAuth = initializeAuth(app, {
+  persistence:
+    Platform.OS === "web" ? browserLocalPersistence : getReactNativePersistence(appStorage),
 });
 
 const ACTION_CODE_SETTINGS = {
@@ -48,10 +63,12 @@ const ACTION_CODE_SETTINGS = {
   androidPackageName: "app.curio.kos",
 };
 
-GoogleSignin.configure({
-  webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? "",
-  offlineAccess: false,
-});
+if (Platform.OS !== "web") {
+  GoogleSignin.configure({
+    webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? "",
+    offlineAccess: false,
+  });
+}
 
 interface AuthContextValue {
   user: User | null;
@@ -125,15 +142,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const sendMagicLink = useCallback(async (email: string) => {
     await sendSignInLinkToEmail(curioAuth, email, ACTION_CODE_SETTINGS);
-    await SecureStore.setItemAsync("magic_email", email);
+    await appStorage.setItem("magic_email", email);
   }, []);
 
   const completeMagicLink = useCallback(async (url: string) => {
     if (!url) return;
-    const email = (await SecureStore.getItemAsync("magic_email")) ?? "";
+    const email = (await appStorage.getItem("magic_email")) ?? "";
     if (!email) throw new Error("Open the link from the same device that requested it.");
     await signInWithEmailLink(curioAuth, email, url);
-    await SecureStore.deleteItemAsync("magic_email");
+    await appStorage.removeItem("magic_email");
   }, []);
 
   const signInGoogle = useCallback(async () => {
