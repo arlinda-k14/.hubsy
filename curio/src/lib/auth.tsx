@@ -64,6 +64,55 @@ const ACTION_CODE_SETTINGS = {
   androidPackageName: "app.curio.kos",
 };
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+export function isValidEmail(value: string): boolean {
+  return EMAIL_RE.test(value.trim());
+}
+
+// Turns a raw Firebase/popup error into something a person can read, instead of
+// leaking "Firebase: Error (auth/...)".
+export function authErrorText(e: unknown): string {
+  const code = (e as { code?: string } | null)?.code ?? "";
+  switch (code) {
+    case "auth/invalid-email":
+    case "auth/missing-email":
+      return "Please enter a valid email address";
+    case "auth/invalid-credential":
+    case "auth/wrong-password":
+    case "auth/user-not-found":
+      return "That email and password don’t match.";
+    case "auth/email-already-in-use":
+      return "That email already has an account — try signing in instead.";
+    case "auth/weak-password":
+      return "Please choose a stronger password.";
+    case "auth/unauthorized-continue-uri":
+      return "This sign-in link isn’t authorized for this domain yet.";
+    case "auth/popup-closed-by-user":
+    case "auth/cancelled-popup-request":
+    case "auth/user-cancelled":
+      return "Sign-in was cancelled.";
+    case "auth/popup-blocked":
+      return "Your browser blocked the sign-in window. Allow pop-ups and try again.";
+    case "auth/operation-not-allowed":
+      return "That sign-in method isn’t enabled yet.";
+    case "auth/account-exists-with-different-credential":
+      return "An account already exists with this email using a different sign-in method.";
+    case "auth/too-many-requests":
+      return "Too many attempts. Please try again in a moment.";
+    case "auth/network-request-failed":
+      return "Network error. Check your connection and try again.";
+    default: {
+      const msg = e instanceof Error ? e.message : "";
+      const cleaned = msg
+        .replace(/^Firebase:\s*/i, "")
+        .replace(/\s*\(auth\/[^)]+\)\.?$/, "")
+        .trim();
+      return cleaned || "Something went wrong. Please try again.";
+    }
+  }
+}
+
 if (Platform.OS !== "web") {
   GoogleSignin.configure({
     webClientId: process.env.EXPO_PUBLIC_GOOGLE_WEB_CLIENT_ID ?? "",
@@ -142,8 +191,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const sendMagicLink = useCallback(async (email: string) => {
-    await sendSignInLinkToEmail(curioAuth, email, ACTION_CODE_SETTINGS);
-    await appStorage.setItem("magic_email", email);
+    const trimmed = email.trim();
+    if (!isValidEmail(trimmed)) throw new Error("Please enter a valid email address");
+    await sendSignInLinkToEmail(curioAuth, trimmed, ACTION_CODE_SETTINGS);
+    await appStorage.setItem("magic_email", trimmed);
   }, []);
 
   const completeMagicLink = useCallback(async (url: string) => {
