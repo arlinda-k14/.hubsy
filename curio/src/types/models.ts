@@ -36,7 +36,9 @@ export interface Video {
   originalTitle: string | null;
   title: string;
   mediaAssetId: string | null;
+  muxUploadId: string | null;
   playbackUrl: string | null;
+  mp4Url: string | null;
   posterUrl: string | null;
   status: VideoStatus;
   tags: string[];

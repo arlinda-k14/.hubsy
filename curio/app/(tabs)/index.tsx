@@ -131,8 +131,16 @@ export default function FeedScreen() {
                 soundEnabled={soundEnabled}
                 liked={!!liked[item.id]}
                 saved={!!saved[item.id]}
+                likeCount={item.likeCount ?? 0}
+                commentCount={item.commentCount ?? 0}
                 onLike={() => toggleLike(item.id)}
-                onComment={() => requireAuth() && router.push(`/comments/${item.id}`)}
+                onComment={() =>
+                  requireAuth() &&
+                  router.push({
+                    pathname: "/comments/[id]",
+                    params: { id: item.id, authorUid: item.authorUid ?? "" },
+                  })
+                }
                 onSave={() => toggleSave(item.id)}
                 onReport={() => report(item.id)}
                 onShare={() => requireAuth()}

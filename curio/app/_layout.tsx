@@ -14,6 +14,15 @@ export default function RootLayout() {
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="sign-in" options={{ presentation: "modal" }} />
             <Stack.Screen name="onboarding/topics" options={{ presentation: "modal" }} />
+            <Stack.Screen
+              name="comments/[id]"
+              options={{
+                presentation: "transparentModal",
+                animation: "slide_from_bottom",
+                headerShown: false,
+                contentStyle: { backgroundColor: "transparent" },
+              }}
+            />
           </Stack>
         </AuthProvider>
       </SafeAreaProvider>

@@ -25,6 +25,8 @@ interface Props {
   soundEnabled: boolean;
   liked: boolean;
   saved: boolean;
+  likeCount: number;
+  commentCount: number;
   onLike: () => void;
   onComment: () => void;
   onSave: () => void;
@@ -39,6 +41,8 @@ export function VideoCard({
   soundEnabled,
   liked,
   saved,
+  likeCount,
+  commentCount,
   onLike,
   onComment,
   onSave,
@@ -100,8 +104,8 @@ export function VideoCard({
       </View>
 
       <View style={styles.rail}>
-        <RailButton icon={liked ? "heart" : "heart-outline"} active={liked} onPress={onLike} />
-        <RailButton icon="chatbubble-outline" onPress={onComment} />
+        <RailButton icon={liked ? "heart" : "heart-outline"} active={liked} count={likeCount} onPress={onLike} />
+        <RailButton icon="chatbubble-outline" count={commentCount} onPress={onComment} />
         <RailButton icon={saved ? "bookmark" : "bookmark-outline"} active={saved} onPress={onSave} />
         <RailButton icon="share-outline" onPress={onShare} />
         <RailButton icon="flag-outline" onPress={onReport} />
@@ -113,15 +117,22 @@ export function VideoCard({
 function RailButton({
   icon,
   active,
+  count,
   onPress,
 }: {
   icon: keyof typeof Ionicons.glyphMap;
   active?: boolean;
+  count?: number;
   onPress: () => void;
 }) {
   return (
     <Pressable onPress={onPress} style={[styles.railBtn, active && styles.railBtnActive]} hitSlop={8}>
       <Ionicons name={icon} size={23} color={active ? "#fff" : "#111827"} />
+      {count && count > 0 ? (
+        <Text style={[styles.railCount, active && styles.railCountActive]}>
+          {count > 999 ? `${Math.floor(count / 1000)}k` : count}
+        </Text>
+      ) : null}
     </Pressable>
   );
 }
@@ -159,12 +170,15 @@ const styles = StyleSheet.create({
   tag: { color: "#c7d2fe", fontSize: 13, fontWeight: "600" },
   rail: { position: "absolute", right: 12, bottom: 40, gap: 12, alignItems: "center" },
   railBtn: {
-    width: 46,
+    minWidth: 46,
     height: 46,
     borderRadius: 23,
+    paddingHorizontal: 8,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: "rgba(255,255,255,0.92)",
   },
   railBtnActive: { backgroundColor: "#5046e5" },
+  railCount: { fontSize: 10, fontWeight: "800", color: "#111827", marginTop: 1 },
+  railCountActive: { color: "#fff" },
 });
