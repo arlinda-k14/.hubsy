@@ -1,0 +1,34 @@
+{
+  "expo": {
+    "name": "Curio",
+    "slug": "curio",
+    "scheme": "curio",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "ios": {
+      "bundleIdentifier": "app.curio.kos",
+      "supportsTablet": false,
+      "infoPlist": {
+        "NSCameraUsageDescription": "Curio uses the camera so you can record clips to share.",
+        "NSPhotoLibraryUsageDescription": "Curio needs access to your photos so you can upload videos.",
+        "NSPhotoLibraryAddUsageDescription": "Curio saves processed clips back to your library."
+      }
+    },
+    "android": {
+      "package": "app.curio.kos",
+      "permissions": ["CAMERA", "READ_MEDIA_VIDEO", "RECORD_AUDIO"]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-secure-store",
+      "expo-video",
+      "expo-image-picker",
+      "expo-camera"
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
