@@ -1,6 +1,6 @@
 import { createElement, useMemo } from "react";
-import { Platform, StyleSheet, View } from "react-native";
-import type { Video } from "../types/models";
+import { Image, Platform, StyleSheet, View } from "react-native";
+import type { Platform as VideoPlatform, Video } from "../types/models";
 
 function youtubeId(url: string): string | null {
   try {
@@ -14,6 +14,26 @@ function youtubeId(url: string): string | null {
     return null;
   }
 }
+
+// Third-party embeds ship their own UI chrome (Instagram's "View profile" header
+// and "View more on Instagram / Add a comment" footer, plus card side shadows).
+// We render the iframe larger than its frame and clip it, so only the vertical
+// video itself remains visible. Values are % of the frame box.
+interface Crop {
+  top: string;
+  left: string;
+  width: string;
+  height: string;
+}
+
+const FULL: Crop = { top: "0%", left: "0%", width: "100%", height: "100%" };
+
+const CROP: Record<VideoPlatform, Crop> = {
+  instagram: { top: "-8%", left: "-1.5%", width: "103%", height: "129%" },
+  tiktok: { top: "-4%", left: "-1%", width: "102%", height: "110%" },
+  youtube: FULL,
+  curio: FULL,
+};
 
 interface Props {
   video: Video;
@@ -40,19 +60,35 @@ export function EmbedPlayer({ video, muted, active }: Props) {
     return null;
   }, [video.embedUrl, video.originalUrl, video.platform, video.platformVideoId, muted]);
 
-  if (!src) {
-    return <View style={styles.fill} />;
+  const poster = video.posterUrl ? (
+    <Image source={{ uri: video.posterUrl }} style={styles.poster} resizeMode="cover" />
+  ) : null;
+
+  // Strict single-playback: only the centered card mounts an embed. Everything
+  // else shows the poster, so no secondary iframe can ever autoplay.
+  if (!active || !src) {
+    return <View style={styles.frame}>{poster}</View>;
   }
+
+  const crop = CROP[video.platform] ?? FULL;
+  const cropStyle = {
+    position: "absolute" as const,
+    top: crop.top,
+    left: crop.left,
+    width: crop.width,
+    height: crop.height,
+    borderWidth: 0,
+  };
 
   if (Platform.OS === "web") {
     return (
-      <View style={styles.fill} pointerEvents={active ? "auto" : "none"}>
+      <View style={styles.frame}>
         {createElement("iframe", {
           src,
           allow: "autoplay; encrypted-media; picture-in-picture; clipboard-write",
           allowFullScreen: true,
           frameBorder: 0,
-          style: { width: "100%", height: "100%", border: 0 },
+          style: cropStyle,
         })}
       </View>
     );
@@ -60,11 +96,11 @@ export function EmbedPlayer({ video, muted, active }: Props) {
 
   const WebView = require("react-native-webview").WebView;
   return (
-    <View style={styles.fill} pointerEvents={active ? "auto" : "none"}>
+    <View style={styles.frame}>
       <WebView
         originWhitelist={["*"]}
         source={{ uri: src }}
-        style={styles.fill}
+        style={cropStyle}
         allowsInlineMediaPlayback
         mediaPlaybackRequiresUserAction={false}
         scrollEnabled={false}
@@ -76,5 +112,6 @@ export function EmbedPlayer({ video, muted, active }: Props) {
 }
 
 const styles = StyleSheet.create({
-  fill: { ...StyleSheet.absoluteFillObject, backgroundColor: "#0c0d12" },
+  frame: { ...StyleSheet.absoluteFillObject, overflow: "hidden", backgroundColor: "#0c0d12" },
+  poster: { width: "100%", height: "100%" },
 });
