@@ -3,6 +3,7 @@ import { VideoView, type VideoPlayer } from "expo-video";
 import { Image, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import type { Video } from "../types/models";
 import { EmbedPlayer } from "./EmbedPlayer";
+import { VideoPlaceholder } from "./VideoPlaceholder";
 import { Icon } from "./Icon";
 
 const PLATFORM_LABEL: Record<string, string> = {
@@ -86,7 +87,11 @@ export function VideoCard({
         />
       ) : (
         <View style={styles.media}>
-          {video.posterUrl ? <Image source={{ uri: video.posterUrl }} style={styles.poster} /> : null}
+          {video.posterUrl ? (
+            <Image source={{ uri: video.posterUrl }} style={styles.poster} />
+          ) : (
+            <VideoPlaceholder platform={video.platform} authorHandle={video.authorHandle} />
+          )}
         </View>
       )}
 
