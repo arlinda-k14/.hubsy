@@ -1,10 +1,10 @@
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import { collection, getDocs, limit, orderBy, query } from "firebase/firestore";
 import { db } from "../../src/lib/firebase";
 import { useAuth } from "../../src/lib/auth";
+import { Icon } from "../../src/components/Icon";
 
 interface SavedRow {
   id: string;
@@ -71,7 +71,7 @@ export default function ProfileScreen() {
       )}
 
       <Pressable style={styles.signout} onPress={signOut}>
-        <Ionicons name="log-out-outline" size={18} color="#dc2626" />
+        <Icon name="log-out-outline" size={18} color="#dc2626" />
         <Text style={styles.signoutText}>Sign out</Text>
       </Pressable>
     </ScrollView>

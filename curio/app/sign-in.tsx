@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useState } from "react";
 import {
@@ -10,6 +9,7 @@ import {
   View,
 } from "react-native";
 import { useAuth, isValidEmail, authErrorText } from "../src/lib/auth";
+import { Icon } from "../src/components/Icon";
 
 export default function SignInScreen() {
   const { signInGoogle, signInApple, signInGitHub, sendMagicLink } = useAuth();
@@ -78,7 +78,7 @@ export default function SignInScreen() {
           <ActivityIndicator color="#fff" />
         ) : (
           <>
-            <Ionicons name="logo-github" size={20} color="#fff" />
+            <Icon name="logo-github" size={20} color="#fff" />
             <Text style={styles.githubText}>Continue with GitHub</Text>
           </>
         )}
@@ -89,7 +89,7 @@ export default function SignInScreen() {
         onPress={(e) => handleProvider(e, "google", signInGoogle)}
         disabled={!!busy}
       >
-        <Ionicons name="logo-google" size={18} color="#111827" />
+        <Icon name="logo-google" size={18} color="#111827" />
         <Text style={styles.btnText}>Continue with Google</Text>
       </Pressable>
 
@@ -98,7 +98,7 @@ export default function SignInScreen() {
         onPress={(e) => handleProvider(e, "apple", signInApple)}
         disabled={!!busy}
       >
-        <Ionicons name="logo-apple" size={20} color="#111827" />
+        <Icon name="logo-apple" size={20} color="#111827" />
         <Text style={styles.btnText}>Continue with Apple</Text>
       </Pressable>
 

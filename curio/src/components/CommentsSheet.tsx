@@ -1,6 +1,6 @@
-import { Ionicons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
+import { Icon } from "./Icon";
 import {
   ActivityIndicator,
   Animated,
@@ -202,7 +202,7 @@ export function CommentsSheet({ videoId, videoAuthorUid, onClose }: Props) {
               <Text style={styles.headerCount}>{comments.length}</Text>
               <View style={styles.headerSpacer} />
               <Pressable onPress={close} hitSlop={10}>
-                <Ionicons name="close" size={24} color="#111827" />
+                <Icon name="close" size={24} color="#111827" />
               </Pressable>
             </View>
           </View>
@@ -234,7 +234,7 @@ export function CommentsSheet({ videoId, videoAuthorUid, onClose }: Props) {
                   Replying to @{replyTo.authorUsername}
                 </Text>
                 <Pressable onPress={() => setReplyTo(null)} hitSlop={8}>
-                  <Ionicons name="close-circle" size={18} color="#6b7280" />
+                  <Icon name="close-circle" size={18} color="#6b7280" />
                 </Pressable>
               </View>
             ) : null}
@@ -258,7 +258,7 @@ export function CommentsSheet({ videoId, videoAuthorUid, onClose }: Props) {
                 {posting ? (
                   <ActivityIndicator color="#fff" size="small" />
                 ) : (
-                  <Ionicons name={user ? "arrow-up" : "log-in-outline"} size={20} color="#fff" />
+                  <Icon name={user ? "arrow-up" : "log-in-outline"} size={20} color="#fff" />
                 )}
               </Pressable>
             </View>
@@ -297,7 +297,7 @@ function CommentRow({
       </View>
       <View style={styles.rowBody}>
         <View style={styles.rowMeta}>
-          {comment.pinned ? <Ionicons name="pin" size={12} color="#5046e5" /> : null}
+          {comment.pinned ? <Icon name="pin" size={12} color="#5046e5" /> : null}
           <Text style={styles.username}>@{comment.authorUsername}</Text>
           <Text style={styles.time}>{formatRelative(comment.createdAt)}</Text>
         </View>

@@ -1,4 +1,3 @@
-import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { router } from "expo-router";
 import { createElement, useEffect, useRef, useState } from "react";
@@ -16,6 +15,7 @@ import {
 import { collection, doc, serverTimestamp, setDoc } from "firebase/firestore";
 import { useAuth } from "../../src/lib/auth";
 import { FEED_CATEGORIES } from "../../src/lib/categories";
+import { Icon } from "../../src/components/Icon";
 import { db } from "../../src/lib/firebase";
 import { PLATFORM_LABEL, parseVideoLink } from "../../src/lib/linkParser";
 import { probeUploadBackend, startUpload, watchVideo } from "../../src/lib/upload";
@@ -93,7 +93,7 @@ function CreditsFields({
   return (
     <View style={styles.credits}>
       <View style={styles.creditsHeader}>
-        <Ionicons name="ribbon-outline" size={16} color="#5046e5" />
+        <Icon name="ribbon-outline" size={16} color="#5046e5" />
         <Text style={styles.creditsTitle}>Creator Credits</Text>
       </View>
       <Text style={styles.creditsSub}>
@@ -122,7 +122,7 @@ function CreditsFields({
 
       {preview ? (
         <View style={styles.badgePreview}>
-          <Ionicons name="person-circle" size={15} color="#0b1220" />
+          <Icon name="person-circle" size={15} color="#0b1220" />
           <Text style={styles.badgePreviewText}>Credited to {preview}</Text>
         </View>
       ) : null}
@@ -398,14 +398,14 @@ export default function CreateScreen() {
           style={[styles.segmentItem, mode === "link" && styles.segmentItemActive]}
           onPress={() => setMode("link")}
         >
-          <Ionicons name="link-outline" size={16} color={mode === "link" ? "#111827" : "#6b7280"} />
+          <Icon name="link-outline" size={16} color={mode === "link" ? "#111827" : "#6b7280"} />
           <Text style={[styles.segmentText, mode === "link" && styles.segmentTextActive]}>Paste Link</Text>
         </Pressable>
         <Pressable
           style={[styles.segmentItem, mode === "upload" && styles.segmentItemActive]}
           onPress={() => setMode("upload")}
         >
-          <Ionicons name="cloud-upload-outline" size={16} color={mode === "upload" ? "#111827" : "#6b7280"} />
+          <Icon name="cloud-upload-outline" size={16} color={mode === "upload" ? "#111827" : "#6b7280"} />
           <Text style={[styles.segmentText, mode === "upload" && styles.segmentTextActive]}>Upload File</Text>
         </Pressable>
       </View>
@@ -416,7 +416,7 @@ export default function CreateScreen() {
 
           {linkDone ? (
             <View style={styles.successCard}>
-              <Ionicons name="checkmark-circle" size={22} color="#16a34a" />
+              <Icon name="checkmark-circle" size={22} color="#16a34a" />
               <Text style={styles.successText}>“{linkDone}” is live in the feed.</Text>
               <Pressable style={styles.cta} onPress={() => router.replace("/(tabs)")}>
                 <Text style={styles.ctaText}>View feed</Text>
@@ -439,7 +439,7 @@ export default function CreateScreen() {
               {preview ? (
                 preview.ok ? (
                   <View style={styles.previewRow}>
-                    <Ionicons name="checkmark-circle" size={16} color="#16a34a" />
+                    <Icon name="checkmark-circle" size={16} color="#16a34a" />
                     <Text style={styles.previewText}>
                       {PLATFORM_LABEL[preview.value.platform]}
                       {preview.value.authorHandle ? ` · ${preview.value.authorHandle}` : ""}
@@ -487,7 +487,7 @@ export default function CreateScreen() {
 
           {backendReady === false ? (
             <View style={styles.notice}>
-              <Ionicons name="information-circle-outline" size={18} color="#92400e" />
+              <Icon name="information-circle-outline" size={18} color="#92400e" />
               <Text style={styles.noticeText}>
                 Direct file hosting requires Mux backend pipeline. Use “Paste Link” for external clips.
               </Text>
@@ -511,7 +511,7 @@ export default function CreateScreen() {
           ) : !picked ? (
             Platform.OS === "web" ? (
               <View style={styles.dropzone}>
-                <Ionicons name="cloud-upload-outline" size={30} color="#5046e5" />
+                <Icon name="cloud-upload-outline" size={30} color="#5046e5" />
                 <Text style={styles.pickerText}>Choose a video</Text>
                 <Text style={styles.pickerSub}>MP4 · 9:16 · under 100 MB</Text>
                 {createElement("input", {
@@ -531,7 +531,7 @@ export default function CreateScreen() {
               </View>
             ) : (
               <Pressable style={styles.dropzone} onPress={pickNative}>
-                <Ionicons name="cloud-upload-outline" size={30} color="#5046e5" />
+                <Icon name="cloud-upload-outline" size={30} color="#5046e5" />
                 <Text style={styles.pickerText}>Choose a video</Text>
                 <Text style={styles.pickerSub}>MP4 · 9:16 · under 100 MB</Text>
               </Pressable>
@@ -539,7 +539,7 @@ export default function CreateScreen() {
           ) : (
             <View style={styles.details}>
               <View style={styles.thumb}>
-                <Ionicons name="videocam-outline" size={28} color="#5046e5" />
+                <Icon name="videocam-outline" size={28} color="#5046e5" />
                 <Text style={styles.thumbText}>{Math.round(picked.durationMs / 1000)}s · 9:16</Text>
               </View>
               <TextInput
