@@ -29,7 +29,7 @@ interface Crop {
 const FULL: Crop = { top: "0%", left: "0%", width: "100%", height: "100%" };
 
 const CROP: Record<VideoPlatform, Crop> = {
-  instagram: { top: "-8%", left: "-1.5%", width: "103%", height: "129%" },
+  instagram: { top: "-12%", left: "-4%", width: "108%", height: "145%" },
   tiktok: { top: "-4%", left: "-1%", width: "102%", height: "110%" },
   youtube: FULL,
   curio: FULL,
@@ -78,6 +78,7 @@ export function EmbedPlayer({ video, muted, active }: Props) {
     width: crop.width,
     height: crop.height,
     borderWidth: 0,
+    pointerEvents: "auto" as const,
   };
 
   if (Platform.OS === "web") {

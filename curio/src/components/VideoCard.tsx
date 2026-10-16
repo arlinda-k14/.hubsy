@@ -3,6 +3,7 @@ import { VideoView, type VideoPlayer } from "expo-video";
 import { Image, Linking, Pressable, StyleSheet, Text, View } from "react-native";
 import type { Video } from "../types/models";
 import { EmbedPlayer } from "./EmbedPlayer";
+import { Icon } from "./Icon";
 
 const PLATFORM_LABEL: Record<string, string> = {
   youtube: "YouTube",
@@ -100,12 +101,12 @@ export function VideoCard({
           }}
           hitSlop={6}
         >
-          <Ionicons name="person-circle" size={16} color="#0b1220" />
+          <Icon name="person-circle" size={16} color="#0b1220" />
           <Text style={styles.creditText} numberOfLines={1}>
             Credited to {handle}
           </Text>
           <View style={styles.creditPlatform}>
-            <Ionicons
+            <Icon
               name={PLATFORM_ICON[video.platform] ?? "link-outline"}
               size={12}
               color="#312e81"
@@ -198,7 +199,7 @@ function RailButton({  icon,
       hitSlop={8}
       style={({ pressed }) => [styles.railBtn, pressed && styles.railBtnPressed]}
     >
-      <Ionicons name={icon} size={small ? 20 : 26} color={color} />
+      <Icon name={icon} size={small ? 20 : 26} color={color} />
       {count && count > 0 ? <Text style={styles.railCount}>{formatCount(count)}</Text> : null}
     </Pressable>
   );
