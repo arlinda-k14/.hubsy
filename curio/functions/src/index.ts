@@ -11,6 +11,8 @@ const MUX_API = "https://api.mux.com/video/v1";
 interface UploadRequest {
   title?: unknown;
   tags?: unknown;
+  creatorHandle?: unknown;
+  sourceLink?: unknown;
 }
 
 function authHeader(): string {
@@ -34,13 +36,21 @@ function normalizeTags(input: unknown): string[] {
 // Firestore video id the client should watch for status changes.
 export const createUpload = onCall(async (req) => {
   if (!req.auth) throw new HttpsError("unauthenticated", "Sign in to upload.");
-  const { title, tags } = (req.data ?? {}) as UploadRequest;
+  const { title, tags, creatorHandle, sourceLink } = (req.data ?? {}) as UploadRequest;
   const cleanTitle = typeof title === "string" ? title.trim().slice(0, 120) : "";
   if (!cleanTitle) throw new HttpsError("invalid-argument", "A title is required.");
 
   const uid = req.auth.uid;
   const profileSnap = await db.doc(`users/${uid}`).get();
-  const authorHandle = (profileSnap.data()?.username as string | undefined) ?? null;
+  const profileHandle = (profileSnap.data()?.username as string | undefined) ?? null;
+
+  // Prefer the explicit creator credit the user gave; fall back to their own handle.
+  const creditedHandle =
+    typeof creatorHandle === "string" && creatorHandle.trim()
+      ? creatorHandle.trim().slice(0, 60)
+      : profileHandle;
+  const creditedUrl =
+    typeof sourceLink === "string" && sourceLink.trim() ? sourceLink.trim().slice(0, 500) : null;
 
   const videoRef = db.collection("videos").doc();
   const videoId = videoRef.id;
@@ -69,9 +79,9 @@ export const createUpload = onCall(async (req) => {
     sourceType: "upload",
     platform: "curio",
     platformVideoId: null,
-    originalUrl: null,
+    originalUrl: creditedUrl,
     embedUrl: null,
-    authorHandle,
+    authorHandle: creditedHandle,
     authorUid: uid,
     originalTitle: null,
     title: cleanTitle,
