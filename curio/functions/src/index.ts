@@ -68,7 +68,9 @@ export const createUpload = onCall(async (req) => {
   await videoRef.set({
     sourceType: "upload",
     platform: "curio",
+    platformVideoId: null,
     originalUrl: null,
+    embedUrl: null,
     authorHandle,
     authorUid: uid,
     originalTitle: null,

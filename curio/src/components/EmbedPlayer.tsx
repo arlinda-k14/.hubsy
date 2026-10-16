@@ -1,6 +1,6 @@
 import { createElement, useMemo } from "react";
 import { Platform, StyleSheet, View } from "react-native";
-import type { Platform as PlatformName, Video } from "../types/models";
+import type { Video } from "../types/models";
 
 function youtubeId(url: string): string | null {
   try {
@@ -22,17 +22,23 @@ interface Props {
 }
 
 export function EmbedPlayer({ video, muted, active }: Props) {
-  const platform: PlatformName = video.platform;
-
   const src = useMemo(() => {
-    const muteParam = muted ? 1 : 0;
-    if (platform === "youtube" && video.originalUrl) {
+    if (video.embedUrl) {
+      if (video.platform === "youtube") {
+        const id = video.platformVideoId ?? youtubeId(video.embedUrl);
+        if (id) {
+          return `https://www.youtube.com/embed/${id}?autoplay=1&mute=${muted ? 1 : 0}&controls=0&playsinline=1&loop=1&playlist=${id}&modestbranding=1&rel=0`;
+        }
+      }
+      return video.embedUrl;
+    }
+    if (video.platform === "youtube" && video.originalUrl) {
       const id = youtubeId(video.originalUrl);
       if (!id) return null;
-      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=${muteParam}&controls=0&playsinline=1&loop=1&playlist=${id}&modestbranding=1&rel=0`;
+      return `https://www.youtube.com/embed/${id}?autoplay=1&mute=${muted ? 1 : 0}&controls=0&playsinline=1&loop=1&playlist=${id}&modestbranding=1&rel=0`;
     }
     return null;
-  }, [platform, video.originalUrl, muted]);
+  }, [video.embedUrl, video.originalUrl, video.platform, video.platformVideoId, muted]);
 
   if (!src) {
     return <View style={styles.fill} />;
@@ -43,7 +49,7 @@ export function EmbedPlayer({ video, muted, active }: Props) {
       <View style={styles.fill} pointerEvents={active ? "auto" : "none"}>
         {createElement("iframe", {
           src,
-          allow: "autoplay; encrypted-media; picture-in-picture",
+          allow: "autoplay; encrypted-media; picture-in-picture; clipboard-write",
           allowFullScreen: true,
           frameBorder: 0,
           style: { width: "100%", height: "100%", border: 0 },
