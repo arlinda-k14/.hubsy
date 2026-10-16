@@ -89,8 +89,8 @@ export function VideoCard({
         </View>
       )}
 
-      <View style={styles.topScrim} pointerEvents="none" />
-      <View style={styles.bottomScrim} pointerEvents="none" />
+      <Scrim side="top" />
+      <Scrim side="bottom" />
 
       {handle ? (
         <Pressable
@@ -132,13 +132,19 @@ export function VideoCard({
 
       <View style={styles.rail}>
         <RailButton
-          icon={liked ? "heart" : "heart-outline"}
-          color={liked ? "#ff4d6d" : "#fff"}
+          icon={liked ? "thumbs-up" : "thumbs-up-outline"}
+          color={liked ? "#a5b4fc" : "#fff"}
           count={likeCount}
           label="Like"
           onPress={onLike}
         />
-        <RailButton icon="chatbubble-outline" color="#fff" count={commentCount} label="Comment" onPress={onComment} />
+        <RailButton
+          icon="chatbubble-ellipses-outline"
+          color="#fff"
+          count={commentCount}
+          label="Comment"
+          onPress={onComment}
+        />
         <RailButton
           icon={saved ? "bookmark" : "bookmark-outline"}
           color={saved ? "#a5b4fc" : "#fff"}
@@ -146,14 +152,32 @@ export function VideoCard({
           onPress={onSave}
         />
         <RailButton icon="share-social-outline" color="#fff" label="Share" onPress={onShare} />
-        <RailButton icon="flag-outline" color="rgba(255,255,255,0.72)" label="Report" onPress={onReport} small />
+        <RailButton icon="flag-outline" color="rgba(255,255,255,0.66)" label="Report" onPress={onReport} small />
       </View>
     </View>
   );
 }
 
-function RailButton({
-  icon,
+// Multi-band scrims emulate a soft gradient without a gradient dependency,
+// keeping text and icons legible over any video with no hard edges.
+const TOP_BANDS = [0.3, 0.14, 0.05];
+const BOTTOM_BANDS = [0.05, 0.1, 0.16, 0.24, 0.34, 0.46];
+
+function Scrim({ side }: { side: "top" | "bottom" }) {
+  const bands = side === "top" ? TOP_BANDS : BOTTOM_BANDS;
+  return (
+    <View
+      style={[styles.scrim, side === "top" ? styles.scrimTop : styles.scrimBottom]}
+      pointerEvents="none"
+    >
+      {bands.map((opacity, i) => (
+        <View key={i} style={{ flex: 1, backgroundColor: `rgba(2,3,7,${opacity})` }} />
+      ))}
+    </View>
+  );
+}
+
+function RailButton({  icon,
   color,
   count,
   label,
@@ -184,22 +208,9 @@ const styles = StyleSheet.create({
   card: { backgroundColor: "#05060a", overflow: "hidden" },
   media: { ...StyleSheet.absoluteFillObject, backgroundColor: "#0c0d12" },
   poster: { width: "100%", height: "100%", resizeMode: "cover" },
-  topScrim: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    height: "22%",
-    backgroundColor: "rgba(0,0,0,0.34)",
-  },
-  bottomScrim: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    bottom: 0,
-    height: "42%",
-    backgroundColor: "rgba(0,0,0,0.42)",
-  },
+  scrim: { position: "absolute", left: 0, right: 0, flexDirection: "column" },
+  scrimTop: { top: 0, height: "20%" },
+  scrimBottom: { bottom: 0, height: "46%" },
   creditBadge: {
     position: "absolute",
     top: 14,

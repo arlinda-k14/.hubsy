@@ -103,9 +103,13 @@ export function usePlayerPool(videos: Video[]) {
         const slot = freeSlots.shift();
         const video = list.find((v) => v.id === id);
         if (!slot || !video) return;
+        const src = sourceFor(video);
+        // External/embed videos have no Mux source — they are played by
+        // EmbedPlayer, so they must never occupy a native player slot.
+        if (!src) return;
         slot.videoId = video.id;
         slot.role = roleForIndex(indexOfId(id));
-        slot.player.replace(sourceFor(video));
+        slot.player.replace(src);
         slot.player.muted = true;
         slot.player.loop = true;
         void prebuffer(slot.player);
@@ -155,10 +159,13 @@ export function usePlayerPool(videos: Video[]) {
     (index: number): { player: VideoPlayer | null; role: SlotRole } => {
       const id = videos[index]?.id;
       if (!id) return { player: null, role: "idle" };
+      // Role is derived from the active index (not slot existence) so
+      // external/embed videos — which never occupy a native slot — still
+      // register as the current, active card.
       const slot = slotsRef.current.find((s) => s.videoId === id);
-      return slot ? { player: slot.player, role: slot.role } : { player: null, role: "idle" };
+      return { player: slot?.player ?? null, role: roleForIndex(index) };
     },
-    [videos],
+    [videos, roleForIndex],
   );
 
   useEffect(() => {
