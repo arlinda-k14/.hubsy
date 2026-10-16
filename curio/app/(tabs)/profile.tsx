@@ -4,11 +4,14 @@ import {
   ActivityIndicator,
   Alert,
   Image,
+  KeyboardAvoidingView,
+  Modal,
   Platform,
   Pressable,
   ScrollView,
   StyleSheet,
   Text,
+  TextInput,
   useWindowDimensions,
   View,
 } from "react-native";
@@ -25,6 +28,7 @@ import {
 import { useVideoPlayer, VideoView } from "expo-video";
 import { db } from "../../src/lib/firebase";
 import { useAuth } from "../../src/lib/auth";
+import { AVATAR_MAX_CHARS, BIO_MAX_CHARS, isValidAvatarUrl, pickAvatar } from "../../src/lib/avatar";
 import { Icon } from "../../src/components/Icon";
 import { EmbedPlayer } from "../../src/components/EmbedPlayer";
 import { VideoPlaceholder } from "../../src/components/VideoPlaceholder";
@@ -36,13 +40,12 @@ interface SavedRow {
   videoId?: string;
 }
 
-type Tab = "videos" | "saved" | "liked" | "edit";
+type Tab = "videos" | "saved" | "liked";
 
 const TABS: { key: Tab; label: string }[] = [
   { key: "videos", label: "My Videos" },
   { key: "saved", label: "Saved" },
   { key: "liked", label: "Liked" },
-  { key: "edit", label: "Edit Profile" },
 ];
 
 const PLATFORM_LABEL: Record<string, string> = {
@@ -62,6 +65,7 @@ const PLATFORM_ICON: Record<string, string> = {
 export default function ProfileScreen() {
   const { user, profile, signOut } = useAuth();
   const [tab, setTab] = useState<Tab>("videos");
+  const [editing, setEditing] = useState(false);
 
   if (!user || !profile) {
     return (
@@ -75,13 +79,23 @@ export default function ProfileScreen() {
     );
   }
 
+  const displayName = (profile.displayName || profile.username).trim();
+  const initial = (displayName || profile.username).charAt(0).toUpperCase();
+
   return (
     <ScrollView style={styles.screen} contentContainerStyle={styles.content}>
       <View style={styles.head}>
-        <View style={styles.avatar}>
-          <Text style={styles.avatarText}>{profile.username.charAt(0).toUpperCase()}</Text>
-        </View>
+        {profile.avatarUrl ? (
+          <Image source={{ uri: profile.avatarUrl }} style={styles.avatarImg} />
+        ) : (
+          <View style={styles.avatar}>
+            <Text style={styles.avatarText}>{initial}</Text>
+          </View>
+        )}
         <View style={{ flex: 1 }}>
+          <Text style={styles.displayName} numberOfLines={1}>
+            {displayName}
+          </Text>
           <Text style={styles.username}>@{profile.username}</Text>
           <Text style={styles.bio}>{profile.bio || "No bio yet."}</Text>
           <View style={styles.topics}>
@@ -92,6 +106,9 @@ export default function ProfileScreen() {
             ))}
           </View>
         </View>
+        <Pressable style={styles.editBtn} onPress={() => setEditing(true)} accessibilityLabel="Edit profile">
+          <Icon name="create-outline" size={18} color="#111827" />
+        </Pressable>
       </View>
 
       <View style={styles.tabbar}>
@@ -102,9 +119,7 @@ export default function ProfileScreen() {
         ))}
       </View>
 
-      {tab === "edit" ? (
-        <EditTab />
-      ) : tab === "videos" ? (
+      {tab === "videos" ? (
         <MyVideos uid={user.uid} />
       ) : (
         <VideoList uid={user.uid} kind={tab} />
@@ -114,8 +129,148 @@ export default function ProfileScreen() {
         <Icon name="log-out-outline" size={18} color="#dc2626" />
         <Text style={styles.signoutText}>Sign out</Text>
       </Pressable>
+
+      <EditProfileModal visible={editing} onClose={() => setEditing(false)} />
     </ScrollView>
   );
+}
+
+function EditProfileModal({ visible, onClose }: { visible: boolean; onClose: () => void }) {
+  const { profile, updateUserProfile } = useAuth();
+  const [name, setName] = useState("");
+  const [bio, setBio] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!visible) return;
+    setName(profile?.displayName ?? "");
+    setBio(profile?.bio ?? "");
+    setAvatarUrl(profile?.avatarUrl ?? "");
+    setError("");
+  }, [visible, profile]);
+
+  const onUpload = useCallback(async () => {
+    setError("");
+    const dataUrl = await pickAvatar();
+    if (dataUrl) setAvatarUrl(dataUrl);
+  }, []);
+
+  const onSave = useCallback(async () => {
+    setError("");
+    if (!isValidAvatarUrl(avatarUrl)) {
+      setError("Avatar must be a valid http(s) URL or an uploaded image.");
+      return;
+    }
+    setSaving(true);
+    try {
+      await updateUserProfile({
+        displayName: name.trim() || null,
+        bio: bio.trim(),
+        avatarUrl: avatarUrl.trim() || null,
+      });
+      onClose();
+    } catch (e) {
+      setError(authErrorLike(e));
+    } finally {
+      setSaving(false);
+    }
+  }, [avatarUrl, bio, name, onClose, updateUserProfile]);
+
+  const previewInitial = (name.trim() || profile?.username || "?").charAt(0).toUpperCase();
+
+  return (
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : undefined}
+        style={styles.modalScrim}
+      >
+        <Pressable style={StyleSheet.absoluteFill} onPress={onClose} />
+        <View style={styles.modalCard}>
+          <View style={styles.modalHead}>
+            <Text style={styles.modalTitle}>Edit Profile</Text>
+            <Pressable onPress={onClose} hitSlop={10} accessibilityLabel="Close">
+              <Icon name="close" size={22} color="#6b7280" />
+            </Pressable>
+          </View>
+
+          <ScrollView style={styles.modalBody} contentContainerStyle={styles.modalBodyInner}>
+            <View style={styles.avatarRow}>
+              {avatarUrl ? (
+                <Image source={{ uri: avatarUrl }} style={styles.avatarPreview} />
+              ) : (
+                <View style={[styles.avatarPreview, styles.avatarPreviewFallback]}>
+                  <Text style={styles.avatarPreviewText}>{previewInitial}</Text>
+                </View>
+              )}
+              <Pressable style={styles.uploadBtn} onPress={onUpload}>
+                <Icon name="cloud-upload-outline" size={16} color="#5046e5" />
+                <Text style={styles.uploadBtnText}>Upload photo</Text>
+              </Pressable>
+            </View>
+
+            <Text style={styles.fieldLabel}>Avatar URL</Text>
+            <TextInput
+              value={avatarUrl}
+              onChangeText={setAvatarUrl}
+              placeholder="https://…"
+              placeholderTextColor="#9ca3af"
+              autoCapitalize="none"
+              autoCorrect={false}
+              style={styles.input}
+            />
+
+            <View style={styles.fieldRow}>
+              <Text style={styles.fieldLabel}>Display name</Text>
+              <Text style={styles.counter}>
+                {name.trim().length}/{AVATAR_MAX_CHARS}
+              </Text>
+            </View>
+            <TextInput
+              value={name}
+              onChangeText={setName}
+              placeholder="Your name"
+              placeholderTextColor="#9ca3af"
+              maxLength={AVATAR_MAX_CHARS}
+              style={styles.input}
+            />
+
+            <View style={styles.fieldRow}>
+              <Text style={styles.fieldLabel}>Bio</Text>
+              <Text style={styles.counter}>
+                {bio.length}/{BIO_MAX_CHARS}
+              </Text>
+            </View>
+            <TextInput
+              value={bio}
+              onChangeText={setBio}
+              placeholder="Tell people what you post about"
+              placeholderTextColor="#9ca3af"
+              maxLength={BIO_MAX_CHARS}
+              multiline
+              style={[styles.input, styles.textarea]}
+            />
+
+            {error ? <Text style={styles.modalError}>{error}</Text> : null}
+          </ScrollView>
+
+          <View style={styles.modalActions}>
+            <Pressable style={[styles.actionBtn, styles.actionGhost]} onPress={onClose} disabled={saving}>
+              <Text style={styles.actionGhostText}>Cancel</Text>
+            </Pressable>
+            <Pressable style={[styles.actionBtn, styles.actionPrimary]} onPress={onSave} disabled={saving}>
+              {saving ? <ActivityIndicator color="#fff" size="small" /> : <Text style={styles.actionPrimaryText}>Save</Text>}
+            </Pressable>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
+    </Modal>
+  );
+}
+
+function authErrorLike(e: unknown): string {
+  return e instanceof Error ? e.message : "Couldn't save your profile. Please try again.";
 }
 
 function normalizeHandle(raw: string): string {
@@ -428,19 +583,6 @@ function VideoList({ uid, kind }: { uid: string; kind: Tab }) {
   );
 }
 
-function EditTab() {
-  const { profile } = useAuth();
-  return (
-    <View style={styles.edit}>
-      <Text style={styles.editField}>Username: @{profile?.username}</Text>
-      <Text style={styles.editField}>GitHub: {profile?.githubUrl ?? "—"}</Text>
-      <Text style={styles.editField}>LinkedIn: {profile?.linkedinUrl ?? "—"}</Text>
-      <Text style={styles.editField}>Bio: {profile?.bio || "—"}</Text>
-      <Text style={styles.editHint}>Profile editing UI wires here next.</Text>
-    </View>
-  );
-}
-
 const styles = StyleSheet.create({
   screen: { flex: 1, backgroundColor: "#f8f7f4" },
   content: { padding: 20, paddingTop: 60, gap: 16 },
@@ -451,9 +593,21 @@ const styles = StyleSheet.create({
   ctaText: { color: "#fff", fontWeight: "700" },
   head: { flexDirection: "row", gap: 14, alignItems: "center" },
   avatar: { width: 64, height: 64, borderRadius: 32, backgroundColor: "#5046e5", alignItems: "center", justifyContent: "center" },
+  avatarImg: { width: 64, height: 64, borderRadius: 32, backgroundColor: "#e5e7eb" },
   avatarText: { color: "#fff", fontSize: 24, fontWeight: "800" },
-  username: { fontSize: 18, fontWeight: "800", color: "#111827" },
-  bio: { fontSize: 13, color: "#4b5563", marginTop: 2 },
+  displayName: { fontSize: 19, fontWeight: "800", color: "#111827" },
+  username: { fontSize: 13, fontWeight: "600", color: "#6b7280", marginTop: 1 },
+  bio: { fontSize: 13, color: "#4b5563", marginTop: 4 },
+  editBtn: {
+    width: 38,
+    height: 38,
+    borderRadius: 19,
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    backgroundColor: "#fff",
+    alignItems: "center",
+    justifyContent: "center",
+  },
   topics: { flexDirection: "row", gap: 8, marginTop: 6, flexWrap: "wrap" },
   topic: { color: "#5046e5", fontSize: 12, fontWeight: "600" },
   tabbar: { flexDirection: "row", flexWrap: "wrap", gap: 8 },
@@ -516,9 +670,57 @@ const styles = StyleSheet.create({
   row: { backgroundColor: "#fff", borderWidth: 1, borderColor: "#e5e7eb", borderRadius: 12, padding: 14 },
   rowTitle: { color: "#111827", fontWeight: "600" },
   empty: { color: "#9ca3af", fontSize: 14 },
-  edit: { gap: 10 },
-  editField: { color: "#111827", fontSize: 14 },
-  editHint: { color: "#9ca3af", fontSize: 13, marginTop: 6 },
   signout: { flexDirection: "row", gap: 8, alignItems: "center", marginTop: 8 },
   signoutText: { color: "#dc2626", fontWeight: "600" },
+  modalScrim: { flex: 1, backgroundColor: "rgba(6,8,16,0.55)", alignItems: "center", justifyContent: "center", padding: 20 },
+  modalCard: { width: "100%", maxWidth: 460, backgroundColor: "#fff", borderRadius: 18, overflow: "hidden" },
+  modalHead: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: "#f1f2f4",
+  },
+  modalTitle: { fontSize: 17, fontWeight: "800", color: "#111827" },
+  modalBody: { maxHeight: 460 },
+  modalBodyInner: { padding: 20, gap: 8 },
+  avatarRow: { flexDirection: "row", alignItems: "center", gap: 14, marginBottom: 6 },
+  avatarPreview: { width: 72, height: 72, borderRadius: 36, backgroundColor: "#e5e7eb" },
+  avatarPreviewFallback: { backgroundColor: "#5046e5", alignItems: "center", justifyContent: "center" },
+  avatarPreviewText: { color: "#fff", fontSize: 28, fontWeight: "800" },
+  uploadBtn: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    borderWidth: 1,
+    borderColor: "#e0e7ff",
+    backgroundColor: "#eef2ff",
+    borderRadius: 999,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+  },
+  uploadBtnText: { color: "#5046e5", fontWeight: "700", fontSize: 13 },
+  fieldRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 8 },
+  fieldLabel: { fontSize: 12.5, fontWeight: "700", color: "#4b5563" },
+  counter: { fontSize: 11.5, color: "#9ca3af", fontWeight: "600" },
+  input: {
+    borderWidth: 1,
+    borderColor: "#e5e7eb",
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 11,
+    fontSize: 14,
+    color: "#111827",
+    backgroundColor: "#fff",
+  },
+  textarea: { minHeight: 82, textAlignVertical: "top" },
+  modalError: { color: "#dc2626", fontSize: 13, marginTop: 6 },
+  modalActions: { flexDirection: "row", gap: 10, padding: 16, borderTopWidth: 1, borderTopColor: "#f1f2f4" },
+  actionBtn: { flex: 1, borderRadius: 12, paddingVertical: 13, alignItems: "center", justifyContent: "center" },
+  actionGhost: { backgroundColor: "#f3f4f6" },
+  actionGhostText: { color: "#374151", fontWeight: "700" },
+  actionPrimary: { backgroundColor: "#5046e5" },
+  actionPrimaryText: { color: "#fff", fontWeight: "800" },
 });

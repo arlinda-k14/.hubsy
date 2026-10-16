@@ -51,18 +51,42 @@ export default function FeedScreen() {
     activeIndex.current = 0;
   }, [category]);
 
+  // Only the card sitting in the centre of the viewport drives playback. We
+  // commit an index from two sources: viewability (continuous, while scrolling)
+  // and the momentum-end snap point (exact, once the swipe settles).
+  const commitIndex = useCallback(
+    (index: number) => {
+      if (!videos.length) return;
+      const clamped = Math.max(0, Math.min(index, videos.length - 1));
+      if (clamped === activeIndex.current) return;
+      activeIndex.current = clamped;
+      void assignWindow(clamped);
+      if (clamped >= videos.length - 3) void loadMore();
+    },
+    [videos.length, assignWindow, loadMore],
+  );
+
+  const commitRef = useRef(commitIndex);
+  commitRef.current = commitIndex;
+
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
       const first = viewableItems[0];
-      if (first?.index != null) {
-        activeIndex.current = first.index;
-        void assignWindow(first.index);
-        if (first.index >= videos.length - 3) void loadMore();
-      }
+      if (first?.index != null) commitRef.current(first.index);
     },
   ).current;
 
-  const viewabilityConfig = useRef({ itemVisiblePercentThreshold: 60 }).current;
+  const viewabilityConfig = useRef({
+    itemVisiblePercentThreshold: 70,
+    minimumViewTime: 120,
+  }).current;
+
+  const onMomentumScrollEnd = useCallback(
+    (e: { nativeEvent: { contentOffset: { y: number } } }) => {
+      commitRef.current(Math.round(e.nativeEvent.contentOffset.y / PAGE));
+    },
+    [PAGE],
+  );
 
   const requireAuth = useCallback(() => {
     if (!user) {
@@ -175,6 +199,7 @@ export default function FeedScreen() {
             decelerationRate="fast"
             onScrollBeginDrag={muteActive}
             onViewableItemsChanged={onViewableItemsChanged}
+            onMomentumScrollEnd={onMomentumScrollEnd}
             viewabilityConfig={viewabilityConfig}
             renderItem={({ item, index }) => {
               const { player, role } = playerFor(index);
@@ -234,17 +259,17 @@ const styles = StyleSheet.create({
   errBody: { fontSize: 14, color: "#9ca3af", textAlign: "center" },
   retry: { marginTop: 8, backgroundColor: "#5046e5", paddingHorizontal: 20, paddingVertical: 10, borderRadius: 999 },
   retryText: { color: "#fff", fontWeight: "600" },
-  pillWrap: { position: "absolute", top: 16, left: 0, right: 0, alignItems: "center" },
+  pillWrap: { position: "absolute", top: 18, left: 0, right: 0, alignItems: "center" },
   pillBar: { flexDirection: "row", gap: 8, paddingHorizontal: 16 },
   pill: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 17,
+    paddingVertical: 9,
     borderRadius: 999,
-    backgroundColor: "rgba(255,255,255,0.14)",
+    backgroundColor: "rgba(9,11,20,0.55)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.22)",
+    borderColor: "rgba(255,255,255,0.32)",
   },
-  pillActive: { backgroundColor: "#5046e5", borderColor: "#5046e5" },
-  pillText: { color: "#e5e7eb", fontSize: 13, fontWeight: "700" },
-  pillTextActive: { color: "#fff" },
+  pillActive: { backgroundColor: "#6366f1", borderColor: "#8b8ff5" },
+  pillText: { color: "#f4f4f7", fontSize: 13, fontWeight: "700", letterSpacing: 0.2 },
+  pillTextActive: { color: "#ffffff" },
 });
