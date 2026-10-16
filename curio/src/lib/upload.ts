@@ -10,6 +10,8 @@ export interface UploadInput {
   uri: string;
   mimeType: string;
   fileSize?: number;
+  creatorHandle?: string | null;
+  sourceLink?: string | null;
 }
 
 interface CreateUploadResult {
@@ -79,11 +81,16 @@ export async function startUpload(
   input: UploadInput,
   onProgress: (pct: number) => void,
 ): Promise<string> {
-  const create = httpsCallable<{ title: string; tags: string }, CreateUploadResult>(
-    functions,
-    "createUpload",
-  );
-  const { data } = await create({ title: input.title, tags: input.tags });
+  const create = httpsCallable<
+    { title: string; tags: string; creatorHandle: string | null; sourceLink: string | null },
+    CreateUploadResult
+  >(functions, "createUpload");
+  const { data } = await create({
+    title: input.title,
+    tags: input.tags,
+    creatorHandle: input.creatorHandle ?? null,
+    sourceLink: input.sourceLink ?? null,
+  });
   const mimeType = input.mimeType || guessMime(input.uri);
 
   if (Platform.OS === "web") {
