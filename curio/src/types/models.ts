@@ -16,6 +16,7 @@ export interface UserProfile {
   uid: string;
   username: string;
   usernameLower: string;
+  displayName: string | null;
   avatarUrl: string | null;
   bio: string;
   githubUrl: string | null;

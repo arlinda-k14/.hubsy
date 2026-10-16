@@ -14,9 +14,10 @@ import {
   signInWithCredential,
   signInWithPopup,
   signOut as fbSignOut,
+  updateProfile as fbUpdateProfile,
   type User,
 } from "firebase/auth";
-import { doc, getDoc, serverTimestamp, setDoc } from "firebase/firestore";
+import { doc, getDoc, serverTimestamp, setDoc, updateDoc } from "firebase/firestore";
 import * as AppleAuthentication from "expo-apple-authentication";
 import * as SecureStore from "expo-secure-store";
 import * as Linking from "expo-linking";
@@ -137,6 +138,11 @@ interface AuthContextValue {
   signInGitHub: () => Promise<void>;
   signOut: () => Promise<void>;
   refreshProfile: () => Promise<void>;
+  updateUserProfile: (patch: {
+    displayName?: string | null;
+    bio?: string;
+    avatarUrl?: string | null;
+  }) => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null);
@@ -161,6 +167,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         uid: u.uid,
         username,
         usernameLower: username.toLowerCase(),
+        displayName: u.displayName ?? null,
         avatarUrl: u.photoURL,
         bio: "",
         githubUrl: null,
@@ -282,6 +289,30 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (user) await loadProfile(user.uid);
   }, [user, loadProfile]);
 
+  const updateUserProfile = useCallback(
+    async (patch: { displayName?: string | null; bio?: string; avatarUrl?: string | null }) => {
+      if (!user) throw new Error("You must be signed in to update your profile.");
+      const clean: Record<string, string | null> = {};
+      if (patch.displayName !== undefined) {
+        clean.displayName = patch.displayName?.trim().slice(0, 50) || null;
+      }
+      if (patch.bio !== undefined) clean.bio = patch.bio.slice(0, 160);
+      if (patch.avatarUrl !== undefined) clean.avatarUrl = patch.avatarUrl || null;
+      if (!Object.keys(clean).length) return;
+
+      await updateDoc(doc(db, "users", user.uid), clean);
+
+      // Mirror the editable fields onto the Firebase Auth record.
+      const authPatch: { displayName?: string | null; photoURL?: string | null } = {};
+      if (clean.displayName !== undefined) authPatch.displayName = clean.displayName;
+      if (clean.avatarUrl !== undefined) authPatch.photoURL = clean.avatarUrl;
+      if (Object.keys(authPatch).length) await fbUpdateProfile(user, authPatch);
+
+      setProfile((prev) => (prev ? ({ ...prev, ...clean } as UserProfile) : prev));
+    },
+    [user],
+  );
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -296,6 +327,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInGitHub,
       signOut,
       refreshProfile,
+      updateUserProfile,
     }),
     [
       user,
@@ -310,6 +342,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       signInGitHub,
       signOut,
       refreshProfile,
+      updateUserProfile,
     ],
   );
 
