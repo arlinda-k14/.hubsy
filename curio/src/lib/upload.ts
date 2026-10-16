@@ -100,3 +100,25 @@ export function watchVideo(videoId: string, cb: (video: Video | null) => void): 
     cb(snap.exists() ? ({ id: snap.id, ...snap.data() } as Video) : null);
   });
 }
+
+// Detects whether the Mux backend pipeline is reachable. Sends an empty title,
+// so the function rejects with invalid-argument before doing any work — no side
+// effects. `not-found` means Functions aren't deployed (Spark plan).
+export async function probeUploadBackend(): Promise<boolean> {
+  try {
+    const fn = httpsCallable(functions, "createUpload");
+    await fn({ title: "" });
+    return true;
+  } catch (e) {
+    const code = (e as { code?: string } | null)?.code ?? "";
+    if (
+      code.includes("not-found") ||
+      code.includes("unavailable") ||
+      code.includes("failed-precondition") ||
+      code.includes("internal")
+    ) {
+      return false;
+    }
+    return true;
+  }
+}

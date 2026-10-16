@@ -30,7 +30,9 @@ export interface Video {
   id: string;
   sourceType: VideoSource;
   platform: Platform;
+  platformVideoId: string | null;
   originalUrl: string | null;
+  embedUrl: string | null;
   authorHandle: string | null;
   authorUid: string | null;
   originalTitle: string | null;
