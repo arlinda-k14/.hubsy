@@ -212,13 +212,14 @@ function RailButton({  icon,
 
 const styles = StyleSheet.create({
   card: { backgroundColor: "#05060a", overflow: "hidden" },
-  media: { ...StyleSheet.absoluteFillObject, backgroundColor: "#0c0d12" },
+  media: { ...StyleSheet.absoluteFillObject, backgroundColor: "#0c0d12", zIndex: 1 },
   poster: { width: "100%", height: "100%", resizeMode: "cover" },
-  scrim: { position: "absolute", left: 0, right: 0, flexDirection: "column" },
+  scrim: { position: "absolute", left: 0, right: 0, flexDirection: "column", zIndex: 2 },
   scrimTop: { top: 0, height: "20%" },
-  scrimBottom: { bottom: 0, height: "46%" },
+  scrimBottom: { bottom: 0, height: "40%" },
   creditBadge: {
     position: "absolute",
+    zIndex: 3,
     top: 14,
     left: 14,
     maxWidth: "76%",
@@ -242,7 +243,7 @@ const styles = StyleSheet.create({
     paddingVertical: 3,
   },
   creditPlatformText: { color: "#312e81", fontSize: 10.5, fontWeight: "800" },
-  bottom: { position: "absolute", left: 16, right: 90, bottom: 30, gap: 8 },
+  bottom: { position: "absolute", zIndex: 3, left: 16, right: 90, bottom: 30, gap: 8 },
   title: {
     color: "#fff",
     fontSize: 16.5,
@@ -261,7 +262,7 @@ const styles = StyleSheet.create({
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 5,
   },
-  rail: { position: "absolute", right: 12, bottom: 30, gap: 18, alignItems: "center" },
+  rail: { position: "absolute", zIndex: 3, right: 12, bottom: 30, gap: 18, alignItems: "center" },
   railBtn: { alignItems: "center", justifyContent: "center", minWidth: 44 },
   railBtnPressed: { opacity: 0.6 },
   railCount: {
