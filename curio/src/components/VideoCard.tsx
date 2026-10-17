@@ -72,6 +72,11 @@ export function VideoCard({
   const active = role === "current";
   const handle = video.authorHandle ? normalizeHandle(video.authorHandle) : "";
   const platformLabel = PLATFORM_LABEL[video.platform] ?? video.platform;
+  const attribution = handle
+    ? `Credited to ${handle}`
+    : isExternal
+      ? `Original on ${platformLabel}`
+      : "";
 
   return (
     <View style={[styles.card, { width, height, borderRadius: radius }]}>
@@ -98,7 +103,7 @@ export function VideoCard({
       <Scrim side="top" />
       <Scrim side="bottom" />
 
-      {handle ? (
+      {attribution ? (
         <Pressable
           style={styles.creditBadge}
           onPress={() => {
@@ -108,7 +113,7 @@ export function VideoCard({
         >
           <Icon name="person-circle" size={16} color="#0b1220" />
           <Text style={styles.creditText} numberOfLines={1}>
-            Credited to {handle}
+            {attribution}
           </Text>
           <View style={styles.creditPlatform}>
             <Icon
