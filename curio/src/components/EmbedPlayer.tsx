@@ -1,6 +1,6 @@
 import { createElement, useMemo } from "react";
 import { Image, Platform, StyleSheet, View } from "react-native";
-import type { Platform as VideoPlatform, Video } from "../types/models";
+import type { Video } from "../types/models";
 import { VideoPlaceholder } from "./VideoPlaceholder";
 
 function youtubeId(url: string): string | null {
@@ -15,27 +15,6 @@ function youtubeId(url: string): string | null {
     return null;
   }
 }
-
-// Third-party embeds ship their own chrome: Instagram's "View profile" header and
-// "View more on Instagram / Add a comment" footer plus card side shadows, and
-// TikTok's own header/footer. We render the embed oversized inside a clipping
-// cropper so only the vertical video remains; the card's rounded, overflow-hidden
-// wrapper hides anything that still spills past the bottom edge.
-interface Crop {
-  top: string;
-  left: string;
-  width: string;
-  height: string;
-}
-
-const FULL: Crop = { top: "0%", left: "0%", width: "100%", height: "100%" };
-
-const CROP: Record<VideoPlatform, Crop> = {
-  instagram: { top: "-15%", left: "-5%", width: "110%", height: "135%" },
-  tiktok: { top: "-8%", left: "-3%", width: "106%", height: "122%" },
-  youtube: FULL,
-  curio: FULL,
-};
 
 // A thumbnail to show behind / instead of the embed. Prefer a stored poster,
 // then derive a YouTube still. TikTok/Instagram provide no static JPEG without
@@ -75,47 +54,36 @@ export function EmbedPlayer({ video, muted, active }: Props) {
   }, [video.embedUrl, video.originalUrl, video.platform, video.platformVideoId, muted]);
 
   const poster = useMemo(() => posterFor(video), [video]);
-  const crop = CROP[video.platform] ?? FULL;
 
-  // The media layer is always present so a card is never an empty/black box:
-  // a poster/thumbnail when available, otherwise a branded placeholder. The
-  // embed is layered on top only for the active card, so off-screen cards keep
-  // their structure and the embed mounts instantly when a card becomes current.
+  // Layer 1 (back, z-index 1): poster/thumbnail or the styled placeholder. It
+  // always fills the frame, so an off-screen or not-yet-loaded card is never a
+  // broken/black box.
   const backdrop = poster ? (
     <Image source={{ uri: poster }} style={styles.media} resizeMode="cover" />
   ) : (
     <VideoPlaceholder platform={video.platform} authorHandle={video.authorHandle} />
   );
 
+  // Layer 2 (front, z-index 2): the live embed, mounted only for the active
+  // card so exactly one video ever plays. It renders above the placeholder.
   const mountEmbed = active && !!src;
-  const embedStyle = {
-    position: "absolute" as const,
-    top: crop.top,
-    left: crop.left,
-    width: crop.width,
-    height: crop.height,
-    borderWidth: 0,
-    pointerEvents: "auto" as const,
-  };
 
   if (Platform.OS === "web") {
     return (
       <View style={styles.frame}>
-        {backdrop}
-        {mountEmbed
-          ? createElement(
-              "div",
-              { style: styles.cropper },
-              createElement("iframe", {
-                src,
-                title: video.title,
-                allow: "autoplay; encrypted-media; picture-in-picture; clipboard-write",
-                allowFullScreen: true,
-                frameBorder: 0,
-                style: embedStyle,
-              }),
-            )
-          : null}
+        <View style={styles.layerBack}>{backdrop}</View>
+        {mountEmbed ? (
+          <View style={styles.layerFront}>
+            {createElement("iframe", {
+              src,
+              title: video.title,
+              allow: "autoplay; encrypted-media; picture-in-picture; clipboard-write",
+              allowFullScreen: true,
+              frameBorder: 0,
+              style: iframeStyle,
+            })}
+          </View>
+        ) : null}
       </View>
     );
   }
@@ -123,12 +91,12 @@ export function EmbedPlayer({ video, muted, active }: Props) {
   const WebView = require("react-native-webview").WebView;
   return (
     <View style={styles.frame}>
-      {backdrop}
+      <View style={styles.layerBack}>{backdrop}</View>
       {mountEmbed ? (
         <WebView
           originWhitelist={["*"]}
           source={{ uri: src }}
-          style={embedStyle}
+          style={styles.webview}
           allowsInlineMediaPlayback
           mediaPlaybackRequiresUserAction={false}
           scrollEnabled={false}
@@ -140,14 +108,27 @@ export function EmbedPlayer({ video, muted, active }: Props) {
   );
 }
 
+// Explicit, crop-free sizing so the embed always paints edge-to-edge above the
+// placeholder layer (never behind it, never at zero size).
+const iframeStyle = {
+  display: "block",
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  borderWidth: 0,
+  borderStyle: "none",
+  margin: 0,
+  padding: 0,
+  zIndex: 2,
+} as const;
+
 const styles = StyleSheet.create({
-  frame: { ...StyleSheet.absoluteFillObject, overflow: "hidden", backgroundColor: "#171a26" },
-  cropper: {
-    position: "relative",
-    width: "100%",
-    height: "100%",
-    overflow: "hidden",
-    pointerEvents: "auto",
-  },
+  // Own stacking context so the inner z-index 1/2 layers order deterministically.
+  frame: { ...StyleSheet.absoluteFillObject, overflow: "hidden", backgroundColor: "#171a26", zIndex: 1 },
+  layerBack: { ...StyleSheet.absoluteFillObject, zIndex: 1 },
+  layerFront: { ...StyleSheet.absoluteFillObject, overflow: "hidden", zIndex: 2 },
   media: { width: "100%", height: "100%" },
+  webview: { ...StyleSheet.absoluteFillObject, zIndex: 2, backgroundColor: "transparent" },
 });
