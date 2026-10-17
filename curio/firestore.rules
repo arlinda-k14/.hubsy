@@ -18,21 +18,34 @@ service cloud.firestore {
         || isAdmin();
 
       // Video docs are created and finalised by Cloud Functions (admin SDK) for
-      // uploads, or directly by signed-in clients for external links.
+      // the Mux upload path, or directly by signed-in clients for external
+      // links and for free-tier local uploads (base64 data URL in mp4Url).
       allow create: if signedIn()
-        && request.resource.data.sourceType == 'external'
         && request.resource.data.status == 'ready'
         && request.resource.data.authorUid == request.auth.uid
-        && request.resource.data.platform in ['youtube', 'tiktok', 'instagram', 'linkedin']
         && request.resource.data.title is string
         && request.resource.data.title.size() > 0
         && request.resource.data.title.size() <= 120
-        && request.resource.data.originalUrl is string
-        && request.resource.data.embedUrl is string
         && request.resource.data.likeCount == 0
         && request.resource.data.commentCount == 0
         && request.resource.data.reportCount == 0
-        && request.resource.data.flagged == false;
+        && request.resource.data.flagged == false
+        && (
+          (
+            request.resource.data.sourceType == 'external'
+            && request.resource.data.platform in ['youtube', 'tiktok', 'instagram', 'linkedin']
+            && request.resource.data.originalUrl is string
+            && request.resource.data.embedUrl is string
+          )
+          ||
+          (
+            request.resource.data.sourceType == 'upload'
+            && request.resource.data.platform == 'curio'
+            && request.resource.data.mp4Url is string
+            && request.resource.data.mp4Url.size() > 0
+            && request.resource.data.mp4Url.size() <= 1040000
+          )
+        );
       allow delete: if signedIn() && resource.data.authorUid == request.auth.uid;
       allow update: if signedIn()
         && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'commentCount']);

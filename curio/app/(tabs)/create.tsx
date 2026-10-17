@@ -25,6 +25,12 @@ const MAX_SECONDS = 90;
 const MAX_BYTES = 100 * 1024 * 1024;
 const TARGET_RATIO = 9 / 16;
 
+// Firestore caps a single document at 1 MiB. A base64 data URL inflates raw
+// bytes by ~4/3, so free-tier local uploads must keep raw clips well under that
+// ceiling (700 KB raw -> ~956 KB encoded, leaving room for the rest of the doc).
+const MAX_LOCAL_BYTES = 700 * 1024;
+const MAX_LOCAL_DATAURL = 1_040_000;
+
 type Mode = "link" | "upload";
 type Phase = "idle" | "uploading" | "processing";
 
@@ -53,6 +59,17 @@ function validateClip(meta: Picked): string | null {
   if (meta.width && meta.height && Math.abs(meta.width / meta.height - TARGET_RATIO) > 0.02)
     problems.push("not 9:16 vertical");
   return problems.length ? `This clip is ${problems.join(", ")}.` : null;
+}
+
+// Reads a picked File into a base64 data URL we can store directly in the
+// Firestore document (no Cloud Storage / Blaze required).
+function readFileAsDataUrl(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result));
+    reader.onerror = () => reject(new Error("Could not read that file."));
+    reader.readAsDataURL(file);
+  });
 }
 
 async function readWebVideo(file: File): Promise<Picked> {
@@ -157,8 +174,10 @@ export default function CreateScreen() {
   const [progress, setProgress] = useState(0);
   const [failure, setFailure] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [uploadDone, setUploadDone] = useState<string | null>(null);
   const [backendReady, setBackendReady] = useState<boolean | null>(null);
   const unwatch = useRef<(() => void) | null>(null);
+  const webFileRef = useRef<File | null>(null);
 
   useEffect(() => () => unwatch.current?.(), []);
 
@@ -291,11 +310,14 @@ export default function CreateScreen() {
       const meta = await readWebVideo(file);
       const problem = validateClip(meta);
       if (problem) {
-        setFailure(`${problem} Use a 9:16 clip under 100 MB.`);
+        setFailure(`${problem} Use a 9:16 clip.`);
         setPicked(null);
+        webFileRef.current = null;
         return;
       }
       setFailure(null);
+      setUploadDone(null);
+      webFileRef.current = file;
       setPicked(meta);
     } catch (err) {
       setFailure(err instanceof Error ? err.message : "Could not read that file.");
@@ -321,12 +343,70 @@ export default function CreateScreen() {
     });
   };
 
+  const buildTags = () =>
+    [uploadCategory, slugTag(uploadCategory)].filter((t, i, a) => a.indexOf(t) === i);
+
+  // Free-tier path: encode the picked file as a base64 data URL and store it in
+  // the video document itself, so it plays in the feed with no Cloud Storage.
+  const publishLocal = async () => {
+    const file = webFileRef.current;
+    if (!file || !user) return;
+    setSubmitting(true);
+    setFailure(null);
+    setPhase("uploading");
+    setProgress(10);
+    try {
+      const dataUrl = await readFileAsDataUrl(file);
+      setProgress(70);
+      if (dataUrl.length > MAX_LOCAL_DATAURL) {
+        throw new Error(
+          `That clip encodes larger than the free-tier limit (~${Math.round(MAX_LOCAL_BYTES / 1024)} KB). Trim it shorter.`,
+        );
+      }
+      const ref = doc(collection(db, "videos"));
+      await setDoc(ref, {
+        sourceType: "upload",
+        platform: "curio",
+        platformVideoId: null,
+        originalUrl: uploadCreatorLink.trim() || null,
+        embedUrl: null,
+        authorHandle: normalizeHandle(uploadCreatorHandle),
+        authorUid: user.uid,
+        originalTitle: null,
+        title: uploadTitle.trim().slice(0, 120),
+        mediaAssetId: null,
+        muxUploadId: null,
+        playbackUrl: null,
+        mp4Url: dataUrl,
+        posterUrl: null,
+        status: "ready",
+        tags: buildTags(),
+        creditOk: true,
+        reportCount: 0,
+        flagged: false,
+        likeCount: 0,
+        commentCount: 0,
+        createdAt: serverTimestamp(),
+        publishedAt: serverTimestamp(),
+      });
+      setProgress(100);
+      const done = uploadTitle.trim();
+      resetUpload();
+      setUploadDone(done);
+    } catch (e) {
+      setPhase("idle");
+      setFailure(e instanceof Error ? e.message : "Could not store that clip.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
   const publishUpload = async () => {
-    if (!picked || !user) return;
-    if (!backendReady) {
-      setFailure("Direct file hosting requires Mux backend pipeline. Use “Paste Link” for external clips.");
+    if (!user) {
+      router.push("/sign-in");
       return;
     }
+    if (!picked) return;
     if (!uploadTitle.trim()) {
       Alert.alert("Add a title", "Give your clip a title before uploading.");
       return;
@@ -335,6 +415,25 @@ export default function CreateScreen() {
       Alert.alert("Pick a category", "Choose a category for your clip.");
       return;
     }
+
+    // On web we prefer the free-tier local path when the clip fits the
+    // Firestore document budget; otherwise fall back to Mux if it's available.
+    const fitsLocal = Platform.OS === "web" && (picked.fileSize ?? 0) <= MAX_LOCAL_BYTES;
+    if (fitsLocal) {
+      await publishLocal();
+      return;
+    }
+
+    if (!backendReady) {
+      const mb = picked.fileSize ? (picked.fileSize / (1024 * 1024)).toFixed(1) : "?";
+      setFailure(
+        Platform.OS === "web"
+          ? `This clip is ${mb} MB. Free-tier local uploads must be under ${Math.round(MAX_LOCAL_BYTES / 1024)} KB — trim it shorter, or enable the Mux pipeline (Blaze) for larger files.`
+          : "Direct uploads need the Mux pipeline. Use “Paste Link” for external clips.",
+      );
+      return;
+    }
+
     setSubmitting(true);
     setFailure(null);
     setProgress(0);
@@ -343,7 +442,7 @@ export default function CreateScreen() {
       const videoId = await startUpload(
         {
           title: uploadTitle.trim(),
-          tags: [uploadCategory, slugTag(uploadCategory)].join(","),
+          tags: buildTags().join(","),
           uri: picked.uri,
           mimeType: picked.mimeType,
           fileSize: picked.fileSize,
@@ -372,6 +471,7 @@ export default function CreateScreen() {
     setUploadCategory("");
     setUploadCreatorHandle("");
     setUploadCreatorLink("");
+    webFileRef.current = null;
   };
 
   const categoryChips = (
@@ -491,101 +591,109 @@ export default function CreateScreen() {
         </View>
       ) : (
         <View style={styles.panel}>
-          <Text style={styles.sub}>Direct upload · 90s max · 100 MB max · vertical 9:16</Text>
+          <Text style={styles.sub}>Direct upload · 90s max · vertical 9:16{Platform.OS === "web" ? ` · free-tier clips under ${Math.round(MAX_LOCAL_BYTES / 1024)} KB` : ""}</Text>
 
-          {backendReady === false ? (
-            <View style={styles.notice}>
-              <Icon name="information-circle-outline" size={18} color="#92400e" />
-              <Text style={styles.noticeText}>
-                Direct file hosting requires Mux backend pipeline. Use “Paste Link” for external clips.
-              </Text>
-            </View>
-          ) : null}
-
-          {phase === "uploading" ? (
-            <View style={styles.progressCard}>
-              <ActivityIndicator color="#5046e5" />
-              <Text style={styles.progressLabel}>Uploading… {progress}%</Text>
-              <View style={styles.bar}>
-                <View style={[styles.barFill, { width: `${progress}%` }]} />
-              </View>
-            </View>
-          ) : phase === "processing" ? (
-            <View style={styles.progressCard}>
-              <ActivityIndicator color="#5046e5" />
-              <Text style={styles.progressLabel}>Processing on Mux…</Text>
-              <Text style={styles.progressHint}>We’ll publish it automatically the moment it’s ready.</Text>
-            </View>
-          ) : !picked ? (
-            Platform.OS === "web" ? (
-              <View style={styles.dropzone}>
-                <Icon name="cloud-upload-outline" size={30} color="#5046e5" />
-                <Text style={styles.pickerText}>Choose a video</Text>
-                <Text style={styles.pickerSub}>MP4 · 9:16 · under 100 MB</Text>
-                {createElement("input", {
-                  type: "file",
-                  accept: "video/*",
-                  onChange: onWebFile,
-                  style: {
-                    position: "absolute",
-                    top: 0,
-                    left: 0,
-                    width: "100%",
-                    height: "100%",
-                    opacity: 0,
-                    cursor: "pointer",
-                  },
-                })}
-              </View>
-            ) : (
-              <Pressable style={styles.dropzone} onPress={pickNative}>
-                <Icon name="cloud-upload-outline" size={30} color="#5046e5" />
-                <Text style={styles.pickerText}>Choose a video</Text>
-                <Text style={styles.pickerSub}>MP4 · 9:16 · under 100 MB</Text>
+          {uploadDone ? (
+            <View style={styles.successCard}>
+              <Icon name="checkmark-circle" size={22} color="#16a34a" />
+              <Text style={styles.successText}>“{uploadDone}” is live in the feed.</Text>
+              <Pressable style={styles.cta} onPress={() => router.replace("/(tabs)")}>
+                <Text style={styles.ctaText}>View feed</Text>
               </Pressable>
-            )
+              <Pressable onPress={() => setUploadDone(null)}>
+                <Text style={styles.link}>Post another</Text>
+              </Pressable>
+            </View>
           ) : (
-            <View style={styles.details}>
-              <View style={styles.thumb}>
-                <Icon name="videocam-outline" size={28} color="#5046e5" />
-                <Text style={styles.thumbText}>{Math.round(picked.durationMs / 1000)}s · 9:16</Text>
-              </View>
-              <TextInput
-                style={styles.input}
-                placeholder="Title"
-                value={uploadTitle}
-                onChangeText={setUploadTitle}
-                maxLength={120}
-              />
-              {failure ? <Text style={styles.error}>{failure}</Text> : null}
-              <Pressable
-                style={[styles.cta, (submitting || !backendReady) && styles.ctaDisabled]}
-                onPress={publishUpload}
-                disabled={submitting}
-              >
-                <Text style={styles.ctaText}>
-                  {backendReady === false ? "Backend unavailable" : "Upload"}
-                </Text>
-              </Pressable>
-              <Pressable onPress={resetUpload}>
-                <Text style={styles.link}>Choose a different video</Text>
-              </Pressable>
-            </View>
-          )}
-
-          {failure && !picked ? <Text style={styles.error}>{failure}</Text> : null}
-
-          {phase === "idle" ? (
             <>
-              {categoryChips}
-              <CreditsFields
-                handle={uploadCreatorHandle}
-                onHandle={setUploadCreatorHandle}
-                link={uploadCreatorLink}
-                onLink={setUploadCreatorLink}
-              />
+              {phase === "uploading" ? (
+                <View style={styles.progressCard}>
+                  <ActivityIndicator color="#5046e5" />
+                  <Text style={styles.progressLabel}>Uploading… {progress}%</Text>
+                  <View style={styles.bar}>
+                    <View style={[styles.barFill, { width: `${progress}%` }]} />
+                  </View>
+                </View>
+              ) : phase === "processing" ? (
+                <View style={styles.progressCard}>
+                  <ActivityIndicator color="#5046e5" />
+                  <Text style={styles.progressLabel}>Processing on Mux…</Text>
+                  <Text style={styles.progressHint}>We’ll publish it automatically the moment it’s ready.</Text>
+                </View>
+              ) : !picked ? (
+                Platform.OS === "web" ? (
+                  <View style={styles.dropzone}>
+                    <Icon name="cloud-upload-outline" size={30} color="#5046e5" />
+                    <Text style={styles.pickerText}>Choose a video</Text>
+                    <Text style={styles.pickerSub}>MP4 · 9:16 · under {Math.round(MAX_LOCAL_BYTES / 1024)} KB</Text>
+                    {createElement("input", {
+                      type: "file",
+                      accept: "video/*",
+                      onChange: onWebFile,
+                      style: {
+                        position: "absolute",
+                        top: 0,
+                        left: 0,
+                        width: "100%",
+                        height: "100%",
+                        opacity: 0,
+                        cursor: "pointer",
+                      },
+                    })}
+                  </View>
+                ) : (
+                  <Pressable style={styles.dropzone} onPress={pickNative}>
+                    <Icon name="cloud-upload-outline" size={30} color="#5046e5" />
+                    <Text style={styles.pickerText}>Choose a video</Text>
+                    <Text style={styles.pickerSub}>MP4 · 9:16 · under 100 MB</Text>
+                  </Pressable>
+                )
+              ) : (
+                <View style={styles.details}>
+                  <View style={styles.thumb}>
+                    <Icon name="videocam-outline" size={28} color="#5046e5" />
+                    <Text style={styles.thumbText}>{Math.round(picked.durationMs / 1000)}s · 9:16</Text>
+                  </View>
+                  <TextInput
+                    style={styles.input}
+                    placeholder="Title"
+                    value={uploadTitle}
+                    onChangeText={setUploadTitle}
+                    maxLength={120}
+                  />
+                  {failure ? <Text style={styles.error}>{failure}</Text> : null}
+                  <Pressable
+                    style={[styles.cta, submitting && styles.ctaDisabled]}
+                    onPress={publishUpload}
+                    disabled={submitting}
+                  >
+                    {submitting ? (
+                      <ActivityIndicator color="#fff" />
+                    ) : (
+                      <Text style={styles.ctaText}>Post Video</Text>
+                    )}
+                  </Pressable>
+                  <Pressable onPress={resetUpload}>
+                    <Text style={styles.link}>Choose a different video</Text>
+                  </Pressable>
+                </View>
+              )}
+
+              {failure && !picked ? <Text style={styles.error}>{failure}</Text> : null}
+
+              {phase === "idle" ? (
+                <>
+                  {categoryChips}
+                  <CreditsFields
+                    handle={uploadCreatorHandle}
+                    onHandle={setUploadCreatorHandle}
+                    link={uploadCreatorLink}
+                    onLink={setUploadCreatorLink}
+                  />
+                </>
+              ) : null}
             </>
-          ) : null}
+          )}
         </View>
       )}
     </ScrollView>
