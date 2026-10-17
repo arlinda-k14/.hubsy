@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Hubsy — Widget Test | Creative Hub Kosovo</title>
+<meta name="color-scheme" content="light">
+<meta name="theme-color" content="#16141F">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #16141F;
+    --paper: #F7F5F0;
+    --violet: #5B3DF5;
+    --violet-ink: #4A2EDB;
+    --text: #1A1725;
+    --muted: #56525F;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--paper);
+    color: var(--text);
+    font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 720px; margin: 0 auto; padding: 64px 24px 140px; }
+  .badge {
+    display: inline-block;
+    font: 600 12px/1 Inter, sans-serif;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--violet-ink);
+    background: #EDE9FF;
+    padding: 7px 12px;
+    border-radius: 999px;
+  }
+  h1 {
+    font-family: "Space Grotesk", Inter, sans-serif;
+    font-weight: 700;
+    font-size: clamp(2rem, 5vw, 3rem);
+    line-height: 1.05;
+    margin: 20px 0 12px;
+    letter-spacing: -.01em;
+  }
+  p.lede { font-size: 17px; line-height: 1.6; color: var(--muted); margin: 0 0 28px; }
+  .card {
+    background: #fff;
+    border: 1px solid #ECE8F5;
+    border-radius: 16px;
+    padding: 22px 22px;
+    margin-bottom: 18px;
+    box-shadow: 0 1px 2px rgba(22, 20, 31, .05);
+  }
+  .card h2 { font-family: "Space Grotesk", Inter, sans-serif; font-size: 16px; margin: 0 0 10px; }
+  .card p, .card li { font-size: 14.5px; line-height: 1.6; color: var(--muted); }
+  ol, ul { margin: 0; padding-left: 20px; }
+  code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: 13px;
+    background: #F2F0FA;
+    color: #3C2FB0;
+    padding: 2px 6px;
+    border-radius: 6px;
+  }
+  .note { font-size: 13.5px; color: var(--muted); border-left: 3px solid var(--violet); padding-left: 14px; }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <span class="badge">Widget Preview</span>
+  <h1>Hubsy test page</h1>
+  <p class="lede">
+    Local preview of the Hubsy chat widget for Creative Hub Kosovo. The floating button
+    at the bottom-right opens the assistant. Nothing is deployed from this page.
+  </p>
+
+  <div class="card">
+    <h2>How to use</h2>
+    <ol>
+      <li>Click the <strong>Hubsy</strong> button in the bottom-right corner.</li>
+      <li>Ask about the academies — courses, schedules, tuition, certifications.</li>
+      <li>Answers come from <code>knowledge-base.json</code>; unknown questions fall back to the contact details.</li>
+    </ol>
+  </div>
+
+  <div class="card">
+    <h2>Connecting a backend</h2>
+    <p>
+      This page ships with <code>endpoint: ""</code>, so the widget replies with the polite
+      fallback message. Point it at your Firebase Function by setting the config
+      <em>before</em> <code>chatbot.js</code> loads:
+    </p>
+    <p class="note">
+      Set <code>window.HUBSY_CONFIG.endpoint</code> to your Firebase Function URL
+      (e.g. <code>https://&lt;region&gt;-&lt;project&gt;.cloudfunctions.net/hubsyChat</code>).
+      The widget POSTs <code>{ message, history }</code> and reads <code>reply</code> from the response.
+    </p>
+  </div>
+</main>
+
+<script>
+  // Point the widget at the Firebase Function backend.
+  // Leave empty to preview the fallback behaviour locally.
+  window.HUBSY_CONFIG = {
+    endpoint: "",
+    // whatsapp: "+38349334437",
+    // phone: "+383 49 334 437",
+    // applyUrl: "https://creativehubkos.com/apply"
+  };
+</script>
+<script src="chatbot.js" defer></script>
+</body>
+</html>
