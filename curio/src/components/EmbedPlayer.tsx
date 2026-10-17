@@ -114,7 +114,8 @@ export function EmbedPlayer({ video, muted, active }: Props) {
 }
 
 // Explicit, crop-free sizing so the embed always paints edge-to-edge above the
-// placeholder layer (never behind it, never at zero size).
+// placeholder layer (never behind it, never at zero size). pointerEvents is
+// auto so an active embed is fully interactive.
 const iframeStyle = {
   display: "block",
   position: "absolute",
@@ -127,13 +128,14 @@ const iframeStyle = {
   margin: 0,
   padding: 0,
   zIndex: 2,
+  pointerEvents: "auto",
 } as const;
 
 const styles = StyleSheet.create({
   // Own stacking context so the inner z-index 1/2 layers order deterministically.
   frame: { ...StyleSheet.absoluteFillObject, overflow: "hidden", backgroundColor: "#171a26", zIndex: 1 },
   layerBack: { ...StyleSheet.absoluteFillObject, zIndex: 1 },
-  layerFront: { ...StyleSheet.absoluteFillObject, overflow: "hidden", zIndex: 2 },
+  layerFront: { ...StyleSheet.absoluteFillObject, overflow: "hidden", zIndex: 2, pointerEvents: "auto" },
   media: { width: "100%", height: "100%" },
   webview: { ...StyleSheet.absoluteFillObject, zIndex: 2, backgroundColor: "transparent" },
 });

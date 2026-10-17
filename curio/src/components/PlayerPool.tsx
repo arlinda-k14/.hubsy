@@ -6,12 +6,13 @@ import { ensureAudioSession, releaseAudioSession } from "../lib/audioSession";
 
 export type SlotRole = "current" | "next" | "prev" | "idle";
 
-// Browsers can't play Mux HLS without hls.js, so the web build uses the MP4
-// rendition; native uses HLS.
+// Browsers play uploaded MP4s through a native HTML5 <video> in VideoCard, so
+// the web build never runs a pooled expo-video player (that would double-play
+// audio behind the visible element). Native still uses the pooled player, and
+// the Mux HLS rendition when available.
 function sourceFor(video: Video): string | null {
-  return Platform.OS === "web"
-    ? video.mp4Url ?? video.playbackUrl
-    : video.playbackUrl ?? video.mp4Url;
+  if (Platform.OS === "web") return null;
+  return video.playbackUrl ?? video.mp4Url;
 }
 
 interface Slot {

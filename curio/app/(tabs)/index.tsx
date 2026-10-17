@@ -29,7 +29,11 @@ export default function FeedScreen() {
   const { playerFor, assignWindow, muteActive, enableSound, soundEnabled } = usePlayerPool(videos);
   const [liked, setLiked] = useState<Record<string, boolean>>({});
   const [saved, setSaved] = useState<Record<string, boolean>>({});
-  const activeIndex = useRef(0);
+  // The active card is tracked as React state (so cards re-render when it
+  // changes) alongside a ref the pool reads synchronously.
+  const [activeIndex, setActiveIndex] = useState(0);
+  const activeIndexRef = useRef(0);
+  const initialized = useRef(false);
 
   const isDesktop = winW >= 768;
   const PAGE = winH;
@@ -47,9 +51,20 @@ export default function FeedScreen() {
     }
   }
 
+  // Reset to the first card whenever the filter changes, and load its player
+  // the moment the first page of videos arrives so card 1 is active on load.
   useEffect(() => {
-    activeIndex.current = 0;
+    activeIndexRef.current = 0;
+    setActiveIndex(0);
+    initialized.current = false;
   }, [category]);
+
+  useEffect(() => {
+    if (videos.length && !initialized.current) {
+      initialized.current = true;
+      void assignWindow(0);
+    }
+  }, [videos.length, assignWindow]);
 
   // Only the card sitting in the centre of the viewport drives playback. We
   // commit an index from two sources: viewability (continuous, while scrolling)
@@ -58,9 +73,11 @@ export default function FeedScreen() {
     (index: number) => {
       if (!videos.length) return;
       const clamped = Math.max(0, Math.min(index, videos.length - 1));
-      if (clamped === activeIndex.current) return;
-      activeIndex.current = clamped;
-      void assignWindow(clamped);
+      setActiveIndex((prev) => (prev === clamped ? prev : clamped));
+      if (clamped !== activeIndexRef.current) {
+        activeIndexRef.current = clamped;
+        void assignWindow(clamped);
+      }
       if (clamped >= videos.length - 3) void loadMore();
     },
     [videos.length, assignWindow, loadMore],
@@ -99,6 +116,16 @@ export default function FeedScreen() {
   const onTap = useCallback(() => {
     if (!soundEnabled) enableSound();
   }, [soundEnabled, enableSound]);
+
+  // Tapping a card force-selects it, so playback starts immediately even if the
+  // scroll/viewability tracking missed the change.
+  const activateCard = useCallback(
+    (index: number) => {
+      commitIndex(index);
+      if (!soundEnabled) enableSound();
+    },
+    [commitIndex, soundEnabled, enableSound],
+  );
 
   const toggleLike = useCallback(
     async (videoId: string) => {
@@ -201,15 +228,16 @@ export default function FeedScreen() {
             onViewableItemsChanged={onViewableItemsChanged}
             onMomentumScrollEnd={onMomentumScrollEnd}
             viewabilityConfig={viewabilityConfig}
+            extraData={activeIndex}
             renderItem={({ item, index }) => {
-              const { player, role } = playerFor(index);
+              const { player } = playerFor(index);
               return (
                 <View style={[styles.page, { height: PAGE }]}>
                   {backdrop(item.posterUrl)}
                   <VideoCard
                     video={item}
                     player={player}
-                    role={role}
+                    isCurrent={index === activeIndex}
                     soundEnabled={soundEnabled}
                     liked={!!liked[item.id]}
                     saved={!!saved[item.id]}
@@ -218,6 +246,7 @@ export default function FeedScreen() {
                     width={cardW}
                     height={cardH}
                     radius={radius}
+                    onActivate={() => activateCard(index)}
                     onLike={() => toggleLike(item.id)}
                     onComment={() =>
                       requireAuth() &&

@@ -1,6 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { VideoView, type VideoPlayer } from "expo-video";
-import { Image, Linking, Pressable, StyleSheet, Text, View } from "react-native";
+import { createElement, useEffect, useRef, type ReactNode } from "react";
+import { Image, Linking, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import type { Video } from "../types/models";
 import { EmbedPlayer } from "./EmbedPlayer";
 import { VideoPlaceholder } from "./VideoPlaceholder";
@@ -25,7 +26,7 @@ const PLATFORM_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
 interface Props {
   video: Video;
   player: VideoPlayer | null;
-  role: "current" | "next" | "prev" | "idle";
+  isCurrent: boolean;
   soundEnabled: boolean;
   liked: boolean;
   saved: boolean;
@@ -34,6 +35,7 @@ interface Props {
   width: number;
   height: number;
   radius?: number;
+  onActivate: () => void;
   onLike: () => void;
   onComment: () => void;
   onSave: () => void;
@@ -55,7 +57,7 @@ function normalizeHandle(raw: string): string {
 export function VideoCard({
   video,
   player,
-  role,
+  isCurrent,
   soundEnabled,
   liked,
   saved,
@@ -64,6 +66,7 @@ export function VideoCard({
   width,
   height,
   radius = 0,
+  onActivate,
   onLike,
   onComment,
   onSave,
@@ -71,7 +74,7 @@ export function VideoCard({
   onShare,
 }: Props) {
   const isExternal = video.sourceType === "external";
-  const active = role === "current";
+  const active = isCurrent;
   const handle = video.authorHandle ? normalizeHandle(video.authorHandle) : "";
   const platformLabel = PLATFORM_LABEL[video.platform] ?? video.platform;
   const attribution = handle
@@ -79,31 +82,51 @@ export function VideoCard({
     : isExternal
       ? `Original on ${platformLabel}`
       : "";
+  const mp4 = video.mp4Url ?? video.playbackUrl;
+
+  // Exactly one card plays at a time. External clips use the platform embed;
+  // uploaded clips use a native HTML5 <video> on web (reliable autoplay +
+  // controls, no iframe) and the pooled expo-video player on native.
+  let media: ReactNode;
+  if (isExternal) {
+    media = <EmbedPlayer video={video} muted={!soundEnabled} active={active} />;
+  } else if (Platform.OS === "web") {
+    media =
+      active && mp4 ? (
+        <WebVideo src={mp4} poster={video.posterUrl} muted={!soundEnabled} />
+      ) : (
+        <Backdrop video={video} />
+      );
+  } else if (player) {
+    media = (
+      <VideoView
+        player={player}
+        style={styles.media}
+        contentFit="cover"
+        nativeControls={false}
+        allowsFullscreen={false}
+      />
+    );
+  } else {
+    media = <Backdrop video={video} />;
+  }
 
   return (
     <View style={[styles.card, { width, height, borderRadius: radius }]}>
-      {isExternal ? (
-        <EmbedPlayer video={video} muted={!soundEnabled} active={active} />
-      ) : player ? (
-        <VideoView
-          player={player}
-          style={styles.media}
-          contentFit="cover"
-          nativeControls={false}
-          allowsFullscreen={false}
-        />
-      ) : (
-        <View style={styles.media}>
-          {video.posterUrl ? (
-            <Image source={{ uri: video.posterUrl }} style={styles.poster} />
-          ) : (
-            <VideoPlaceholder platform={video.platform} authorHandle={video.authorHandle} />
-          )}
-        </View>
-      )}
+      {media}
 
       <Scrim side="top" />
       <Scrim side="bottom" />
+
+      {/* Fallback activation: tapping an inactive card force-selects it so the
+          player starts even if scroll tracking missed the change. */}
+      {!active ? (
+        <Pressable
+          style={styles.activateLayer}
+          onPress={onActivate}
+          accessibilityLabel="Play this clip"
+        />
+      ) : null}
 
       {attribution ? (
         <Pressable
@@ -128,7 +151,7 @@ export function VideoCard({
         </Pressable>
       ) : null}
 
-      <View style={styles.bottom}>
+      <View style={styles.bottom} pointerEvents="none">
         <Text style={styles.title} numberOfLines={2}>
           {video.title}
         </Text>
@@ -170,6 +193,64 @@ export function VideoCard({
     </View>
   );
 }
+
+// Static poster / styled placeholder shown behind, or instead of, live media.
+function Backdrop({ video }: { video: Video }) {
+  return (
+    <View style={styles.media}>
+      {video.posterUrl ? (
+        <Image source={{ uri: video.posterUrl }} style={styles.poster} />
+      ) : (
+        <VideoPlaceholder platform={video.platform} authorHandle={video.authorHandle} />
+      )}
+    </View>
+  );
+}
+
+// Native HTML5 <video> for uploaded clips on web. Native controls + autoplay
+// give clean browser playback without an iframe. If unmuted autoplay is blocked
+// we fall back to muted playback so the clip always moves.
+function WebVideo({ src, poster, muted }: { src: string; poster: string | null; muted: boolean }) {
+  const ref = useRef<HTMLVideoElement | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    el.muted = muted;
+    const play = el.play();
+    if (play && typeof play.catch === "function") {
+      play.catch(() => {
+        el.muted = true;
+        void el.play().catch(() => {});
+      });
+    }
+  }, [src, muted]);
+
+  return createElement("video", {
+    ref,
+    src,
+    poster: poster ?? undefined,
+    controls: true,
+    autoPlay: true,
+    playsInline: true,
+    muted,
+    loop: true,
+    preload: "auto",
+    style: webVideoStyle,
+  });
+}
+
+const webVideoStyle = {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  width: "100%",
+  height: "100%",
+  objectFit: "cover",
+  backgroundColor: "#000",
+  display: "block",
+  zIndex: 1,
+} as const;
 
 // Multi-band scrims emulate a soft gradient without a gradient dependency,
 // keeping text and icons legible over any video with no hard edges.
@@ -221,6 +302,7 @@ const styles = StyleSheet.create({
   card: { backgroundColor: "#05060a", overflow: "hidden" },
   media: { ...StyleSheet.absoluteFillObject, backgroundColor: "#0c0d12", zIndex: 1 },
   poster: { width: "100%", height: "100%", resizeMode: "cover" },
+  activateLayer: { ...StyleSheet.absoluteFillObject, zIndex: 2, backgroundColor: "transparent" },
   scrim: { position: "absolute", left: 0, right: 0, flexDirection: "column", zIndex: 2 },
   scrimTop: { top: 0, height: "20%" },
   scrimBottom: { bottom: 0, height: "40%" },
