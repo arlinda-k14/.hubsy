@@ -450,6 +450,11 @@ function ProfileVideoCard({
   const thumb = posterFor(video);
   const playable = isExternal || !!uri;
   const handle = video.authorHandle ? normalizeHandle(video.authorHandle) : "";
+  const attribution = handle
+    ? `Credited to ${handle}`
+    : isExternal
+      ? `Original on ${PLATFORM_LABEL[video.platform] ?? video.platform}`
+      : "";
   const height = Math.round(width * 1.3333);
 
   return (
@@ -509,11 +514,11 @@ function ProfileVideoCard({
           </View>
         ) : null}
 
-        {handle ? (
+        {attribution ? (
           <View style={styles.credit}>
             <Icon name="person-circle" size={14} color="#5046e5" />
             <Text style={styles.creditText} numberOfLines={1}>
-              Credited to {handle}
+              {attribution}
             </Text>
             <View style={styles.creditPlatform}>
               <Icon name={(PLATFORM_ICON[video.platform] ?? "link-outline") as never} size={11} color="#312e81" />
