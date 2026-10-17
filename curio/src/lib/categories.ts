@@ -1,4 +1,11 @@
-export const FEED_CATEGORIES = ["Marketing", "Vibe Coding", "Tech"] as const;
+export const FEED_CATEGORIES = [
+  "Marketing",
+  "Vibe Coding",
+  "Data",
+  "Coding",
+  "Tech",
+  "AI",
+] as const;
 
 export type FeedCategory = (typeof FEED_CATEGORIES)[number];
 
