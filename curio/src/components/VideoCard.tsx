@@ -10,6 +10,7 @@ const PLATFORM_LABEL: Record<string, string> = {
   youtube: "YouTube",
   tiktok: "TikTok",
   instagram: "Instagram",
+  linkedin: "LinkedIn",
   curio: "Curio",
 };
 
@@ -17,6 +18,7 @@ const PLATFORM_ICON: Record<string, keyof typeof Ionicons.glyphMap> = {
   youtube: "logo-youtube",
   tiktok: "logo-tiktok",
   instagram: "logo-instagram",
+  linkedin: "logo-linkedin",
   curio: "sparkles",
 };
 

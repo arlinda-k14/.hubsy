@@ -43,6 +43,11 @@ export function EmbedPlayer({ video, muted, active }: Props) {
           return `https://www.youtube.com/embed/${id}?autoplay=1&mute=${muted ? 1 : 0}&controls=0&playsinline=1&loop=1&playlist=${id}&modestbranding=1&rel=0`;
         }
       }
+      if (video.platform === "linkedin") {
+        // LinkedIn's /embed/feed/update endpoint is already a self-contained,
+        // responsive post player - hand it to the iframe verbatim.
+        return video.embedUrl;
+      }
       return video.embedUrl;
     }
     if (video.platform === "youtube" && video.originalUrl) {
