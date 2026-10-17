@@ -17,3 +17,7 @@ android/
 functions/node_modules/
 functions/lib/
 functions/.env
+
+# Local upload config (see .env.example). Values are public but kept local.
+.env
+.env.local
