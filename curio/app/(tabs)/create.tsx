@@ -18,18 +18,14 @@ import { FEED_CATEGORIES } from "../../src/lib/categories";
 import { Icon } from "../../src/components/Icon";
 import { db } from "../../src/lib/firebase";
 import { PLATFORM_LABEL, parseVideoLink } from "../../src/lib/linkParser";
+import {
+  CLOUDINARY_VIDEO_MAX_BYTES,
+  cloudinaryConfigured,
+  uploadVideoToCloudinary,
+  type CloudinarySource,
+} from "../../src/lib/cloudinary";
 import { probeUploadBackend, startUpload, watchVideo } from "../../src/lib/upload";
 import type { Video } from "../../src/types/models";
-
-const MAX_SECONDS = 90;
-const MAX_BYTES = 100 * 1024 * 1024;
-const TARGET_RATIO = 9 / 16;
-
-// Firestore caps a single document at 1 MiB. A base64 data URL inflates raw
-// bytes by ~4/3, so free-tier local uploads must keep raw clips well under that
-// ceiling (700 KB raw -> ~956 KB encoded, leaving room for the rest of the doc).
-const MAX_LOCAL_BYTES = 700 * 1024;
-const MAX_LOCAL_DATAURL = 1_040_000;
 
 type Mode = "link" | "upload";
 type Phase = "idle" | "uploading" | "processing";
@@ -52,24 +48,13 @@ function slugTag(raw: string): string {
   return raw.trim().toLowerCase().replace(/\s+/g, "-");
 }
 
+// Only the Cloudinary free-tier size cap is enforced now; the feed plays any
+// aspect with cover-crop, so we no longer block on 9:16 / duration.
 function validateClip(meta: Picked): string | null {
-  const problems: string[] = [];
-  if (meta.durationMs > MAX_SECONDS * 1000) problems.push(`longer than ${MAX_SECONDS}s`);
-  if (meta.fileSize && meta.fileSize > MAX_BYTES) problems.push("larger than 100 MB");
-  if (meta.width && meta.height && Math.abs(meta.width / meta.height - TARGET_RATIO) > 0.02)
-    problems.push("not 9:16 vertical");
-  return problems.length ? `This clip is ${problems.join(", ")}.` : null;
-}
-
-// Reads a picked File into a base64 data URL we can store directly in the
-// Firestore document (no Cloud Storage / Blaze required).
-function readFileAsDataUrl(file: File): Promise<string> {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new Error("Could not read that file."));
-    reader.readAsDataURL(file);
-  });
+  if (meta.fileSize && meta.fileSize > CLOUDINARY_VIDEO_MAX_BYTES) {
+    return "This file is larger than 100 MB. Cloudinary’s free tier caps video uploads at 100 MB.";
+  }
+  return null;
 }
 
 async function readWebVideo(file: File): Promise<Picked> {
@@ -297,7 +282,7 @@ export default function CreateScreen() {
     };
     const problem = validateClip(meta);
     if (problem) {
-      Alert.alert("Trim or crop needed", `${problem} Open the editor to trim or crop it first.`);
+      Alert.alert("Clip too large", problem);
       return;
     }
     setPicked(meta);
@@ -310,7 +295,7 @@ export default function CreateScreen() {
       const meta = await readWebVideo(file);
       const problem = validateClip(meta);
       if (problem) {
-        setFailure(`${problem} Use a 9:16 clip.`);
+        setFailure(problem);
         setPicked(null);
         webFileRef.current = null;
         return;
@@ -346,56 +331,67 @@ export default function CreateScreen() {
   const buildTags = () =>
     [uploadCategory, slugTag(uploadCategory)].filter((t, i, a) => a.indexOf(t) === i);
 
-  // Free-tier path: encode the picked file as a base64 data URL and store it in
-  // the video document itself, so it plays in the feed with no Cloud Storage.
-  const publishLocal = async () => {
-    const file = webFileRef.current;
-    if (!file || !user) return;
+  const writeUploadDoc = async (fields: {
+    mp4Url: string;
+    posterUrl: string | null;
+    mediaAssetId: string | null;
+  }) => {
+    if (!user) return;
+    const ref = doc(collection(db, "videos"));
+    await setDoc(ref, {
+      sourceType: "upload",
+      platform: "curio",
+      platformVideoId: null,
+      originalUrl: uploadCreatorLink.trim() || null,
+      embedUrl: null,
+      authorHandle: normalizeHandle(uploadCreatorHandle),
+      authorUid: user.uid,
+      originalTitle: null,
+      title: uploadTitle.trim().slice(0, 120),
+      mediaAssetId: fields.mediaAssetId,
+      muxUploadId: null,
+      playbackUrl: fields.mp4Url,
+      mp4Url: fields.mp4Url,
+      posterUrl: fields.posterUrl,
+      status: "ready",
+      tags: buildTags(),
+      creditOk: true,
+      reportCount: 0,
+      flagged: false,
+      likeCount: 0,
+      commentCount: 0,
+      createdAt: serverTimestamp(),
+      publishedAt: serverTimestamp(),
+    });
+  };
+
+  // Free-tier path: upload straight from the browser to Cloudinary's unsigned
+  // preset, then store the resulting delivery URL in the Firestore document.
+  const publishToCloudinary = async () => {
+    const source: CloudinarySource | null =
+      Platform.OS === "web"
+        ? webFileRef.current
+        : { uri: picked!.uri, name: `upload-${Date.now()}.mp4`, type: picked!.mimeType };
+    if (!source) throw new Error("Pick a video file first.");
+
     setSubmitting(true);
     setFailure(null);
     setPhase("uploading");
-    setProgress(10);
+    setProgress(0);
     try {
-      const dataUrl = await readFileAsDataUrl(file);
-      setProgress(70);
-      if (dataUrl.length > MAX_LOCAL_DATAURL) {
-        throw new Error(
-          `That clip encodes larger than the free-tier limit (~${Math.round(MAX_LOCAL_BYTES / 1024)} KB). Trim it shorter.`,
-        );
-      }
-      const ref = doc(collection(db, "videos"));
-      await setDoc(ref, {
-        sourceType: "upload",
-        platform: "curio",
-        platformVideoId: null,
-        originalUrl: uploadCreatorLink.trim() || null,
-        embedUrl: null,
-        authorHandle: normalizeHandle(uploadCreatorHandle),
-        authorUid: user.uid,
-        originalTitle: null,
-        title: uploadTitle.trim().slice(0, 120),
-        mediaAssetId: null,
-        muxUploadId: null,
-        playbackUrl: null,
-        mp4Url: dataUrl,
-        posterUrl: null,
-        status: "ready",
-        tags: buildTags(),
-        creditOk: true,
-        reportCount: 0,
-        flagged: false,
-        likeCount: 0,
-        commentCount: 0,
-        createdAt: serverTimestamp(),
-        publishedAt: serverTimestamp(),
-      });
+      const up = await uploadVideoToCloudinary(source, setProgress);
       setProgress(100);
+      await writeUploadDoc({
+        mp4Url: up.mp4Url,
+        posterUrl: up.posterUrl,
+        mediaAssetId: up.publicId,
+      });
       const done = uploadTitle.trim();
       resetUpload();
       setUploadDone(done);
     } catch (e) {
       setPhase("idle");
-      setFailure(e instanceof Error ? e.message : "Could not store that clip.");
+      setFailure(e instanceof Error ? e.message : "Upload failed.");
     } finally {
       setSubmitting(false);
     }
@@ -415,21 +411,21 @@ export default function CreateScreen() {
       Alert.alert("Pick a category", "Choose a category for your clip.");
       return;
     }
-
-    // On web we prefer the free-tier local path when the clip fits the
-    // Firestore document budget; otherwise fall back to Mux if it's available.
-    const fitsLocal = Platform.OS === "web" && (picked.fileSize ?? 0) <= MAX_LOCAL_BYTES;
-    if (fitsLocal) {
-      await publishLocal();
+    if ((picked.fileSize ?? 0) > CLOUDINARY_VIDEO_MAX_BYTES) {
+      setFailure("This file is larger than 100 MB. Cloudinary’s free tier caps video uploads at 100 MB.");
       return;
     }
 
+    // Prefer the free Cloudinary pipeline (works on web and native, no Blaze).
+    if (cloudinaryConfigured()) {
+      await publishToCloudinary();
+      return;
+    }
+
+    // Fallback: the Mux pipeline, when the backend is deployed.
     if (!backendReady) {
-      const mb = picked.fileSize ? (picked.fileSize / (1024 * 1024)).toFixed(1) : "?";
       setFailure(
-        Platform.OS === "web"
-          ? `This clip is ${mb} MB. Free-tier local uploads must be under ${Math.round(MAX_LOCAL_BYTES / 1024)} KB — trim it shorter, or enable the Mux pipeline (Blaze) for larger files.`
-          : "Direct uploads need the Mux pipeline. Use “Paste Link” for external clips.",
+        "Uploads aren’t configured yet. Add your Cloudinary cloud name and unsigned preset (see .env.example), or enable the Mux pipeline.",
       );
       return;
     }
@@ -591,7 +587,7 @@ export default function CreateScreen() {
         </View>
       ) : (
         <View style={styles.panel}>
-          <Text style={styles.sub}>Direct upload · 90s max · vertical 9:16{Platform.OS === "web" ? ` · free-tier clips under ${Math.round(MAX_LOCAL_BYTES / 1024)} KB` : ""}</Text>
+          <Text style={styles.sub}>Direct upload · MP4 up to 100 MB · vertical looks best</Text>
 
           {uploadDone ? (
             <View style={styles.successCard}>
@@ -625,7 +621,7 @@ export default function CreateScreen() {
                   <View style={styles.dropzone}>
                     <Icon name="cloud-upload-outline" size={30} color="#5046e5" />
                     <Text style={styles.pickerText}>Choose a video</Text>
-                    <Text style={styles.pickerSub}>MP4 · 9:16 · under {Math.round(MAX_LOCAL_BYTES / 1024)} KB</Text>
+                    <Text style={styles.pickerSub}>MP4 · up to 100 MB</Text>
                     {createElement("input", {
                       type: "file",
                       accept: "video/*",
@@ -645,14 +641,14 @@ export default function CreateScreen() {
                   <Pressable style={styles.dropzone} onPress={pickNative}>
                     <Icon name="cloud-upload-outline" size={30} color="#5046e5" />
                     <Text style={styles.pickerText}>Choose a video</Text>
-                    <Text style={styles.pickerSub}>MP4 · 9:16 · under 100 MB</Text>
+                    <Text style={styles.pickerSub}>MP4 · up to 100 MB</Text>
                   </Pressable>
                 )
               ) : (
                 <View style={styles.details}>
                   <View style={styles.thumb}>
                     <Icon name="videocam-outline" size={28} color="#5046e5" />
-                    <Text style={styles.thumbText}>{Math.round(picked.durationMs / 1000)}s · 9:16</Text>
+                    <Text style={styles.thumbText}>{Math.round(picked.durationMs / 1000)}s · {picked.width}×{picked.height}</Text>
                   </View>
                   <TextInput
                     style={styles.input}

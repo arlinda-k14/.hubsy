@@ -19,7 +19,8 @@ service cloud.firestore {
 
       // Video docs are created and finalised by Cloud Functions (admin SDK) for
       // the Mux upload path, or directly by signed-in clients for external
-      // links and for free-tier local uploads (base64 data URL in mp4Url).
+      // links and for uploaded clips hosted on Cloudinary (short delivery URL
+      // in mp4Url).
       allow create: if signedIn()
         && request.resource.data.status == 'ready'
         && request.resource.data.authorUid == request.auth.uid
@@ -43,7 +44,7 @@ service cloud.firestore {
             && request.resource.data.platform == 'curio'
             && request.resource.data.mp4Url is string
             && request.resource.data.mp4Url.size() > 0
-            && request.resource.data.mp4Url.size() <= 1040000
+            && request.resource.data.mp4Url.size() <= 4096
           )
         );
       allow delete: if signedIn() && resource.data.authorUid == request.auth.uid;
