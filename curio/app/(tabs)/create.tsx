@@ -145,6 +145,7 @@ export default function CreateScreen() {
   const [linkDone, setLinkDone] = useState<string | null>(null);
   const handleTouched = useRef(false);
   const linkTouched = useRef(false);
+  const titleTouched = useRef(false);
 
   // Upload state
   const [picked, setPicked] = useState<Picked | null>(null);
@@ -185,6 +186,9 @@ export default function CreateScreen() {
         setCreatorHandle(parsed.value.authorHandle);
       }
       if (!linkTouched.current) setCreatorLink(parsed.value.originalUrl);
+      if (!titleTouched.current && !linkTitle.trim() && parsed.value.suggestedTitle) {
+        setLinkTitle(parsed.value.suggestedTitle);
+      }
     }
   };
 
@@ -243,6 +247,7 @@ export default function CreateScreen() {
       setCreatorLink("");
       handleTouched.current = false;
       linkTouched.current = false;
+      titleTouched.current = false;
     } catch (e) {
       setLinkError(e instanceof Error ? e.message : "Couldn’t save that clip.");
     } finally {
@@ -412,7 +417,7 @@ export default function CreateScreen() {
 
       {mode === "link" ? (
         <View style={styles.panel}>
-          <Text style={styles.sub}>Paste a YouTube, TikTok or Instagram link. We store the official embed and credit the creator.</Text>
+          <Text style={styles.sub}>Paste a YouTube, TikTok, Instagram or LinkedIn link. We store the official embed and credit the creator.</Text>
 
           {linkDone ? (
             <View style={styles.successCard}>
@@ -454,7 +459,10 @@ export default function CreateScreen() {
                 style={styles.input}
                 placeholder="Title"
                 value={linkTitle}
-                onChangeText={setLinkTitle}
+                onChangeText={(v) => {
+                  titleTouched.current = true;
+                  setLinkTitle(v);
+                }}
                 maxLength={120}
               />
 

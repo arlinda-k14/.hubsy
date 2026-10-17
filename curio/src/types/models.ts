@@ -10,7 +10,7 @@ export type VideoStatus =
   | "unpublished"
   | "removed";
 
-export type Platform = "curio" | "youtube" | "tiktok" | "instagram";
+export type Platform = "curio" | "youtube" | "tiktok" | "instagram" | "linkedin";
 
 export interface UserProfile {
   uid: string;

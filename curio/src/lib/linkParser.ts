@@ -6,6 +6,9 @@ export interface ParsedLink {
   embedUrl: string;
   originalUrl: string;
   authorHandle: string | null;
+  // Best-effort title we can pull from the URL itself (currently LinkedIn post
+  // slugs). Used to pre-fill the Title field so the creator doesn't start blank.
+  suggestedTitle?: string | null;
 }
 
 export type ParseResult = { ok: true; value: ParsedLink } | { ok: false; error: string };
@@ -114,9 +117,81 @@ function instagram(url: URL): ParseResult {
   };
 }
 
+// LinkedIn post / feed-update URLs we accept:
+//   https://www.linkedin.com/feed/update/urn:li:activity:{id}/
+//   https://www.linkedin.com/embed/feed/update/urn:li:ugcPost:{id}   (or share)
+//   https://www.linkedin.com/posts/{vanity}_{slug}-activity-{id}-{hash}/
+// and rewrite them to LinkedIn's public embed endpoint
+//   https://www.linkedin.com/embed/feed/update/urn:li:{kind}:{id}
+const LINKEDIN_URN = /urn:li:(activity|ugcpost|share):(\d+)/i;
+const LINKEDIN_SLUG_ACTIVITY = /activity-(\d{6,})/i;
+
+function titleFromSlug(text: string): string | null {
+  const clean = text.trim();
+  if (clean.length < 8) return null;
+  const cased = clean.charAt(0).toUpperCase() + clean.slice(1);
+  return cased.length > 120 ? `${cased.slice(0, 117)}…` : cased;
+}
+
+function linkedin(url: URL): ParseResult {
+  const path = decodeURIComponent(url.pathname);
+  const urn = path.match(LINKEDIN_URN);
+  const slugActivity = path.match(LINKEDIN_SLUG_ACTIVITY);
+  const id = urn?.[2] ?? slugActivity?.[1] ?? null;
+
+  if (!id) {
+    return {
+      ok: false,
+      error:
+        "Couldn’t read that LinkedIn link. Use a post or feed-update URL containing an activity, ugcPost or share id.",
+    };
+  }
+
+  // Preserve the exact URN kind when the URL carries one (share / ugcPost /
+  // activity); otherwise default to the ugcPost form LinkedIn's own
+  // "Embed this post" control emits.
+  const kind = urn ? urn[1].toLowerCase().replace("ugcpost", "ugcPost") : "ugcPost";
+  const embedUrl = `https://www.linkedin.com/embed/feed/update/urn:li:${kind}:${id}`;
+
+  const parts = path.split("/").filter(Boolean);
+  const postsIndex = parts.indexOf("posts");
+  const slug = postsIndex >= 0 ? parts[postsIndex + 1] : null;
+
+  let authorHandle: string | null = null;
+  let suggestedTitle: string | null = null;
+  if (slug) {
+    const underscore = slug.indexOf("_");
+    if (underscore > 0) {
+      const vanity = slug.slice(0, underscore);
+      if (/^[A-Za-z0-9-]{2,}$/.test(vanity)) authorHandle = `@${vanity}`;
+      const text = slug
+        .slice(underscore + 1)
+        .replace(/activity-\d+.*$/i, "")
+        .replace(/-+$/g, "")
+        .replace(/-/g, " ")
+        .trim();
+      suggestedTitle = titleFromSlug(text);
+    } else if (!/activity-/i.test(slug) && /^[A-Za-z0-9-]{2,}$/.test(slug)) {
+      authorHandle = `@${slug}`;
+    }
+  }
+
+  return {
+    ok: true,
+    value: {
+      platform: "linkedin",
+      videoId: id,
+      embedUrl,
+      originalUrl: url.origin + url.pathname,
+      authorHandle,
+      suggestedTitle,
+    },
+  };
+}
+
 export function parseVideoLink(raw: string): ParseResult {
   const url = toUrl(raw);
-  if (!url) return { ok: false, error: "Enter a valid YouTube, TikTok or Instagram link." };
+  if (!url) return { ok: false, error: "Enter a valid YouTube, TikTok, Instagram or LinkedIn link." };
 
   const host = url.hostname.replace(/^www\./, "");
   if (host === "youtu.be" || host.endsWith("youtube.com") || host.endsWith("youtube-nocookie.com")) {
@@ -124,13 +199,18 @@ export function parseVideoLink(raw: string): ParseResult {
   }
   if (host.endsWith("tiktok.com")) return tiktok(url);
   if (host.endsWith("instagram.com")) return instagram(url);
+  if (host === "lnkd.in") {
+    return { ok: false, error: "Short LinkedIn links aren’t supported. Open the post and copy the full linkedin.com URL." };
+  }
+  if (host.endsWith("linkedin.com")) return linkedin(url);
 
-  return { ok: false, error: "Only YouTube, TikTok and Instagram links are supported." };
+  return { ok: false, error: "Only YouTube, TikTok, Instagram and LinkedIn links are supported." };
 }
 
 export const PLATFORM_LABEL: Record<Platform, string> = {
   youtube: "YouTube",
   tiktok: "TikTok",
   instagram: "Instagram",
+  linkedin: "LinkedIn",
   curio: "Curio",
 };
