@@ -7,9 +7,11 @@
  *     window.HUBSY_CONFIG = {
  *       endpoint: "https://<region>-<project>.cloudfunctions.net/hubsyChat",
  *       // optional overrides:
- *       whatsapp: "+38349334437",
- *       phone: "+383 49 334 437",
- *       applyUrl: "https://creativehubkos.com/apply"
+ *       applyUrl: "https://creativehubkos.com/apply",
+ *       contacts: {
+ *         flaka:   { name: "Flakë",   phone: "+383 49 334 437", email: "flaka@creativehubkos.com" },
+ *         leonita: { name: "Leonita", phone: "+383 49 334 438", email: "leonita@creativehubkos.com" }
+ *       }
  *     };
  *   </script>
  *   <script src="chatbot.js" defer></script>
@@ -17,6 +19,8 @@
  * The widget POSTs JSON { message, history } to `endpoint` and expects a JSON
  * reply shaped as one of: { reply } | { message } | { text } |
  * { choices: [{ message: { content } }] }.
+ *
+ * Brand palette: creativehubkos.com — navy #051238, accent green #00E087/#00FF94.
  */
 (function () {
   "use strict";
@@ -24,34 +28,62 @@
   var DEFAULTS = {
     endpoint: "",
     title: "Hubsy | Creative Hub Kosovo",
-    subtitle: "AI Assistant · Zakonisht përgjigjet menjëherë",
+    subtitle: "Asistenti AI · Përgjigjet në shqip ose anglisht",
     launcherLabel: "Hubsy",
-    accent: "#5B3DF5",
-    accentDark: "#4A2EDB",
-    ink: "#16141F",
-    whatsapp: "+38349334437",
-    phone: "+383 49 334 437",
+    // creativehubkos.com brand colors
+    navy: "#051238",
+    navy2: "#1A2240",
+    accent: "#00E087",
+    accentBright: "#00FF94",
+    accentDark: "#00B26B",
+    soft: "#E9FBF3",
+    logBg: "#F6F8FB",
+    border: "#E6EAF2",
+    muted: "#5A647E",
+    mutedLight: "#8891AE",
+    languageDefault: "sq",
+    contacts: {
+      flaka: { name: "Flakë", phone: "+383 49 334 437", email: "flaka@creativehubkos.com" },
+      leonita: { name: "Leonita", phone: "+383 49 334 438", email: "leonita@creativehubkos.com" }
+    },
+    // Academy → responsible contact (Group A: Flakë, Group B: Leonita)
+    academyGroups: {
+      A: ["Data Engineering, Cloud & AI", "Vibe Coding & AI Agents",
+          "AI-powered Product & Project Management", "Full-stack Development"],
+      B: ["Data Science & Analytics", "Digital Marketing", "Human Resources"]
+    },
     applyUrl: "",
     maxHistory: 12,
     storageKey: "hubsy.chat.history.v1",
     greeting:
       "Përshëndetje! Unë jam Hubsy, asistenti AI i Creative Hub Kosovo. " +
       "Mund t'ju ndihmoj me pyetje rreth akademive tona: kurse, module, orare, " +
-      "çmime dhe certifikime. Si mund t'ju ndihmoj?\n\n" +
-      "Hi! I'm Hubsy, Creative Hub Kosovo's AI assistant. Ask me about our " +
-      "academies — courses, modules, schedules, tuition and certifications."
+      "çmime, certifikime dhe aplikim. Si mund t'ju ndihmoj?"
   };
 
   var CFG = Object.assign({}, DEFAULTS, window.HUBSY_CONFIG || {});
+  CFG.contacts = Object.assign({}, DEFAULTS.contacts, (window.HUBSY_CONFIG || {}).contacts || {});
+
+  var FLAKA = CFG.contacts.flaka;
+  var LEONITA = CFG.contacts.leonita;
+
+  function telHref(phone) {
+    return "tel:" + String(phone).replace(/[^\d+]/g, "");
+  }
 
   var FALLBACK =
     "Për këtë pyetje nuk kam informacion të saktë, prandaj nuk dua të hamendësoj. " +
-    "Ju lutem kontaktoni Creative Hub Kosovo direkt:\n" +
-    "• WhatsApp / telefon: " + CFG.phone + "\n" +
-    (CFG.applyUrl ? "• Formulari i aplikimit: " + CFG.applyUrl + "\n" : "") +
+    "Kontaktoni Creative Hub Kosovo direkt:\n" +
+    "• Data Engineering, Vibe Coding, Product & Project Management, Full-stack Development: " +
+    FLAKA.phone + " · " + FLAKA.email + "\n" +
+    "• Data Science, Digital Marketing, HR: " +
+    LEONITA.phone + " · " + LEONITA.email + "\n" +
     "\nFor this question I don't have exact information, so I won't guess. " +
-    "Please contact Creative Hub Kosovo directly via WhatsApp/phone (" + CFG.phone + ")" +
-    (CFG.applyUrl ? " or the application form." : ".");
+    "Please contact Creative Hub Kosovo directly:\n" +
+    "• Data Engineering, Vibe Coding, Product & Project Management, Full-stack Development: " +
+    FLAKA.phone + " · " + FLAKA.email + "\n" +
+    "• Data Science, Digital Marketing, HR: " +
+    LEONITA.phone + " · " + LEONITA.email;
 
   function el(tag, className, text) {
     var n = document.createElement(tag);
@@ -73,11 +105,6 @@
     });
   }
 
-  function waLink() {
-    var digits = String(CFG.whatsapp).replace(/[^\d]/g, "");
-    return "https://wa.me/" + digits;
-  }
-
   function build() {
     if (document.getElementById("hubsy-root")) return;
 
@@ -88,46 +115,47 @@
     style.textContent = [
       "#hubsy-root,#hubsy-root *{box-sizing:border-box;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}",
       "#hubsy-root{position:fixed;right:20px;bottom:20px;z-index:2147483000}",
-      "#hubsy-root .hubsy-launcher{display:flex;align-items:center;gap:10px;border:0;cursor:pointer;padding:12px 18px 12px 12px;border-radius:999px;background:linear-gradient(135deg,#6D51F7," + CFG.accentDark + ");color:#fff;font-weight:600;font-size:15px;box-shadow:0 10px 30px rgba(74,46,219,.38);transition:transform .18s ease,box-shadow .18s ease}",
-      "#hubsy-root .hubsy-launcher:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(74,46,219,.46)}",
-      "#hubsy-root .hubsy-launcher:focus-visible{outline:3px solid #A893FF;outline-offset:2px}",
-      "#hubsy-root .hubsy-launcher .hubsy-avatar{width:30px;height:30px;border-radius:50%;background:#fff;color:" + CFG.accentDark + ";display:grid;place-items:center;font-weight:800;font-size:15px}",
+      "#hubsy-root .hubsy-launcher{display:flex;align-items:center;gap:10px;border:0;cursor:pointer;padding:12px 18px 12px 12px;border-radius:999px;background:" + CFG.navy + ";color:#fff;font-weight:600;font-size:15px;box-shadow:0 10px 30px rgba(5,18,56,.34);transition:transform .18s ease,box-shadow .18s ease}",
+      "#hubsy-root .hubsy-launcher:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(5,18,56,.42),0 0 0 3px rgba(0,224,135,.35)}",
+      "#hubsy-root .hubsy-launcher:focus-visible{outline:3px solid " + CFG.accent + ";outline-offset:2px}",
+      "#hubsy-root .hubsy-launcher .hubsy-avatar{width:30px;height:30px;border-radius:50%;background:" + CFG.accentBright + ";color:" + CFG.navy + ";display:grid;place-items:center;font-weight:800;font-size:15px}",
       "#hubsy-root .hubsy-launcher.hubsy-hidden{display:none}",
-      "#hubsy-root .hubsy-window{position:absolute;right:0;bottom:74px;width:380px;max-width:calc(100vw - 32px);height:600px;max-height:calc(100vh - 120px);background:#fff;border-radius:18px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(22,20,31,.28);opacity:0;transform:translateY(12px) scale(.98);pointer-events:none;transition:opacity .2s ease,transform .2s ease}",
+      "#hubsy-root .hubsy-window{position:absolute;right:0;bottom:74px;width:380px;max-width:calc(100vw - 32px);height:600px;max-height:calc(100vh - 120px);background:#fff;border-radius:18px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(5,18,56,.28);opacity:0;transform:translateY(12px) scale(.98);pointer-events:none;transition:opacity .2s ease,transform .2s ease}",
       "#hubsy-root.hubsy-open .hubsy-window{opacity:1;transform:none;pointer-events:auto}",
-      "#hubsy-root .hubsy-head{background:" + CFG.ink + ";color:#F7F5F0;padding:16px 18px;display:flex;align-items:center;gap:12px}",
-      "#hubsy-root .hubsy-head .hubsy-avatar{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#6D51F7," + CFG.accentDark + ");color:#fff;display:grid;place-items:center;font-weight:800;font-size:16px;flex:none}",
+      "#hubsy-root .hubsy-head{background:" + CFG.navy + ";color:#FFFFFF;padding:16px 18px;display:flex;align-items:center;gap:12px}",
+      "#hubsy-root .hubsy-head .hubsy-avatar{width:38px;height:38px;border-radius:50%;background:" + CFG.accentBright + ";color:" + CFG.navy + ";display:grid;place-items:center;font-weight:800;font-size:16px;flex:none}",
       "#hubsy-root .hubsy-head-txt{min-width:0;flex:1}",
       "#hubsy-root .hubsy-title{font-weight:700;font-size:15px;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
-      "#hubsy-root .hubsy-sub{font-size:12px;color:#B9B3C7;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
-      "#hubsy-root .hubsy-close{background:transparent;border:0;color:#B9B3C7;cursor:pointer;font-size:22px;line-height:1;padding:4px 6px;border-radius:8px}",
-      "#hubsy-root .hubsy-close:hover{color:#fff;background:rgba(255,255,255,.08)}",
-      "#hubsy-root .hubsy-log{flex:1;overflow-y:auto;padding:18px;background:#F7F5F0;display:flex;flex-direction:column;gap:12px}",
+      "#hubsy-root .hubsy-sub{font-size:12px;color:" + CFG.mutedLight + ";margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+      "#hubsy-root .hubsy-close{background:transparent;border:0;color:" + CFG.mutedLight + ";cursor:pointer;font-size:22px;line-height:1;padding:4px 6px;border-radius:8px}",
+      "#hubsy-root .hubsy-close:hover{color:#fff;background:rgba(255,255,255,.1)}",
+      "#hubsy-root .hubsy-log{flex:1;overflow-y:auto;padding:18px;background:" + CFG.logBg + ";display:flex;flex-direction:column;gap:12px}",
       "#hubsy-root .hubsy-msg{max-width:84%;padding:11px 14px;border-radius:16px;font-size:14.5px;line-height:1.5}",
-      "#hubsy-root .hubsy-msg.hubsy-bot{background:#fff;color:#1A1725;border:1px solid #ECE8F5;border-bottom-left-radius:6px;align-self:flex-start;box-shadow:0 1px 2px rgba(22,20,31,.05)}",
-      "#hubsy-root .hubsy-msg.hubsy-user{background:linear-gradient(135deg,#6D51F7," + CFG.accentDark + ");color:#fff;border-bottom-right-radius:6px;align-self:flex-end}",
+      "#hubsy-root .hubsy-msg.hubsy-bot{background:" + CFG.soft + ";color:" + CFG.navy + ";border:1px solid #D6F2E5;border-bottom-left-radius:6px;align-self:flex-start}",
+      "#hubsy-root .hubsy-msg.hubsy-user{background:#FFFFFF;color:" + CFG.navy + ";border:1px solid " + CFG.border + ";border-bottom-right-radius:6px;align-self:flex-end;box-shadow:0 1px 2px rgba(5,18,56,.06)}",
       "#hubsy-root .hubsy-p{margin:0 0 8px}",
       "#hubsy-root .hubsy-msg .hubsy-p:last-child{margin-bottom:0}",
-      "#hubsy-root .hubsy-typing{align-self:flex-start;display:flex;gap:5px;background:#fff;border:1px solid #ECE8F5;padding:12px 14px;border-radius:16px;border-bottom-left-radius:6px}",
-      "#hubsy-root .hubsy-dot{width:7px;height:7px;border-radius:50%;background:#A893FF;animation:hubsy-bounce 1.2s infinite ease-in-out}",
+      "#hubsy-root .hubsy-typing{align-self:flex-start;display:flex;gap:5px;background:" + CFG.soft + ";border:1px solid #D6F2E5;padding:12px 14px;border-radius:16px;border-bottom-left-radius:6px}",
+      "#hubsy-root .hubsy-dot{width:7px;height:7px;border-radius:50%;background:" + CFG.accentDark + ";animation:hubsy-bounce 1.2s infinite ease-in-out}",
       "#hubsy-root .hubsy-dot:nth-child(2){animation-delay:.15s}",
       "#hubsy-root .hubsy-dot:nth-child(3){animation-delay:.3s}",
       "@keyframes hubsy-bounce{0%,60%,100%{transform:translateY(0);opacity:.5}30%{transform:translateY(-5px);opacity:1}}",
-      "#hubsy-root .hubsy-foot{border-top:1px solid #ECE8F5;padding:12px;background:#fff;display:flex;gap:8px;align-items:flex-end}",
-      "#hubsy-root .hubsy-input{flex:1;resize:none;border:1px solid #DCD6EC;border-radius:12px;padding:11px 12px;font-size:14.5px;line-height:1.4;max-height:120px;min-height:44px;color:#1A1725;outline:none}",
-      "#hubsy-root .hubsy-input:focus{border-color:" + CFG.accent + ";box-shadow:0 0 0 3px rgba(91,61,245,.14)}",
-      "#hubsy-root .hubsy-send{border:0;cursor:pointer;width:44px;height:44px;flex:none;border-radius:12px;background:" + CFG.accent + ";color:#fff;font-size:17px;display:grid;place-items:center;transition:background .15s ease}",
-      "#hubsy-root .hubsy-send:hover{background:" + CFG.accentDark + "}",
+      "#hubsy-root .hubsy-foot{border-top:1px solid " + CFG.border + ";padding:12px;background:#fff;display:flex;gap:8px;align-items:flex-end}",
+      "#hubsy-root .hubsy-input{flex:1;resize:none;border:1px solid " + CFG.border + ";border-radius:12px;padding:11px 12px;font-size:14.5px;line-height:1.4;max-height:120px;min-height:44px;color:" + CFG.navy + ";outline:none;background:#fff}",
+      "#hubsy-root .hubsy-input::placeholder{color:" + CFG.mutedLight + "}",
+      "#hubsy-root .hubsy-input:focus{border-color:" + CFG.accent + ";box-shadow:0 0 0 3px rgba(0,224,135,.18)}",
+      "#hubsy-root .hubsy-send{border:0;cursor:pointer;width:44px;height:44px;flex:none;border-radius:12px;background:" + CFG.accent + ";color:" + CFG.navy + ";font-size:17px;display:grid;place-items:center;transition:background .15s ease}",
+      "#hubsy-root .hubsy-send:hover{background:" + CFG.accentDark + ";color:#fff}",
       "#hubsy-root .hubsy-send:disabled{opacity:.5;cursor:not-allowed}",
-      "#hubsy-root .hubsy-cta{display:inline-flex;flex-wrap:wrap;gap:8px;margin-top:10px}",
-      "#hubsy-root .hubsy-cta a{font-size:13px;font-weight:600;text-decoration:none;color:" + CFG.accentDark + ";background:#EDE9FF;padding:7px 11px;border-radius:999px}",
-      "#hubsy-root .hubsy-cta a:hover{background:#E1DAFF}",
+      "#hubsy-root .hubsy-cta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}",
+      "#hubsy-root .hubsy-cta a{font-size:12.5px;font-weight:600;text-decoration:none;color:" + CFG.navy + ";background:#FFFFFF;border:1px solid #CDEFDF;padding:7px 11px;border-radius:999px}",
+      "#hubsy-root .hubsy-cta a:hover{border-color:" + CFG.accentDark + ";background:" + CFG.soft + "}",
       "@media(max-width:480px){#hubsy-root{right:12px;bottom:12px;left:12px}#hubsy-root .hubsy-window{right:0;left:0;bottom:68px;width:auto;height:calc(100vh - 100px);max-height:none}#hubsy-root .hubsy-launcher{width:100%;justify-content:center}}"
     ].join("\n");
 
     var launcher = el("button", "hubsy-launcher");
     launcher.type = "button";
-    launcher.setAttribute("aria-label", "Open Hubsy chat");
+    launcher.setAttribute("aria-label", "Hap bisedën me Hubsy");
     launcher.innerHTML =
       '<span class="hubsy-avatar" aria-hidden="true">H</span>' +
       '<span class="hubsy-launcher-label"></span>';
@@ -136,7 +164,7 @@
     var win = el("div", "hubsy-window");
     win.setAttribute("role", "dialog");
     win.setAttribute("aria-modal", "false");
-    win.setAttribute("aria-label", "Hubsy chat");
+    win.setAttribute("aria-label", "Bisedë me Hubsy");
 
     var head = el("div", "hubsy-head");
     var hAvatar = el("div", "hubsy-avatar", "H");
@@ -146,7 +174,7 @@
     headTxt.appendChild(el("div", "hubsy-sub", CFG.subtitle));
     var close = el("button", "hubsy-close", "\u00D7");
     close.type = "button";
-    close.setAttribute("aria-label", "Close chat");
+    close.setAttribute("aria-label", "Mbyll bisedën");
     head.appendChild(hAvatar);
     head.appendChild(headTxt);
     head.appendChild(close);
@@ -158,11 +186,11 @@
     var foot = el("div", "hubsy-foot");
     var input = el("textarea", "hubsy-input");
     input.setAttribute("rows", "1");
-    input.setAttribute("placeholder", "Shkruani një mesazh… / Type a message…");
-    input.setAttribute("aria-label", "Message Hubsy");
+    input.setAttribute("placeholder", "Shkruani një mesazh… (Type a message…)");
+    input.setAttribute("aria-label", "Mesazh për Hubsy");
     var send = el("button", "hubsy-send", "\u27A4");
     send.type = "button";
-    send.setAttribute("aria-label", "Send message");
+    send.setAttribute("aria-label", "Dërgo mesazhin");
     foot.appendChild(input);
     foot.appendChild(send);
 
@@ -199,10 +227,11 @@
     } catch (e) {}
   }
 
-  function addBubble(role, text) {
+  function addBubble(role, text, opts) {
+    opts = opts || {};
     var b = el("div", "hubsy-msg hubsy-" + (role === "user" ? "user" : "bot"));
     bubbleText(b, text);
-    if (role !== "user") b.appendChild(ctaBlock());
+    if (role !== "user" && opts.withCta) b.appendChild(ctaBlock());
     ui.log.appendChild(b);
     ui.log.scrollTop = ui.log.scrollHeight;
     return b;
@@ -210,18 +239,23 @@
 
   function ctaBlock() {
     var wrap = el("div", "hubsy-cta");
-    var wa = el("a", null, "WhatsApp " + CFG.phone);
-    wa.href = waLink();
-    wa.target = "_blank";
-    wa.rel = "noopener";
-    wrap.appendChild(wa);
-    if (CFG.applyUrl) {
-      var ap = el("a", null, "Apliko / Apply");
-      ap.href = CFG.applyUrl;
-      ap.target = "_blank";
-      ap.rel = "noopener";
-      wrap.appendChild(ap);
+
+    function link(label, href) {
+      var a = el("a", null, label);
+      a.href = href;
+      if (/^https?:/i.test(href)) {
+        a.target = "_blank";
+        a.rel = "noopener";
+      }
+      wrap.appendChild(a);
+      return a;
     }
+
+    link(FLAKA.name + ": " + FLAKA.phone, telHref(FLAKA.phone));
+    link(LEONITA.name + ": " + LEONITA.phone, telHref(LEONITA.phone));
+    link(FLAKA.email, "mailto:" + FLAKA.email);
+    link(LEONITA.email, "mailto:" + LEONITA.email);
+    if (CFG.applyUrl) link("Apliko / Apply", CFG.applyUrl);
     return wrap;
   }
 
@@ -230,7 +264,7 @@
     t.appendChild(el("span", "hubsy-dot"));
     t.appendChild(el("span", "hubsy-dot"));
     t.appendChild(el("span", "hubsy-dot"));
-    t.setAttribute("aria-label", "Hubsy is typing");
+    t.setAttribute("aria-label", "Hubsy po shkruan");
     ui.log.appendChild(t);
     ui.log.scrollTop = ui.log.scrollHeight;
     return t;
@@ -257,7 +291,8 @@
     }
     var body = {
       message: message,
-      history: history.slice(-CFG.maxHistory)
+      history: history.slice(-CFG.maxHistory),
+      language: CFG.languageDefault
     };
     return fetch(CFG.endpoint, {
       method: "POST",
@@ -269,7 +304,7 @@
     }).then(function (data) {
       var reply = parseReply(data);
       if (!reply) throw new Error("Empty reply");
-      return { reply: reply };
+      return { reply: reply, fallback: !!data.fallback };
     }).catch(function (err) {
       if (window.console && console.warn) console.warn("[Hubsy] backend error:", err);
       return { reply: FALLBACK, fallback: true };
@@ -291,7 +326,7 @@
     requestReply(text).then(function (result) {
       typing.remove();
       history.push({ role: "assistant", content: result.reply });
-      addBubble("bot", result.reply);
+      addBubble("bot", result.reply, { withCta: result.fallback });
       saveHistory();
     }).finally(function () {
       busy = false;
@@ -307,7 +342,7 @@
 
   function open() {
     ui.root.classList.add("hubsy-open");
-    ui.launcher.setAttribute("aria-label", "Close Hubsy chat");
+    ui.launcher.setAttribute("aria-label", "Mbyll bisedën me Hubsy");
     if (!ui.log.childElementCount) {
       addBubble("bot", CFG.greeting);
     } else {
@@ -318,7 +353,7 @@
 
   function closeChat() {
     ui.root.classList.remove("hubsy-open");
-    ui.launcher.setAttribute("aria-label", "Open Hubsy chat");
+    ui.launcher.setAttribute("aria-label", "Hap bisedën me Hubsy");
     ui.launcher.focus();
   }
 

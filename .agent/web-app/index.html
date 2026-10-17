@@ -5,18 +5,19 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Hubsy — Widget Test | Creative Hub Kosovo</title>
 <meta name="color-scheme" content="light">
-<meta name="theme-color" content="#16141F">
+<meta name="theme-color" content="#051238">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root {
-    --ink: #16141F;
-    --paper: #F7F5F0;
-    --violet: #5B3DF5;
-    --violet-ink: #4A2EDB;
-    --text: #1A1725;
-    --muted: #56525F;
+    --ink: #051238;
+    --paper: #F6F8FB;
+    --accent: #00E087;
+    --accent-dark: #00B26B;
+    --soft: #E9FBF3;
+    --text: #051238;
+    --muted: #5A647E;
   }
   * { box-sizing: border-box; }
   body {
@@ -33,8 +34,8 @@
     font: 600 12px/1 Inter, sans-serif;
     letter-spacing: .08em;
     text-transform: uppercase;
-    color: var(--violet-ink);
-    background: #EDE9FF;
+    color: var(--ink);
+    background: var(--soft);
     padding: 7px 12px;
     border-radius: 999px;
   }
@@ -61,12 +62,12 @@
   code {
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
     font-size: 13px;
-    background: #F2F0FA;
-    color: #3C2FB0;
+    background: #EEF2F9;
+    color: var(--ink);
     padding: 2px 6px;
     border-radius: 6px;
   }
-  .note { font-size: 13.5px; color: var(--muted); border-left: 3px solid var(--violet); padding-left: 14px; }
+  .note { font-size: 13.5px; color: var(--muted); border-left: 3px solid var(--accent); padding-left: 14px; }
 </style>
 </head>
 <body>
@@ -107,9 +108,11 @@
   // Leave empty to preview the fallback behaviour locally.
   window.HUBSY_CONFIG = {
     endpoint: "",
-    // whatsapp: "+38349334437",
-    // phone: "+383 49 334 437",
-    // applyUrl: "https://creativehubkos.com/apply"
+    // applyUrl: "https://creativehubkos.com/apply",
+    // contacts: {
+    //   flaka:   { name: "Flakë",   phone: "+383 49 334 437", email: "flaka@creativehubkos.com" },
+    //   leonita: { name: "Leonita", phone: "+383 49 334 438", email: "leonita@creativehubkos.com" }
+    // }
   };
 </script>
 <script src="chatbot.js" defer></script>
