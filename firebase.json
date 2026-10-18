@@ -5,5 +5,19 @@
     "predeploy": [
       "node ./scripts/sync-data.mjs"
     ]
+  },
+  "hosting": {
+    "site": "hubsy-widget",
+    "public": "widget",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "cleanUrls": true,
+    "trailingSlash": false,
+    "predeploy": [
+      "node ./scripts/sync-widget.mjs"
+    ]
   }
 }

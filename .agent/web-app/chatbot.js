@@ -1,32 +1,27 @@
 /*!
- * Hubsy — Creative Hub Kosovo AI Assistant
- * Standalone embeddable chat widget.
+ * Hubsy — Creative Hub Kosovo AI Brand Assistant
+ * Standalone embeddable chat widget. Works two ways:
  *
- * Usage:
- *   <script>
- *     window.HUBSY_CONFIG = {
- *       endpoint: "https://<region>-<project>.cloudfunctions.net/hubsyChat",
- *       // optional overrides:
- *       applyUrl: "https://creativehubkos.com/apply",
- *       contacts: {
- *         flaka:   { name: "Flakë",   phone: "+383 49 334 437", email: "flaka@creativehubkos.com" },
- *         leonita: { name: "Leonita", phone: "+383 49 334 438", email: "leonita@creativehubkos.com" }
- *       }
- *     };
- *   </script>
- *   <script src="chatbot.js" defer></script>
+ *  1. CLIENT-SIDE (default, no backend / no Blaze plan): the widget fetches
+ *     knowledge-base.json from the same host as this script and answers
+ *     directly from it with a local retrieval engine. Quoted facts only.
  *
- * The widget POSTs JSON { message, history } to `endpoint` and expects a JSON
- * reply shaped as one of: { reply } | { message } | { text } |
- * { choices: [{ message: { content } }] }.
+ *  2. BACKEND (optional): set `endpoint` to the Firebase Function and the
+ *     widget POSTs { message, history } to it instead.
  *
- * Brand palette: creativehubkos.com — navy #051238, accent green #00E087/#00FF94.
+ * WordPress embed:
+ *   <script>window.HUBSY_CONFIG = { endpoint: "" };</script>
+ *   <script src="https://<your-host>/chatbot.js" defer></script>
+ *
+ * Expected reply shape from a backend endpoint: { reply } | { message } |
+ * { text } | { choices:[{ message:{ content } }] }.
  */
-(function () {
+(function (global) {
   "use strict";
 
   var DEFAULTS = {
     endpoint: "",
+    knowledgeBaseUrl: "",
     title: "Hubsy | Creative Hub Kosovo",
     subtitle: "Asistenti AI · Përgjigjet në shqip ose anglisht",
     launcherLabel: "Hubsy",
@@ -46,12 +41,6 @@
       flaka: { name: "Flakë", phone: "+383 49 334 437", email: "flaka@creativehubkos.com" },
       leonita: { name: "Leonita", phone: "+383 49 334 438", email: "leonita@creativehubkos.com" }
     },
-    // Academy → responsible contact (Group A: Flakë, Group B: Leonita)
-    academyGroups: {
-      A: ["Data Engineering, Cloud & AI", "Vibe Coding & AI Agents",
-          "AI-powered Product & Project Management", "Full-stack Development"],
-      B: ["Data Science & Analytics", "Digital Marketing", "Human Resources"]
-    },
     applyUrl: "",
     maxHistory: 12,
     storageKey: "hubsy.chat.history.v1",
@@ -61,29 +50,382 @@
       "çmime, certifikime dhe aplikim. Si mund t'ju ndihmoj?"
   };
 
-  var CFG = Object.assign({}, DEFAULTS, window.HUBSY_CONFIG || {});
-  CFG.contacts = Object.assign({}, DEFAULTS.contacts, (window.HUBSY_CONFIG || {}).contacts || {});
+  // ---------------------------------------------------------------------------
+  // Pure helpers (also exported for tests)
+  // ---------------------------------------------------------------------------
 
-  var FLAKA = CFG.contacts.flaka;
-  var LEONITA = CFG.contacts.leonita;
+  var STOPWORDS = {};
+  (
+    "e i të te se sa me në ne për per dhe a po jo jam je është eshte kjo ky këtë kete nga që qe një nje do mund kam ka më me shume shumë deri apo ose nuk kam kemi jeni janë jane " +
+    "the a an is are of to in for and or what how much does do can i you your it this that my we on at be with about which who when where please"
+  )
+    .split(/\s+/)
+    .forEach(function (w) {
+      if (w) STOPWORDS[w] = true;
+    });
 
-  function telHref(phone) {
-    return "tel:" + String(phone).replace(/[^\d+]/g, "");
+  function tokenize(text) {
+    return String(text)
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, " ")
+      .split(/\s+/)
+      .filter(function (t) {
+        return t.length >= 2 && !STOPWORDS[t];
+      });
   }
 
-  var FALLBACK =
-    "Për këtë pyetje nuk kam informacion të saktë, prandaj nuk dua të hamendësoj. " +
-    "Kontaktoni Creative Hub Kosovo direkt:\n" +
-    "• Data Engineering, Vibe Coding, Product & Project Management, Full-stack Development: " +
-    FLAKA.phone + " · " + FLAKA.email + "\n" +
-    "• Data Science, Digital Marketing, HR: " +
-    LEONITA.phone + " · " + LEONITA.email + "\n" +
-    "\nFor this question I don't have exact information, so I won't guess. " +
-    "Please contact Creative Hub Kosovo directly:\n" +
-    "• Data Engineering, Vibe Coding, Product & Project Management, Full-stack Development: " +
-    FLAKA.phone + " · " + FLAKA.email + "\n" +
-    "• Data Science, Digital Marketing, HR: " +
-    LEONITA.phone + " · " + LEONITA.email;
+  function stem(t) {
+    return t.length <= 5 ? t : t.slice(0, 5);
+  }
+
+  function hasWord(text, word) {
+    var i = -1;
+    while ((i = text.indexOf(word, i + 1)) !== -1) {
+      var before = i === 0 ? "" : text[i - 1];
+      var after = i + word.length >= text.length ? "" : text[i + word.length];
+      var bOk = before === "" || !/[\p{L}\p{N}]/u.test(before);
+      var aOk = after === "" || !/[\p{L}\p{N}]/u.test(after);
+      if (bOk && aOk) return true;
+    }
+    return false;
+  }
+
+  // Keyword match tolerant of Albanian/English suffixes: single-word keywords
+  // match as a word prefix ("kontakt" matches "kontakti"); phrases match whole.
+  function matchKeyword(text, kw) {
+    if (kw.indexOf(" ") !== -1) return text.indexOf(kw) !== -1;
+    var toks = text.split(/\s+/);
+    for (var i = 0; i < toks.length; i++) {
+      if (toks[i] === kw) return true;
+      if (kw.length >= 3 && toks[i].indexOf(kw) === 0) return true;
+    }
+    return false;
+  }
+
+  var ACADEMIES = {
+    dm: { name: "Digital Marketing & AI", keywords: ["digital marketing", "marketing", "meta ads", "google ads", "seo", "email marketing", "copywriting"] },
+    ds: { name: "Data Science & Analytics", keywords: ["data science", "data analytics", "analytics", "machine learning", "power bi", "statistika"] },
+    de: { name: "Data Engineering, Cloud & AI", keywords: ["data engineering", "engineering", "cloud", "pyspark", "databricks"] },
+    fs: { name: "Full-stack Development", keywords: ["full-stack", "fullstack", "full stack", "web development", "frontend", "react", "django", "javascript"] },
+    hr: { name: "Human Resources", keywords: ["human resources", "hr", "rekrutim", "recruitment", "performance management"] },
+    pm: { name: "AI-powered Product & Project Management", keywords: ["product management", "project management", "product & project", "product and project", "scrum"] },
+    vc: { name: "Vibe Coding & AI Agents", keywords: ["vibe coding", "vibe", "ai agents", "ai agent"] }
+  };
+
+  var GROUP_A = ["de", "vc", "pm", "fs"];
+
+  var INTENTS = {
+    price: ["kushton", "çmim", "cmim", "çmimet", "cmimet", "price", "cost", "tuition", "sa para", "fee"],
+    payment: ["këste", "keste", "installment", "installments", "pagesa", "pagesë", "pagese", "mënyra e pagesës"],
+    duration: ["zgjat", "kohëzgjatja", "kohezgjatja", "orari", "orar", "javë", "jave", "orë", "ore", "duration", "how long", "weeks", "hours"],
+    start: ["fillojnë", "fillojne", "fillon", "data e fillimit", "kur fillon", "start", "when does"],
+    modules: ["modulet", "moduli", "modul", "module", "kurrikula", "kurrikul", "curriculum", "syllabus", "programi", "program"],
+    format: ["format", "online", "fizik", "zoom", "in-person", "live"],
+    language: ["gjuhë", "gjuhe", "gjuha", "anglisht", "shqip", "language", "english", "albanian"],
+    location: ["kampus", "lokacion", "adres", "adresa", "ku ndodhet", "where", "location", "prishtin", "zyra"],
+    prerequisites: ["parakusht", "parakushtet", "kushtet", "pranimit", "requirements", "prerequisite", "aplikim", "apply", "aplikoj"],
+    projects: ["projekte", "projekt", "portfolio", "projects", "project"],
+    trainers: ["trajner", "trajneret", "trainer", "trainers", "instruktor", "profesor", "lecturer"],
+    audience: ["audienca", "target", "profili", "profile", "kush mund", "për kë", "per ke", "audience"],
+    certification: ["certifikatë", "certifikate", "certifikim", "diplom", "diplomë", "certification", "certificate", "cert"],
+    contact: ["kontakt", "përgjegjës", "pergjegjes", "personi", "telefon", "telefoni", "email", "numri", "numero"]
+  };
+
+  // Intents that only make sense when we know which academy is meant.
+  var ACADEMY_SPECIFIC = {
+    price: 1, payment: 1, duration: 1, modules: 1, projects: 1, trainers: 1, audience: 1, certification: 1
+  };
+
+  function detectAcademies(text) {
+    var t = String(text).toLowerCase();
+    var found = {};
+    Object.keys(ACADEMIES).forEach(function (id) {
+      var kws = ACADEMIES[id].keywords;
+      for (var i = 0; i < kws.length; i++) {
+        if (matchKeyword(t, kws[i])) {
+          found[id] = true;
+          break;
+        }
+      }
+    });
+    return found;
+  }
+
+  function detectIntents(text) {
+    var t = String(text).toLowerCase();
+    var found = {};
+    Object.keys(INTENTS).forEach(function (id) {
+      var kws = INTENTS[id];
+      for (var i = 0; i < kws.length; i++) {
+        if (matchKeyword(t, kws[i])) {
+          found[id] = true;
+          break;
+        }
+      }
+    });
+    return found;
+  }
+
+  function keys(obj) {
+    return Object.keys(obj);
+  }
+
+  function overlapCount(a, b) {
+    var n = 0;
+    keys(a).forEach(function (k) {
+      if (b[k]) n++;
+    });
+    return n;
+  }
+
+  function buildIndex(kb) {
+    return kb
+      .filter(function (e) {
+        return e && e.topic && e.answer;
+      })
+      .map(function (e) {
+        var topicLc = e.topic.toLowerCase();
+        var topicStems = {};
+        var topicTokens = {};
+        tokenize(e.topic).forEach(function (t) {
+          topicStems[stem(t)] = true;
+          topicTokens[t] = true;
+        });
+        var answerStems = {};
+        tokenize(e.answer).forEach(function (t) {
+          answerStems[stem(t)] = true;
+        });
+        return {
+          topic: e.topic,
+          answer: e.answer,
+          topicLc: topicLc,
+          academies: detectAcademies(topicLc),
+          intents: detectIntents(topicLc),
+          isSummary: /modulet|module|kurrikul|programi/i.test(topicLc),
+          topicStems: topicStems,
+          topicTokens: topicTokens,
+          answerStems: answerStems,
+          isGeneral: keys(detectAcademies(topicLc)).length === 0
+        };
+      });
+  }
+
+  // Some intents map onto the same knowledge-base entries.
+  var INTENT_ALIASES = { certification: ["price"] };
+
+  function intentOverlap(qIntent, entryIntents) {
+    var n = overlapCount(qIntent, entryIntents);
+    keys(INTENT_ALIASES).forEach(function (src) {
+      if (qIntent[src]) {
+        INTENT_ALIASES[src].forEach(function (alt) {
+          if (entryIntents[alt]) n++;
+        });
+      }
+    });
+    return n;
+  }
+
+  function scoreEntry(entry, qStems, qAcad, qIntent, qTokens) {
+    var score = 0;
+
+    var acadOverlap = overlapCount(qAcad, entry.academies);
+    score += 1 * acadOverlap;
+    if (keys(qAcad).length && keys(entry.academies).length && acadOverlap === 0) {
+      score -= 2;
+    }
+
+    var iOverlap = intentOverlap(qIntent, entry.intents);
+    score += 4 * iOverlap;
+    if (keys(qIntent).length && keys(entry.intents).length && iOverlap === 0) {
+      score -= 2;
+    }
+
+    var topicHits = 0;
+    keys(qStems).forEach(function (s) {
+      if (entry.topicStems[s]) topicHits++;
+    });
+    score += 2 * Math.min(topicHits, 8);
+
+    var answerHits = 0;
+    keys(qStems).forEach(function (s) {
+      if (entry.answerStems[s]) answerHits++;
+    });
+    score += 0.5 * Math.min(answerHits, 3);
+
+    if (qTokens) {
+      var exactHits = 0;
+      keys(qTokens).forEach(function (t) {
+        if (entry.topicTokens[t]) exactHits++;
+      });
+      score += 1.5 * Math.min(exactHits, 6);
+    }
+
+    if (entry.isSummary && qIntent.modules) score += 2;
+
+    return score;
+  }
+
+  function normalize(text) {
+    return String(text).toLowerCase().replace(/\s+/g, " ").trim();
+  }
+
+  var GREETINGS = ["pershendetje", "përshëndetje", "tung", "tungjatjeta", "miredita", "mirëdita", "dita e mire", "hello", "hi", "hey", "good morning", "good afternoon"];
+  var THANKS = ["faleminderit", "flm", "thanks", "thank you", "rrofsh"];
+
+  function createResponder(kb, cfg) {
+    cfg = cfg || {};
+    var index = buildIndex(kb);
+    var contacts = cfg.contacts || DEFAULTS.contacts;
+    var flaka = contacts.flaka;
+    var leonita = contacts.leonita;
+
+    function telHref(p) {
+      return "tel:" + String(p).replace(/[^\d+]/g, "");
+    }
+
+    function academyNames() {
+      return keys(ACADEMIES).map(function (id) {
+        return "• " + ACADEMIES[id].name;
+      }).join("\n");
+    }
+
+    function contactsFor(qAcad) {
+      var ids = keys(qAcad);
+      var lines = [];
+      if (ids.length) {
+        var groupA = ids.some(function (id) {
+          return GROUP_A.indexOf(id) !== -1;
+        });
+        var groupB = ids.some(function (id) {
+          return GROUP_A.indexOf(id) === -1;
+        });
+        if (groupA && !groupB) return { text: flaka.name + ": " + flaka.phone + " · " + flaka.email, single: flaka };
+        if (groupB && !groupA) return { text: leonita.name + ": " + leonita.phone + " · " + leonita.email, single: leonita };
+      }
+      return {
+        text: flaka.name + ": " + flaka.phone + " · " + flaka.email + "\n" +
+              leonita.name + ": " + leonita.phone + " · " + leonita.email,
+        single: null
+      };
+    }
+
+    function fallbackFor(qAcad) {
+      var routing = contactsFor(qAcad);
+      var reply =
+        "Për këtë pyetje nuk kam informacion të saktë, prandaj nuk dua të hamendësoj. " +
+        "Ju lutem kontaktoni Creative Hub Kosovo:\n" + routing.text + "\n\n" +
+        "For this question I don't have exact information, so I won't guess. " +
+        "Please contact Creative Hub Kosovo: " + routing.text;
+      return { reply: reply, fallback: true, kind: "fallback" };
+    }
+
+    function clarify(qIntent) {
+      void qIntent;
+      return {
+        reply:
+          "Për këtë pyetje më duhet të di për cilën akademi bëhet fjalë. Akademitë:\n" +
+          academyNames() +
+          "\n\nPër cilën akademi dëshironi informacion?",
+        fallback: false,
+        kind: "clarify"
+      };
+    }
+
+    function respond(message) {
+      var text = normalize(message);
+      if (!text) return null;
+
+      var words = text.split(" ").filter(Boolean);
+      var isGreeting = words.length <= 4 && GREETINGS.some(function (g) { return hasWord(text, g); });
+      if (isGreeting) {
+        return { reply: cfg.greeting || DEFAULTS.greeting, fallback: false, kind: "greeting" };
+      }
+      if (words.length <= 3 && THANKS.some(function (g) { return hasWord(text, g); })) {
+        return {
+          reply: "Me kënaqësi! Nëse keni pyetje të tjera për akademitë e Creative Hub Kosovo, jam këtu.",
+          fallback: false,
+          kind: "thanks"
+        };
+      }
+
+      var qAcad = detectAcademies(text);
+      var qIntent = detectIntents(text);
+
+      var wantsSpecific = keys(qIntent).some(function (i) { return ACADEMY_SPECIFIC[i]; });
+      if (wantsSpecific && keys(qAcad).length === 0) {
+        return clarify(qIntent);
+      }
+
+      var qStems = {};
+      var qTokens = {};
+      tokenize(text).forEach(function (t) {
+        qStems[stem(t)] = true;
+        qTokens[t] = true;
+      });
+
+      var best = null;
+      var bestScore = -Infinity;
+      for (var i = 0; i < index.length; i++) {
+        var s = scoreEntry(index[i], qStems, qAcad, qIntent, qTokens);
+        if (s > bestScore) {
+          bestScore = s;
+          best = index[i];
+        }
+      }
+
+      var MIN = 2.6;
+      if (best && bestScore >= MIN) {
+        return { reply: best.answer, fallback: false, kind: "entry", topic: best.topic, score: bestScore };
+      }
+      return fallbackFor(qAcad);
+    }
+
+    return {
+      respond: respond,
+      index: index,
+      detectAcademies: detectAcademies,
+      detectIntents: detectIntents,
+      _score: scoreEntry
+    };
+  }
+
+  var PURE = {
+    tokenize: tokenize,
+    stem: stem,
+    hasWord: hasWord,
+    detectAcademies: detectAcademies,
+    detectIntents: detectIntents,
+    buildIndex: buildIndex,
+    scoreEntry: scoreEntry,
+    createResponder: createResponder,
+    DEFAULTS: DEFAULTS
+  };
+
+  // Node/CommonJS: export for tests and stop (no DOM here).
+  if (typeof module !== "undefined" && module.exports) {
+    module.exports = PURE;
+    return;
+  }
+  if (typeof document === "undefined") return;
+
+  // ---------------------------------------------------------------------------
+  // Browser widget
+  // ---------------------------------------------------------------------------
+
+  var CFG = Object.assign({}, DEFAULTS, global.HUBSY_CONFIG || {});
+  CFG.contacts = Object.assign({}, DEFAULTS.contacts, (global.HUBSY_CONFIG || {}).contacts || {});
+
+  function scriptBase() {
+    var s = document.currentScript;
+    if (!s) {
+      var all = document.getElementsByTagName("script");
+      for (var i = all.length - 1; i >= 0; i--) {
+        if (all[i].src && /chatbot\.js(\?|$)/.test(all[i].src)) { s = all[i]; break; }
+      }
+    }
+    if (!s || !s.src) return "";
+    return s.src.replace(/[^/]*$/, "");
+  }
 
   function el(tag, className, text) {
     var n = document.createElement(tag);
@@ -93,9 +435,7 @@
   }
 
   function bubbleText(container, text) {
-    // Render plain text with paragraph breaks; never inject raw HTML.
-    var parts = String(text).split(/\n{2,}/);
-    parts.forEach(function (block) {
+    String(text).split(/\n{2,}/).forEach(function (block) {
       var p = el("p", "hubsy-p");
       block.split("\n").forEach(function (line, i) {
         if (i > 0) p.appendChild(document.createElement("br"));
@@ -106,7 +446,7 @@
   }
 
   function build() {
-    if (document.getElementById("hubsy-root")) return;
+    if (document.getElementById("hubsy-root")) return null;
 
     var root = el("div");
     root.id = "hubsy-root";
@@ -119,7 +459,6 @@
       "#hubsy-root .hubsy-launcher:hover{transform:translateY(-2px);box-shadow:0 14px 36px rgba(5,18,56,.42),0 0 0 3px rgba(0,224,135,.35)}",
       "#hubsy-root .hubsy-launcher:focus-visible{outline:3px solid " + CFG.accent + ";outline-offset:2px}",
       "#hubsy-root .hubsy-launcher .hubsy-avatar{width:30px;height:30px;border-radius:50%;background:" + CFG.accentBright + ";color:" + CFG.navy + ";display:grid;place-items:center;font-weight:800;font-size:15px}",
-      "#hubsy-root .hubsy-launcher.hubsy-hidden{display:none}",
       "#hubsy-root .hubsy-window{position:absolute;right:0;bottom:74px;width:380px;max-width:calc(100vw - 32px);height:600px;max-height:calc(100vh - 120px);background:#fff;border-radius:18px;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 64px rgba(5,18,56,.28);opacity:0;transform:translateY(12px) scale(.98);pointer-events:none;transition:opacity .2s ease,transform .2s ease}",
       "#hubsy-root.hubsy-open .hubsy-window{opacity:1;transform:none;pointer-events:auto}",
       "#hubsy-root .hubsy-head{background:" + CFG.navy + ";color:#FFFFFF;padding:16px 18px;display:flex;align-items:center;gap:12px}",
@@ -156,9 +495,7 @@
     var launcher = el("button", "hubsy-launcher");
     launcher.type = "button";
     launcher.setAttribute("aria-label", "Hap bisedën me Hubsy");
-    launcher.innerHTML =
-      '<span class="hubsy-avatar" aria-hidden="true">H</span>' +
-      '<span class="hubsy-launcher-label"></span>';
+    launcher.innerHTML = '<span class="hubsy-avatar" aria-hidden="true">H</span><span class="hubsy-launcher-label"></span>';
     launcher.querySelector(".hubsy-launcher-label").textContent = CFG.launcherLabel;
 
     var win = el("div", "hubsy-window");
@@ -211,6 +548,8 @@
 
   var history = loadHistory();
   var busy = false;
+  var responder = null;
+  var kbPromise = null;
 
   function loadHistory() {
     try {
@@ -227,6 +566,46 @@
     } catch (e) {}
   }
 
+  function kbUrl() {
+    if (CFG.knowledgeBaseUrl) return CFG.knowledgeBaseUrl;
+    var base = scriptBase();
+    return base ? base + "knowledge-base.json" : "knowledge-base.json";
+  }
+
+  function ensureResponder() {
+    if (responder) return Promise.resolve(responder);
+    if (!kbPromise) {
+      kbPromise = fetch(kbUrl())
+        .then(function (r) {
+          if (!r.ok) throw new Error("HTTP " + r.status);
+          return r.json();
+        })
+        .then(function (kb) {
+          responder = createResponder(kb, CFG);
+          return responder;
+        });
+    }
+    return kbPromise;
+  }
+
+  function ctaBlock() {
+    var wrap = el("div", "hubsy-cta");
+    function link(label, href) {
+      var a = el("a", null, label);
+      a.href = href;
+      if (/^https?:/i.test(href)) { a.target = "_blank"; a.rel = "noopener"; }
+      wrap.appendChild(a);
+    }
+    var f = CFG.contacts.flaka;
+    var l = CFG.contacts.leonita;
+    link(f.name + ": " + f.phone, "tel:" + String(f.phone).replace(/[^\d+]/g, ""));
+    link(l.name + ": " + l.phone, "tel:" + String(l.phone).replace(/[^\d+]/g, ""));
+    link(f.email, "mailto:" + f.email);
+    link(l.email, "mailto:" + l.email);
+    if (CFG.applyUrl) link("Apliko / Apply", CFG.applyUrl);
+    return wrap;
+  }
+
   function addBubble(role, text, opts) {
     opts = opts || {};
     var b = el("div", "hubsy-msg hubsy-" + (role === "user" ? "user" : "bot"));
@@ -235,28 +614,6 @@
     ui.log.appendChild(b);
     ui.log.scrollTop = ui.log.scrollHeight;
     return b;
-  }
-
-  function ctaBlock() {
-    var wrap = el("div", "hubsy-cta");
-
-    function link(label, href) {
-      var a = el("a", null, label);
-      a.href = href;
-      if (/^https?:/i.test(href)) {
-        a.target = "_blank";
-        a.rel = "noopener";
-      }
-      wrap.appendChild(a);
-      return a;
-    }
-
-    link(FLAKA.name + ": " + FLAKA.phone, telHref(FLAKA.phone));
-    link(LEONITA.name + ": " + LEONITA.phone, telHref(LEONITA.phone));
-    link(FLAKA.email, "mailto:" + FLAKA.email);
-    link(LEONITA.email, "mailto:" + LEONITA.email);
-    if (CFG.applyUrl) link("Apliko / Apply", CFG.applyUrl);
-    return wrap;
   }
 
   function showTyping() {
@@ -278,37 +635,43 @@
     if (typeof data.text === "string") return data.text;
     if (data.message && typeof data.message.content === "string") return data.message.content;
     if (Array.isArray(data.choices) && data.choices[0] && data.choices[0].message &&
-        typeof data.choices[0].message.content === "string") {
-      return data.choices[0].message.content;
-    }
+        typeof data.choices[0].message.content === "string") return data.choices[0].message.content;
     if (typeof data.output === "string") return data.output;
     return null;
   }
 
-  function requestReply(message) {
-    if (!CFG.endpoint) {
-      return Promise.resolve({ reply: FALLBACK, fallback: true });
+  function ask(message) {
+    if (CFG.endpoint) {
+      return fetch(CFG.endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: message, history: history.slice(-CFG.maxHistory), language: CFG.languageDefault })
+      })
+        .then(function (res) {
+          if (!res.ok) throw new Error("HTTP " + res.status);
+          return res.json();
+        })
+        .then(function (data) {
+          var reply = parseReply(data);
+          if (!reply) throw new Error("Empty reply");
+          return { reply: reply, fallback: !!data.fallback };
+        })
+        .catch(function (err) {
+          if (global.console && console.warn) console.warn("[Hubsy] backend error, using local knowledge base:", err);
+          return ensureResponder().then(function (r) { return r.respond(message); });
+        });
     }
-    var body = {
-      message: message,
-      history: history.slice(-CFG.maxHistory),
-      language: CFG.languageDefault
-    };
-    return fetch(CFG.endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(body)
-    }).then(function (res) {
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      return res.json();
-    }).then(function (data) {
-      var reply = parseReply(data);
-      if (!reply) throw new Error("Empty reply");
-      return { reply: reply, fallback: !!data.fallback };
-    }).catch(function (err) {
-      if (window.console && console.warn) console.warn("[Hubsy] backend error:", err);
-      return { reply: FALLBACK, fallback: true };
-    });
+    return ensureResponder()
+      .then(function (r) { return r.respond(message); })
+      .catch(function (err) {
+        if (global.console && console.warn) console.warn("[Hubsy] knowledge base error:", err);
+        return {
+          reply: "Nuk mund t'i ngarkoj një çast informacionet. Ju lutem kontaktoni Creative Hub Kosovo:\n" +
+            "• " + CFG.contacts.flaka.phone + " · " + CFG.contacts.flaka.email + "\n" +
+            "• " + CFG.contacts.leonita.phone + " · " + CFG.contacts.leonita.email,
+          fallback: true
+        };
+      });
   }
 
   function sendMessage() {
@@ -323,10 +686,11 @@
     addBubble("user", text);
     var typing = showTyping();
 
-    requestReply(text).then(function (result) {
+    ask(text).then(function (result) {
       typing.remove();
+      if (!result) result = { reply: CFG.greeting, fallback: false };
       history.push({ role: "assistant", content: result.reply });
-      addBubble("bot", result.reply, { withCta: result.fallback });
+      addBubble("bot", result.reply, { withCta: !!result.fallback });
       saveHistory();
     }).finally(function () {
       busy = false;
@@ -343,11 +707,8 @@
   function open() {
     ui.root.classList.add("hubsy-open");
     ui.launcher.setAttribute("aria-label", "Mbyll bisedën me Hubsy");
-    if (!ui.log.childElementCount) {
-      addBubble("bot", CFG.greeting);
-    } else {
-      ui.log.scrollTop = ui.log.scrollHeight;
-    }
+    if (!ui.log.childElementCount) addBubble("bot", CFG.greeting);
+    else ui.log.scrollTop = ui.log.scrollHeight;
     ui.input.focus();
   }
 
@@ -362,7 +723,6 @@
     else open();
   }
 
-  // Restore prior messages in this session.
   if (history.length) {
     history.forEach(function (m) {
       var b = el("div", "hubsy-msg hubsy-" + (m.role === "user" ? "user" : "bot"));
@@ -376,19 +736,18 @@
   ui.send.addEventListener("click", sendMessage);
   ui.input.addEventListener("input", autoGrow);
   ui.input.addEventListener("keydown", function (e) {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
+    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendMessage(); }
   });
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && ui.root.classList.contains("hubsy-open")) closeChat();
   });
 
-  window.Hubsy = {
+  global.Hubsy = {
     open: open,
     close: closeChat,
     toggle: toggle,
-    config: CFG
+    ask: ask,
+    config: CFG,
+    ready: ensureResponder
   };
-})();
+})(typeof window !== "undefined" ? window : globalThis);
