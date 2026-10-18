@@ -38,8 +38,18 @@
     mutedLight: "#8891AE",
     languageDefault: "sq",
     contacts: {
-      flaka: { name: "Flakë", phone: "+383 49 334 437", email: "flaka@creativehubkos.com" },
-      leonita: { name: "Leonita", phone: "+383 49 334 438", email: "leonita@creativehubkos.com" }
+      flaka: {
+        name: "Flaka",
+        phone: "+383 49 334 437",
+        email: "flaka@creativehubkos.com",
+        calendly: "https://calendly.com/flaka-creativehub/30min"
+      },
+      leonita: {
+        name: "Leonita",
+        phone: "+383 49 334 438",
+        email: "leonita@creativehubkos.com",
+        calendly: "https://calendly.com/leonita-creativehubkos/30min"
+      }
     },
     applyUrl: "",
     maxHistory: 12,
@@ -143,8 +153,13 @@
     trainers: ["trajner", "trajneret", "trainer", "trainers", "instruktor", "profesor", "lecturer"],
     audience: ["audienca", "target", "profili", "profile", "kush mund", "për kë", "per ke", "audience"],
     certification: ["certifikatë", "certifikate", "certifikim", "diplom", "diplomë", "certification", "certificate", "cert"],
-    contact: ["kontakt", "kontakto", "contact", "përgjegjës", "pergjegjes", "personi", "telefon", "telefoni", "email", "numri", "numero", "ndihmo", "ndihmë", "ndihme", "help", "assist", "këshill", "keshill", "bisedo"]
+    contact: ["kontakt", "kontakto", "contact", "përgjegjës", "pergjegjes", "person", "personi", "telefon", "telefoni", "email", "numri", "numero", "flas", "njeri", "takim", "cakto", "ndihmo", "ndihmë", "ndihme", "help", "assist", "këshill", "keshill", "bisedo", "talk", "speak"]
   };
+
+  // Explicit contact requests: these always route to a coordinator, even when an
+  // academy is mentioned in the same message.
+  var CONTACT_STRONG = ["kontakt", "kontakto", "contact", "flas", "person", "njeri",
+    "telefon", "telefoni", "numri", "numero", "email", "takim", "cakto", "talk", "speak", "lidh"];
 
   // Intents that only make sense when we know which academy is meant.
   var ACADEMY_SPECIFIC = {
@@ -401,16 +416,36 @@
       return "Koleget e mia Flaka dhe Leonita do të jenë të lumtur t'ju ndihmojnë me çdo detaj.";
     }
 
-    function connectText(qAcad, lang) {
-      var t = routingTargets(qAcad);
-      if (lang === "en") {
-        if (t.single === "flaka") return "Happy to connect you with my colleague Flaka. She will be happy to help you with any details.";
-        if (t.single === "leonita") return "Happy to connect you with my colleague Leonita. She will be happy to help you with any details.";
-        return "Happy to connect you with my colleagues Flaka and Leonita. They will be happy to help you with any details.";
+    // Exact coordinator introductions used when a user asks to talk to a person.
+    var CONTACT_INTRO = {
+      flaka: {
+        sq: "Patjetër! Flaka është Koordinatorja e Akademisë. Ti mund të caktosh një takim fizikisht në kampusin tonë në Prishtinë ose online.",
+        en: "Of course! Flaka is the Academy Coordinator. You can book a meeting with her in person at our campus in Prishtina or online."
+      },
+      leonita: {
+        sq: "Patjetër! Leonita është Koordinatorja e Akademisë se Data Science & Analytics + AI (dhe Akademive të tjera si Digital Marketing & HR). Ti mund të caktosh një takim fizikisht në kampusin tonë në Prishtinë ose online.",
+        en: "Of course! Leonita is the Coordinator of the Data Science & Analytics + AI Academy (and other academies such as Digital Marketing & HR). You can book a meeting with her in person at our campus in Prishtina or online."
+      },
+      both: {
+        sq: "Patjetër! Koleget e mia Flaka dhe Leonita janë koordinatoret tona. Ti mund të caktosh një takim fizikisht në kampusin tonë në Prishtinë ose online për të biseduar mbi programet tona.",
+        en: "Of course! My colleagues Flaka and Leonita are our coordinators. You can book a meeting with them in person at our campus in Prishtina or online to talk about our programs."
       }
-      if (t.single === "flaka") return "Me kënaqësi t'ju lidh me kolegen time Flaka. Ajo do të jetë e lumtur t'ju ndihmojë me çdo detaj.";
-      if (t.single === "leonita") return "Me kënaqësi t'ju lidh me kolegen time Leonita. Ajo do të jetë e lumtur t'ju ndihmojë me çdo detaj.";
-      return "Me kënaqësi t'ju lidh me koleget e mia Flaka dhe Leonita. Do të jenë të lumtur t'ju ndihmojnë me çdo detaj.";
+    };
+
+    function mentionTarget(text) {
+      var f = hasWord(text, "flaka") || text.indexOf("flakë") !== -1;
+      var l = hasWord(text, "leonita");
+      if (f && !l) return { flaka: true, leonita: false, single: "flaka" };
+      if (l && !f) return { flaka: false, leonita: true, single: "leonita" };
+      return null;
+    }
+
+    function contactTargets(text, qAcad) {
+      return mentionTarget(text) || routingTargets(qAcad);
+    }
+
+    function contactIntro(lang, single) {
+      return CONTACT_INTRO[single][lang];
     }
 
     function bios() {
@@ -457,8 +492,9 @@
       return { reply: routingText(qAcad, lang), fallback: true, kind: "fallback", lang: lang, cta: routingTargets(qAcad) };
     }
 
-    function contactReply(qAcad, lang) {
-      return { reply: connectText(qAcad, lang), fallback: true, kind: "contact", lang: lang, cta: routingTargets(qAcad) };
+    function contactReply(text, qAcad, lang) {
+      var t = contactTargets(text, qAcad);
+      return { reply: contactIntro(lang, t.single), fallback: true, kind: "contact", lang: lang, cta: t };
     }
 
     function clarify(lang) {
@@ -540,8 +576,9 @@
       }
       var qIntent = detectIntents(text);
 
-      if (qIntent.contact && !keys(qAcad).length) {
-        return contactReply(qAcad, lang);
+      var strongContact = CONTACT_STRONG.some(function (k) { return matchKeyword(text, k); });
+      if (strongContact || (qIntent.contact && !keys(qAcad).length)) {
+        return contactReply(text, qAcad, lang);
       }
 
       var wantsSpecific = keys(qIntent).some(function (i) { return ACADEMY_SPECIFIC[i]; });
@@ -827,6 +864,7 @@
       wrap.appendChild(a);
     }
     function person(c) {
+      if (c.calendly) link(c.name + " · Cakto takim", c.calendly);
       link(c.name + " · " + c.phone, "tel:" + String(c.phone).replace(/[^\d+]/g, ""));
       link(c.email, "mailto:" + c.email);
     }

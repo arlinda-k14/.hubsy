@@ -55,8 +55,18 @@ const SYSTEM_INSTRUCTION =
 
 // --- Language handling: Hubsy replies in one language only ---
 const CONTACTS = {
-  flaka: { name: "Flaka", phone: "+383 49 334 437", email: "flaka@creativehubkos.com" },
-  leonita: { name: "Leonita", phone: "+383 49 334 438", email: "leonita@creativehubkos.com" }
+  flaka: {
+    name: "Flaka",
+    phone: "+383 49 334 437",
+    email: "flaka@creativehubkos.com",
+    calendly: "https://calendly.com/flaka-creativehub/30min"
+  },
+  leonita: {
+    name: "Leonita",
+    phone: "+383 49 334 438",
+    email: "leonita@creativehubkos.com",
+    calendly: "https://calendly.com/leonita-creativehubkos/30min"
+  }
 };
 
 const GROUP_A_LABEL =
@@ -87,16 +97,16 @@ function detectLanguage(text) {
 }
 
 // Server-side fallback, used only if the model returns no usable text.
-// Introduces Hubsy's human colleagues and routes by group, in one language.
+// Introduces Hubsy's human coordinators and their booking options, in one language.
 function safetyFallback(lang) {
   const c = CONTACTS;
   const intro = lang === "en"
-    ? "My colleagues know this best, and they will be happy to help you with any details."
-    : "Këtë e dinë më së miri koleget e mia, dhe ato do të jenë të lumtur t'ju ndihmojnë me çdo detaj.";
+    ? "Of course! My colleagues Flaka and Leonita are our coordinators. You can book a meeting with them in person at our campus in Prishtina or online."
+    : "Patjetër! Koleget e mia Flaka dhe Leonita janë koordinatoret tona. Ti mund të caktosh një takim fizikisht në kampusin tonë në Prishtinë ose online për të biseduar mbi programet tona.";
   return (
     intro + "\n" +
-    "• Flaka (" + GROUP_A_LABEL + "): " + c.flaka.phone + " · " + c.flaka.email + "\n" +
-    "• Leonita (" + GROUP_B_LABEL + "): " + c.leonita.phone + " · " + c.leonita.email
+    "• Flaka (" + GROUP_A_LABEL + "): " + c.flaka.calendly + " · " + c.flaka.phone + " · " + c.flaka.email + "\n" +
+    "• Leonita (" + GROUP_B_LABEL + "): " + c.leonita.calendly + " · " + c.leonita.phone + " · " + c.leonita.email
   );
 }
 
