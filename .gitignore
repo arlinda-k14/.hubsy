@@ -12,3 +12,8 @@ skills/research-assistant/data/last_search.json
 # student placement records may contain personal data - never commit
 docs/internal/placements/*
 !docs/internal/placements/README.md
+
+# Firebase Functions
+functions/node_modules/
+functions/data/
+.env

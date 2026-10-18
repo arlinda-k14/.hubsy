@@ -1,0 +1,19 @@
+{
+  "name": "hubsy-functions",
+  "description": "Hubsy — Creative Hub Kosovo AI Brand Assistant (Firebase Functions)",
+  "private": true,
+  "type": "commonjs",
+  "main": "index.js",
+  "engines": {
+    "node": "22"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions",
+    "logs": "firebase functions:log",
+    "sync": "node ../scripts/sync-data.mjs"
+  },
+  "dependencies": {
+    "@google/genai": "^1.0.0",
+    "firebase-functions": "^6.0.0"
+  }
+}
