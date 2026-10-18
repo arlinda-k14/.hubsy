@@ -10,7 +10,7 @@ const root = resolve(here, "..");
 const src = resolve(root, ".agent/web-app");
 const dest = resolve(root, "widget");
 
-const files = ["index.html", "chatbot.js", "knowledge-base.json"];
+const files = ["index.html", "chatbot.js", "knowledge-base.json", "_headers"];
 
 rmSync(dest, { recursive: true, force: true });
 mkdirSync(dest, { recursive: true });
