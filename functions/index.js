@@ -53,14 +53,55 @@ const SYSTEM_INSTRUCTION =
   "use the fallback routing described above.\n\n" +
   KB_TEXT;
 
+// --- Language handling: Hubsy replies in one language only ---
+const CONTACTS = {
+  flaka: { name: "Flaka", phone: "+383 49 334 437", email: "flaka@creativehubkos.com" },
+  leonita: { name: "Leonita", phone: "+383 49 334 438", email: "leonita@creativehubkos.com" }
+};
+
+const GROUP_A_LABEL =
+  "Data Engineering, Vibe Coding, Product & Project Management, Full-stack Development";
+const GROUP_B_LABEL = "Data Science, Digital Marketing, HR";
+
+const AL_MARKERS = ["sa", "kushton", "është", "eshte", "mund", "jam", "për", "per", "dhe", "kam",
+  "cila", "cili", "kur", "ku", "kush", "akademia", "akademi", "kursi", "orar", "çmimi", "cmimi",
+  "pagesa", "pagese", "këste", "keste", "dua", "ju", "tuaj", "aplikim", "faleminderit",
+  "përshëndetje", "pershendetje", "trajnim", "certifikata", "mënyra"];
+const EN_MARKERS = ["the", "how", "much", "does", "cost", "price", "academy", "when", "can", "you",
+  "your", "what", "are", "and", "with", "about", "where", "tuition", "payment", "installments",
+  "installment", "modules", "start", "duration", "hello", "hi", "thanks", "please", "apply",
+  "certificate", "schedule"];
+
+function detectLanguage(text) {
+  const raw = String(text || "");
+  if (/[ëç]/i.test(raw)) return "sq";
+  const padded = " " + raw.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ") + " ";
+  let al = 0;
+  let en = 0;
+  AL_MARKERS.forEach((w) => { if (padded.includes(" " + w + " ")) al++; });
+  EN_MARKERS.forEach((w) => { if (padded.includes(" " + w + " ")) en++; });
+  if (en > al) return "en";
+  if (al > 0) return "sq";
+  if (en > 0) return "en";
+  return "sq";
+}
+
 // Server-side fallback, used only if the model returns no usable text.
-const SAFETY_FALLBACK =
-  "Për këtë pyetje nuk kam informacion të saktë, prandaj nuk dua të hamendësoj. " +
-  "Ju lutem kontaktoni Creative Hub Kosovo:\n" +
-  "• Data Engineering, Vibe Coding, Product & Project Management, Full-stack Development: " +
-  "+383 49 334 437 · flaka@creativehubkos.com\n" +
-  "• Data Science, Digital Marketing, HR: " +
-  "+383 49 334 438 · leonita@creativehubkos.com";
+// Introduces Hubsy's human colleagues and routes by group, in one language.
+function safetyFallback(lang) {
+  const c = CONTACTS;
+  const intro = lang === "en"
+    ? "I don't have exact information for this question, so I won't guess."
+    : "Për këtë pyetje nuk kam informacion të saktë, prandaj nuk dua të hamendësoj.";
+  const colleagues = lang === "en"
+    ? "My colleagues Flaka and Leonita will be happy to help you with any details."
+    : "Kolegët e mi Flaka dhe Leonita do të jenë të lumtur t'ju ndihmojnë me çdo detaj.";
+  return (
+    intro + "\n" + colleagues + "\n" +
+    "• " + GROUP_A_LABEL + ": " + c.flaka.phone + " · " + c.flaka.email + "\n" +
+    "• " + GROUP_B_LABEL + ": " + c.leonita.phone + " · " + c.leonita.email
+  );
+}
 
 let client = null;
 function getClient() {
@@ -100,6 +141,9 @@ exports.hubsyChat = onRequest(
       return;
     }
 
+    const lang =
+      body.language === "en" || body.language === "sq" ? body.language : detectLanguage(message);
+
     const contents = sanitizeHistory(body.history);
     contents.push({ role: "user", parts: [{ text: message.slice(0, MAX_MESSAGE_CHARS) }] });
 
@@ -116,13 +160,13 @@ exports.hubsyChat = onRequest(
 
       const reply = (response && typeof response.text === "string" ? response.text : "").trim();
       if (!reply) {
-        res.status(200).json({ reply: SAFETY_FALLBACK, fallback: true });
+        res.status(200).json({ reply: safetyFallback(lang), fallback: true });
         return;
       }
       res.status(200).json({ reply: reply, fallback: false });
     } catch (err) {
       console.error("[hubsyChat] Gemini error:", err);
-      res.status(502).json({ error: "Upstream model error", reply: SAFETY_FALLBACK, fallback: true });
+      res.status(502).json({ error: "Upstream model error", reply: safetyFallback(lang), fallback: true });
     }
   }
 );

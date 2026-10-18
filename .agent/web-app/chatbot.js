@@ -50,6 +50,21 @@
       "çmime, certifikime dhe aplikim. Si mund t'ju ndihmoj?"
   };
 
+  // Generated messages are single-language: pick the variant that matches the user.
+  var STRINGS = {
+    greeting: {
+      sq: DEFAULTS.greeting,
+      en:
+        "Hello! I'm Hubsy, the AI assistant for Creative Hub Kosovo. " +
+        "I can help with questions about our academies: courses, modules, schedules, " +
+        "pricing, certifications, and applying. How can I help you?"
+    },
+    thanks: {
+      sq: "Me kënaqësi! Nëse keni pyetje të tjera për akademitë e Creative Hub Kosovo, jam këtu.",
+      en: "You're welcome! If you have more questions about Creative Hub Kosovo academies, I'm here."
+    }
+  };
+
   // ---------------------------------------------------------------------------
   // Pure helpers (also exported for tests)
   // ---------------------------------------------------------------------------
@@ -128,7 +143,7 @@
     trainers: ["trajner", "trajneret", "trainer", "trainers", "instruktor", "profesor", "lecturer"],
     audience: ["audienca", "target", "profili", "profile", "kush mund", "për kë", "per ke", "audience"],
     certification: ["certifikatë", "certifikate", "certifikim", "diplom", "diplomë", "certification", "certificate", "cert"],
-    contact: ["kontakt", "përgjegjës", "pergjegjes", "personi", "telefon", "telefoni", "email", "numri", "numero"]
+    contact: ["kontakt", "kontakto", "contact", "përgjegjës", "pergjegjes", "personi", "telefon", "telefoni", "email", "numri", "numero", "ndihmo", "ndihmë", "ndihme", "help", "assist", "këshill", "keshill", "bisedo"]
   };
 
   // Intents that only make sense when we know which academy is meant.
@@ -269,6 +284,56 @@
     return String(text).toLowerCase().replace(/\s+/g, " ").trim();
   }
 
+  var AL_MARKERS = ["sa", "kushton", "është", "eshte", "mund", "jam", "për", "per", "dhe", "kam",
+    "cila", "cili", "kur", "ku", "kush", "akademia", "akademi", "kursi", "orar", "çmimi", "cmimi",
+    "pagesa", "pagese", "këste", "keste", "dua", "ju", "tuaj", "aplikim", "faleminderit",
+    "përshëndetje", "pershendetje", "trajnim", "certifikata", "mënyra"];
+  var EN_MARKERS = ["the", "how", "much", "does", "cost", "price", "academy", "when", "can", "you",
+    "your", "what", "are", "and", "with", "about", "where", "tuition", "payment", "installments",
+    "installment", "modules", "start", "duration", "hello", "hi", "thanks", "please", "apply",
+    "certificate", "schedule"];
+
+  // Best-effort language detection: Albanian by default, English when clearly English.
+  function detectLanguage(text) {
+    var raw = String(text || "");
+    if (/[ëç]/i.test(raw)) return "sq";
+    var padded = " " + raw.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ") + " ";
+    var al = 0;
+    var en = 0;
+    AL_MARKERS.forEach(function (w) { if (padded.indexOf(" " + w + " ") !== -1) al++; });
+    EN_MARKERS.forEach(function (w) { if (padded.indexOf(" " + w + " ") !== -1) en++; });
+    if (en > al) return "en";
+    if (al > 0) return "sq";
+    if (en > 0) return "en";
+    return "sq";
+  }
+
+  function parseAmount(s) {
+    s = String(s).replace(/\s/g, "");
+    if (/^\d{1,3}(,\d{3})+$/.test(s)) s = s.replace(/,/g, "");
+    else if (/^\d{1,3}(\.\d{3})+$/.test(s)) s = s.replace(/\./g, "");
+    else s = s.replace(/,/g, ".");
+    var n = parseFloat(s);
+    return isFinite(n) ? n : null;
+  }
+
+  // Pull priced tiers (label + total) out of a knowledge-base pricing answer.
+  function parseTiers(answer) {
+    var text = String(answer).replace(/[\u2013\u2014]/g, "-");
+    var tiers = [];
+    text.split(/\.\s+/).forEach(function (seg) {
+      var m = seg.match(/Çmimi(?:\s+normal)?:\s*([\d.,]+)\s*€?/i);
+      if (!m) return;
+      var amount = parseAmount(m[1]);
+      if (amount == null) return;
+      var cut = seg.indexOf(m[0]);
+      var label = seg.slice(0, cut).replace(/[,\s]+$/, "");
+      label = label.split(/[,:]/).pop().trim();
+      tiers.push({ label: label, total: amount });
+    });
+    return tiers;
+  }
+
   var GREETINGS = ["pershendetje", "përshëndetje", "tung", "tungjatjeta", "miredita", "mirëdita", "dita e mire", "hello", "hi", "hey", "good morning", "good afternoon"];
   var THANKS = ["faleminderit", "flm", "thanks", "thank you", "rrofsh"];
 
@@ -279,81 +344,165 @@
     var flaka = contacts.flaka;
     var leonita = contacts.leonita;
 
-    function telHref(p) {
-      return "tel:" + String(p).replace(/[^\d+]/g, "");
+    var ACADEMY_LABELS = {
+      dm: "Digital Marketing & AI",
+      ds: "Data Science & Analytics + AI",
+      de: "Data Engineering, Cloud & AI",
+      fs: "Full-stack Development + AI",
+      hr: "Human Resources + AI",
+      pm: "AI-powered Product & Project Management",
+      vc: "Vibe Coding & AI Agents"
+    };
+
+    function academyLabel(id) {
+      return ACADEMY_LABELS[id] || (ACADEMIES[id] && ACADEMIES[id].name) || id;
     }
 
     function academyNames() {
       return keys(ACADEMIES).map(function (id) {
-        return "• " + ACADEMIES[id].name;
+        return "• " + academyLabel(id);
       }).join("\n");
     }
 
-    function contactsFor(qAcad) {
+    function telHref(p) {
+      return "tel:" + String(p).replace(/[^\d+]/g, "");
+    }
+
+    function contactOne(c) {
+      return c.name + ": " + c.phone + " · " + c.email;
+    }
+
+    // Route to Hubsy's human colleagues, in one language only.
+    function routingBlock(qAcad, lang) {
       var ids = keys(qAcad);
-      var lines = [];
-      if (ids.length) {
-        var groupA = ids.some(function (id) {
-          return GROUP_A.indexOf(id) !== -1;
-        });
-        var groupB = ids.some(function (id) {
-          return GROUP_A.indexOf(id) === -1;
-        });
-        if (groupA && !groupB) return { text: flaka.name + ": " + flaka.phone + " · " + flaka.email, single: flaka };
-        if (groupB && !groupA) return { text: leonita.name + ": " + leonita.phone + " · " + leonita.email, single: leonita };
+      var hasA = false;
+      var hasB = false;
+      ids.forEach(function (id) {
+        if (GROUP_A.indexOf(id) !== -1) hasA = true;
+        else hasB = true;
+      });
+      var onlyA = hasA && !hasB;
+      var onlyB = hasB && !hasA;
+      if (lang === "en") {
+        var intro = "My colleagues Flaka and Leonita will be happy to help you with any details.";
+        if (onlyA) return intro + "\nFor this academy, Flaka can help: " + contactOne(flaka) + ".";
+        if (onlyB) return intro + "\nFor this academy, Leonita can help: " + contactOne(leonita) + ".";
+        return intro +
+          "\n• Flaka (Data Engineering, Vibe Coding, Product & Project Management, Full-stack Development): " + contactOne(flaka) +
+          "\n• Leonita (Data Science, Digital Marketing, HR): " + contactOne(leonita);
       }
-      return {
-        text: flaka.name + ": " + flaka.phone + " · " + flaka.email + "\n" +
-              leonita.name + ": " + leonita.phone + " · " + leonita.email,
-        single: null
-      };
+      var introSq = "Kolegët e mi Flaka dhe Leonita do të jenë të lumtur t'ju ndihmojnë me çdo detaj.";
+      if (onlyA) return introSq + "\nPër këtë akademi mund t'ju ndihmojë Flaka: " + contactOne(flaka) + ".";
+      if (onlyB) return introSq + "\nPër këtë akademi mund t'ju ndihmojë Leonita: " + contactOne(leonita) + ".";
+      return introSq +
+        "\n• Flaka (Data Engineering, Vibe Coding, Product & Project Management, Full-stack Development): " + contactOne(flaka) +
+        "\n• Leonita (Data Science, Digital Marketing, HR): " + contactOne(leonita);
     }
 
-    function fallbackFor(qAcad) {
-      var routing = contactsFor(qAcad);
-      var reply =
-        "Për këtë pyetje nuk kam informacion të saktë, prandaj nuk dua të hamendësoj. " +
-        "Ju lutem kontaktoni Creative Hub Kosovo:\n" + routing.text + "\n\n" +
-        "For this question I don't have exact information, so I won't guess. " +
-        "Please contact Creative Hub Kosovo: " + routing.text;
-      return { reply: reply, fallback: true, kind: "fallback" };
+    function fallbackFor(qAcad, lang) {
+      var reply = (lang === "en"
+        ? "I don't have exact information for this question, so I won't guess.\n"
+        : "Për këtë pyetje nuk kam informacion të saktë, prandaj nuk dua të hamendësoj.\n") +
+        routingBlock(qAcad, lang);
+      return { reply: reply, fallback: true, kind: "fallback", lang: lang };
     }
 
-    function clarify(qIntent) {
-      void qIntent;
-      return {
-        reply:
-          "Për këtë pyetje më duhet të di për cilën akademi bëhet fjalë. Akademitë:\n" +
-          academyNames() +
-          "\n\nPër cilën akademi dëshironi informacion?",
-        fallback: false,
-        kind: "clarify"
-      };
+    function contactReply(qAcad, lang) {
+      var reply = (lang === "en"
+        ? "Happy to connect you with my colleagues.\n"
+        : "Me kënaqësi t'ju lidh me kolegët e mi.\n") +
+        routingBlock(qAcad, lang);
+      return { reply: reply, fallback: true, kind: "contact", lang: lang };
     }
 
-    function respond(message) {
+    function clarify(lang) {
+      var reply = lang === "en"
+        ? "I can help with that. Which academy do you mean?\n" + academyNames() + "\nLet me know which one."
+        : "Mund t'ju ndihmoj. Për cilën akademi bëhet fjalë?\n" + academyNames() + "\nMë tregoni për cilën.";
+      return { reply: reply, fallback: false, kind: "clarify", lang: lang };
+    }
+
+    function formatEuro(n) {
+      return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    }
+
+    function findPriceEntry(id) {
+      for (var i = 0; i < index.length; i++) {
+        if (index[i].academies[id] && index[i].intents.price) return index[i];
+      }
+      return null;
+    }
+
+    // Up to 15 monthly installments, with total / 15 estimated for each tier.
+    function installmentReply(qAcad, lang) {
+      var lines = [];
+      keys(qAcad).forEach(function (id) {
+        var e = findPriceEntry(id);
+        if (!e) return;
+        parseTiers(e.answer).forEach(function (t) {
+          var monthly = Math.round(t.total / 15);
+          var label = lang === "en" && t.label ? t.label.split(/\s*-\s*/)[0].trim() : t.label;
+          lines.push("• " + academyLabel(id) + (label ? " (" + label + ")" : "") + ": €" + formatEuro(t.total) +
+            (lang === "en" ? " total, about €" + monthly + " per month" : " gjithsej, rreth €" + monthly + " në muaj"));
+        });
+      });
+      if (!lines.length) return null;
+      var head = lang === "en"
+        ? "Creative Hub Kosovo offers flexible payment plans of up to 15 monthly installments."
+        : "Creative Hub Kosovo ofron plane fleksibile pagese deri në 15 këste mujore.";
+      var tail = lang === "en"
+        ? "These are estimates based on the total tuition, so the team can confirm the exact plan for you."
+        : "Këto janë vlera të përllogaritura bazuar në çmimin total, ndaj ekipi mund t'ju konfirmojë planin e saktë.";
+      return { reply: head + "\n" + lines.join("\n") + "\n" + tail, fallback: false, kind: "installments", lang: lang };
+    }
+
+    function inferAcademyFromHistory(history) {
+      if (!Array.isArray(history)) return null;
+      for (var i = history.length - 1; i >= 0; i--) {
+        var m = history[i];
+        if (!m || m.role !== "user" || typeof m.content !== "string") continue;
+        var found = keys(detectAcademies(m.content));
+        if (found.length) return found[0];
+      }
+      return null;
+    }
+
+    function respond(message, history) {
       var text = normalize(message);
       if (!text) return null;
 
+      var lang = detectLanguage(message);
       var words = text.split(" ").filter(Boolean);
       var isGreeting = words.length <= 4 && GREETINGS.some(function (g) { return hasWord(text, g); });
       if (isGreeting) {
-        return { reply: cfg.greeting || DEFAULTS.greeting, fallback: false, kind: "greeting" };
+        return {
+          reply: lang === "en" ? STRINGS.greeting.en : (cfg.greeting || STRINGS.greeting.sq),
+          fallback: false, kind: "greeting", lang: lang
+        };
       }
       if (words.length <= 3 && THANKS.some(function (g) { return hasWord(text, g); })) {
-        return {
-          reply: "Me kënaqësi! Nëse keni pyetje të tjera për akademitë e Creative Hub Kosovo, jam këtu.",
-          fallback: false,
-          kind: "thanks"
-        };
+        return { reply: STRINGS.thanks[lang], fallback: false, kind: "thanks", lang: lang };
       }
 
       var qAcad = detectAcademies(text);
+      if (!keys(qAcad).length) {
+        var carried = inferAcademyFromHistory(history);
+        if (carried) qAcad[carried] = true;
+      }
       var qIntent = detectIntents(text);
+
+      if (qIntent.contact && !keys(qAcad).length) {
+        return contactReply(qAcad, lang);
+      }
 
       var wantsSpecific = keys(qIntent).some(function (i) { return ACADEMY_SPECIFIC[i]; });
       if (wantsSpecific && keys(qAcad).length === 0) {
-        return clarify(qIntent);
+        return clarify(lang);
+      }
+
+      if (qIntent.payment && keys(qAcad).length) {
+        var inst = installmentReply(qAcad, lang);
+        if (inst) return inst;
       }
 
       var qStems = {};
@@ -365,19 +514,19 @@
 
       var best = null;
       var bestScore = -Infinity;
-      for (var i = 0; i < index.length; i++) {
-        var s = scoreEntry(index[i], qStems, qAcad, qIntent, qTokens);
+      for (var j = 0; j < index.length; j++) {
+        var s = scoreEntry(index[j], qStems, qAcad, qIntent, qTokens);
         if (s > bestScore) {
           bestScore = s;
-          best = index[i];
+          best = index[j];
         }
       }
 
       var MIN = 2.6;
       if (best && bestScore >= MIN) {
-        return { reply: best.answer, fallback: false, kind: "entry", topic: best.topic, score: bestScore };
+        return { reply: best.answer, fallback: false, kind: "entry", topic: best.topic, score: bestScore, lang: lang };
       }
-      return fallbackFor(qAcad);
+      return fallbackFor(qAcad, lang);
     }
 
     return {
@@ -395,6 +544,9 @@
     hasWord: hasWord,
     detectAcademies: detectAcademies,
     detectIntents: detectIntents,
+    detectLanguage: detectLanguage,
+    parseAmount: parseAmount,
+    parseTiers: parseTiers,
     buildIndex: buildIndex,
     scoreEntry: scoreEntry,
     createResponder: createResponder,
@@ -641,11 +793,12 @@
   }
 
   function ask(message) {
+    var lang = detectLanguage(message);
     if (CFG.endpoint) {
       return fetch(CFG.endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: message, history: history.slice(-CFG.maxHistory), language: CFG.languageDefault })
+        body: JSON.stringify({ message: message, history: history.slice(-CFG.maxHistory), language: lang })
       })
         .then(function (res) {
           if (!res.ok) throw new Error("HTTP " + res.status);
@@ -662,13 +815,16 @@
         });
     }
     return ensureResponder()
-      .then(function (r) { return r.respond(message); })
+      .then(function (r) { return r.respond(message, history); })
       .catch(function (err) {
         if (global.console && console.warn) console.warn("[Hubsy] knowledge base error:", err);
+        var head = lang === "en"
+          ? "I can't load the information right now. My colleagues will be happy to help you with any details.\n"
+          : "Nuk mund t'i ngarkoj një çast informacionet. Kolegët e mi do të jenë të lumtur t'ju ndihmojnë me çdo detaj.\n";
         return {
-          reply: "Nuk mund t'i ngarkoj një çast informacionet. Ju lutem kontaktoni Creative Hub Kosovo:\n" +
-            "• " + CFG.contacts.flaka.phone + " · " + CFG.contacts.flaka.email + "\n" +
-            "• " + CFG.contacts.leonita.phone + " · " + CFG.contacts.leonita.email,
+          reply: head +
+            "• " + CFG.contacts.flaka.name + ": " + CFG.contacts.flaka.phone + " · " + CFG.contacts.flaka.email + "\n" +
+            "• " + CFG.contacts.leonita.name + ": " + CFG.contacts.leonita.phone + " · " + CFG.contacts.leonita.email,
           fallback: true
         };
       });
