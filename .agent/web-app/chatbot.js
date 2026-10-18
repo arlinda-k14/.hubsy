@@ -289,9 +289,9 @@
     "pagesa", "pagese", "këste", "keste", "dua", "ju", "tuaj", "aplikim", "faleminderit",
     "përshëndetje", "pershendetje", "trajnim", "certifikata", "mënyra"];
   var EN_MARKERS = ["the", "how", "much", "does", "cost", "price", "academy", "when", "can", "you",
-    "your", "what", "are", "and", "with", "about", "where", "tuition", "payment", "installments",
-    "installment", "modules", "start", "duration", "hello", "hi", "thanks", "please", "apply",
-    "certificate", "schedule"];
+    "your", "what", "are", "and", "with", "about", "where", "who", "is", "tuition", "payment",
+    "installments", "installment", "modules", "start", "duration", "hello", "hi", "thanks", "please",
+    "apply", "certificate", "schedule"];
 
   // Best-effort language detection: Albanian by default, English when clearly English.
   function detectLanguage(text) {
@@ -368,12 +368,8 @@
       return "tel:" + String(p).replace(/[^\d+]/g, "");
     }
 
-    function contactOne(c) {
-      return c.name + ": " + c.phone + " · " + c.email;
-    }
-
-    // Route to Hubsy's human colleagues, in one language only.
-    function routingBlock(qAcad, lang) {
+    // Which colleague should answer, based on the academies mentioned.
+    function routingTargets(qAcad) {
       var ids = keys(qAcad);
       var hasA = false;
       var hasB = false;
@@ -381,38 +377,88 @@
         if (GROUP_A.indexOf(id) !== -1) hasA = true;
         else hasB = true;
       });
-      var onlyA = hasA && !hasB;
-      var onlyB = hasB && !hasA;
+      if (hasA && !hasB) return { flaka: true, leonita: false, single: "flaka" };
+      if (hasB && !hasA) return { flaka: false, leonita: true, single: "leonita" };
+      return { flaka: true, leonita: true, single: "both" };
+    }
+
+    var COLLEAGUE_GROUP = {
+      flaka: { sq: "Data Engineering, Vibe Coding, Full-stack dhe Project Management", en: "Data Engineering, Vibe Coding, Full-stack, and Project Management" },
+      leonita: { sq: "Data Science, Digital Marketing dhe HR", en: "Data Science, Digital Marketing, and HR" }
+    };
+
+    // Warm name-only introduction. Contact details live in the clickable buttons,
+    // so the text never repeats a phone number or email.
+    function routingText(qAcad, lang) {
+      var t = routingTargets(qAcad);
       if (lang === "en") {
-        var intro = "My colleagues Flaka and Leonita will be happy to help you with any details.";
-        if (onlyA) return intro + "\nFor this academy, Flaka can help: " + contactOne(flaka) + ".";
-        if (onlyB) return intro + "\nFor this academy, Leonita can help: " + contactOne(leonita) + ".";
-        return intro +
-          "\n• Flaka (Data Engineering, Vibe Coding, Product & Project Management, Full-stack Development): " + contactOne(flaka) +
-          "\n• Leonita (Data Science, Digital Marketing, HR): " + contactOne(leonita);
+        if (t.single === "flaka") return "My colleague Flaka knows this best, and she will be happy to help you with any details.";
+        if (t.single === "leonita") return "My colleague Leonita knows this best, and she will be happy to help you with any details.";
+        return "My colleagues Flaka and Leonita will be happy to help you with any details.";
       }
-      var introSq = "Kolegët e mi Flaka dhe Leonita do të jenë të lumtur t'ju ndihmojnë me çdo detaj.";
-      if (onlyA) return introSq + "\nPër këtë akademi mund t'ju ndihmojë Flaka: " + contactOne(flaka) + ".";
-      if (onlyB) return introSq + "\nPër këtë akademi mund t'ju ndihmojë Leonita: " + contactOne(leonita) + ".";
-      return introSq +
-        "\n• Flaka (Data Engineering, Vibe Coding, Product & Project Management, Full-stack Development): " + contactOne(flaka) +
-        "\n• Leonita (Data Science, Digital Marketing, HR): " + contactOne(leonita);
+      if (t.single === "flaka") return "Këtë e di më së miri kolegia ime Flaka, dhe ajo do të jetë e lumtur t'ju ndihmojë me çdo detaj.";
+      if (t.single === "leonita") return "Këtë e di më së miri kolegia ime Leonita, dhe ajo do të jetë e lumtur t'ju ndihmojë me çdo detaj.";
+      return "Koleget e mia Flaka dhe Leonita do të jenë të lumtur t'ju ndihmojnë me çdo detaj.";
+    }
+
+    function connectText(qAcad, lang) {
+      var t = routingTargets(qAcad);
+      if (lang === "en") {
+        if (t.single === "flaka") return "Happy to connect you with my colleague Flaka. She will be happy to help you with any details.";
+        if (t.single === "leonita") return "Happy to connect you with my colleague Leonita. She will be happy to help you with any details.";
+        return "Happy to connect you with my colleagues Flaka and Leonita. They will be happy to help you with any details.";
+      }
+      if (t.single === "flaka") return "Me kënaqësi t'ju lidh me kolegen time Flaka. Ajo do të jetë e lumtur t'ju ndihmojë me çdo detaj.";
+      if (t.single === "leonita") return "Me kënaqësi t'ju lidh me kolegen time Leonita. Ajo do të jetë e lumtur t'ju ndihmojë me çdo detaj.";
+      return "Me kënaqësi t'ju lidh me koleget e mia Flaka dhe Leonita. Do të jenë të lumtur t'ju ndihmojnë me çdo detaj.";
+    }
+
+    function bios() {
+      return {
+        leonita: {
+          sq: "Leonita Krasniqi është kolegia ime dhe koordinatore për akademitë si " + COLLEAGUE_GROUP.leonita.sq +
+            ". Ajo do të jetë e lumtur t'ju ndihmojë me çdo detaj!",
+          en: "Leonita Krasniqi is my colleague and the coordinator for academies such as " + COLLEAGUE_GROUP.leonita.en +
+            ". She will be happy to help you with any details!"
+        },
+        flaka: {
+          sq: "Flaka Dermaku është kolegia ime dhe koordinatore për akademitë si " + COLLEAGUE_GROUP.flaka.sq +
+            ". Ajo do të jetë e lumtur t'ju ndihmojë me çdo detaj!",
+          en: "Flaka Dermaku is my colleague and the coordinator for academies such as " + COLLEAGUE_GROUP.flaka.en +
+            ". She will be happy to help you with any details!"
+        }
+      };
+    }
+
+    function detectBioTarget(text) {
+      var hasFlaka = hasWord(text, "flaka") || text.indexOf("flakë") !== -1;
+      var hasLeonita = hasWord(text, "leonita");
+      if (!hasFlaka && !hasLeonita) return null;
+      var asks = hasWord(text, "kush") || hasWord(text, "who") || hasWord(text, "është") ||
+        hasWord(text, "eshte") || hasWord(text, "is") || hasWord(text, "rreth") ||
+        hasWord(text, "about") || hasWord(text, "koordinatore") || hasWord(text, "koordinator");
+      if (!asks) return null;
+      if (hasFlaka && !hasLeonita) return "flaka";
+      if (hasLeonita && !hasFlaka) return "leonita";
+      return null;
+    }
+
+    function bioReply(who, lang) {
+      return {
+        reply: bios()[who][lang],
+        fallback: false,
+        kind: "bio",
+        lang: lang,
+        cta: who === "flaka" ? { flaka: true, leonita: false, single: "flaka" } : { flaka: false, leonita: true, single: "leonita" }
+      };
     }
 
     function fallbackFor(qAcad, lang) {
-      var reply = (lang === "en"
-        ? "I don't have exact information for this question, so I won't guess.\n"
-        : "Për këtë pyetje nuk kam informacion të saktë, prandaj nuk dua të hamendësoj.\n") +
-        routingBlock(qAcad, lang);
-      return { reply: reply, fallback: true, kind: "fallback", lang: lang };
+      return { reply: routingText(qAcad, lang), fallback: true, kind: "fallback", lang: lang, cta: routingTargets(qAcad) };
     }
 
     function contactReply(qAcad, lang) {
-      var reply = (lang === "en"
-        ? "Happy to connect you with my colleagues.\n"
-        : "Me kënaqësi t'ju lidh me kolegët e mi.\n") +
-        routingBlock(qAcad, lang);
-      return { reply: reply, fallback: true, kind: "contact", lang: lang };
+      return { reply: connectText(qAcad, lang), fallback: true, kind: "contact", lang: lang, cta: routingTargets(qAcad) };
     }
 
     function clarify(lang) {
@@ -483,6 +529,9 @@
       if (words.length <= 3 && THANKS.some(function (g) { return hasWord(text, g); })) {
         return { reply: STRINGS.thanks[lang], fallback: false, kind: "thanks", lang: lang };
       }
+
+      var bioWho = detectBioTarget(text);
+      if (bioWho) return bioReply(bioWho, lang);
 
       var qAcad = detectAcademies(text);
       if (!keys(qAcad).length) {
@@ -586,12 +635,36 @@
     return n;
   }
 
+  var LINK_RE = /([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|(\+?\d[\d\s]{6,}\d)/g;
+
+  // Turn bare emails and phone numbers into clickable links.
+  function appendLinkified(p, line) {
+    var last = 0;
+    var m;
+    LINK_RE.lastIndex = 0;
+    while ((m = LINK_RE.exec(line)) !== null) {
+      if (m.index > last) p.appendChild(document.createTextNode(line.slice(last, m.index)));
+      var a = document.createElement("a");
+      var val = m[0];
+      if (m[1]) {
+        a.href = "mailto:" + val;
+        a.textContent = val;
+      } else {
+        a.href = "tel:" + val.replace(/[^\d+]/g, "");
+        a.textContent = val;
+      }
+      p.appendChild(a);
+      last = m.index + val.length;
+    }
+    if (last < line.length) p.appendChild(document.createTextNode(line.slice(last)));
+  }
+
   function bubbleText(container, text) {
     String(text).split(/\n{2,}/).forEach(function (block) {
       var p = el("p", "hubsy-p");
       block.split("\n").forEach(function (line, i) {
         if (i > 0) p.appendChild(document.createElement("br"));
-        p.appendChild(document.createTextNode(line));
+        appendLinkified(p, line);
       });
       container.appendChild(p);
     });
@@ -625,6 +698,7 @@
       "#hubsy-root .hubsy-msg.hubsy-bot{background:" + CFG.soft + ";color:" + CFG.navy + ";border:1px solid #D6F2E5;border-bottom-left-radius:6px;align-self:flex-start}",
       "#hubsy-root .hubsy-msg.hubsy-user{background:#FFFFFF;color:" + CFG.navy + ";border:1px solid " + CFG.border + ";border-bottom-right-radius:6px;align-self:flex-end;box-shadow:0 1px 2px rgba(5,18,56,.06)}",
       "#hubsy-root .hubsy-p{margin:0 0 8px}",
+      "#hubsy-root .hubsy-p a{color:" + CFG.accentDark + ";font-weight:600;text-decoration:underline}",
       "#hubsy-root .hubsy-msg .hubsy-p:last-child{margin-bottom:0}",
       "#hubsy-root .hubsy-typing{align-self:flex-start;display:flex;gap:5px;background:" + CFG.soft + ";border:1px solid #D6F2E5;padding:12px 14px;border-radius:16px;border-bottom-left-radius:6px}",
       "#hubsy-root .hubsy-dot{width:7px;height:7px;border-radius:50%;background:" + CFG.accentDark + ";animation:hubsy-bounce 1.2s infinite ease-in-out}",
@@ -740,7 +814,11 @@
     return kbPromise;
   }
 
-  function ctaBlock() {
+  function ctaBlock(spec) {
+    spec = spec || {};
+    var showFlaka = spec.flaka !== false;
+    var showLeonita = spec.leonita !== false;
+
     var wrap = el("div", "hubsy-cta");
     function link(label, href) {
       var a = el("a", null, label);
@@ -748,12 +826,12 @@
       if (/^https?:/i.test(href)) { a.target = "_blank"; a.rel = "noopener"; }
       wrap.appendChild(a);
     }
-    var f = CFG.contacts.flaka;
-    var l = CFG.contacts.leonita;
-    link(f.name + ": " + f.phone, "tel:" + String(f.phone).replace(/[^\d+]/g, ""));
-    link(l.name + ": " + l.phone, "tel:" + String(l.phone).replace(/[^\d+]/g, ""));
-    link(f.email, "mailto:" + f.email);
-    link(l.email, "mailto:" + l.email);
+    function person(c) {
+      link(c.name + " · " + c.phone, "tel:" + String(c.phone).replace(/[^\d+]/g, ""));
+      link(c.email, "mailto:" + c.email);
+    }
+    if (showFlaka) person(CFG.contacts.flaka);
+    if (showLeonita) person(CFG.contacts.leonita);
     if (CFG.applyUrl) link("Apliko / Apply", CFG.applyUrl);
     return wrap;
   }
@@ -762,7 +840,7 @@
     opts = opts || {};
     var b = el("div", "hubsy-msg hubsy-" + (role === "user" ? "user" : "bot"));
     bubbleText(b, text);
-    if (role !== "user" && opts.withCta) b.appendChild(ctaBlock());
+    if (role !== "user" && opts.cta) b.appendChild(ctaBlock(opts.cta));
     ui.log.appendChild(b);
     ui.log.scrollTop = ui.log.scrollHeight;
     return b;
@@ -819,14 +897,9 @@
       .catch(function (err) {
         if (global.console && console.warn) console.warn("[Hubsy] knowledge base error:", err);
         var head = lang === "en"
-          ? "I can't load the information right now. My colleagues will be happy to help you with any details.\n"
-          : "Nuk mund t'i ngarkoj një çast informacionet. Kolegët e mi do të jenë të lumtur t'ju ndihmojnë me çdo detaj.\n";
-        return {
-          reply: head +
-            "• " + CFG.contacts.flaka.name + ": " + CFG.contacts.flaka.phone + " · " + CFG.contacts.flaka.email + "\n" +
-            "• " + CFG.contacts.leonita.name + ": " + CFG.contacts.leonita.phone + " · " + CFG.contacts.leonita.email,
-          fallback: true
-        };
+          ? "I can't load the information right now, but my colleagues Flaka and Leonita are here for you."
+          : "Nuk mund t'i ngarkoj një çast informacionet, por koleget e mia Flaka dhe Leonita janë këtu për ju.";
+        return { reply: head, fallback: true, cta: { flaka: true, leonita: true } };
       });
   }
 
@@ -846,7 +919,7 @@
       typing.remove();
       if (!result) result = { reply: CFG.greeting, fallback: false };
       history.push({ role: "assistant", content: result.reply });
-      addBubble("bot", result.reply, { withCta: !!result.fallback });
+      addBubble("bot", result.reply, { cta: result.cta });
       saveHistory();
     }).finally(function () {
       busy = false;

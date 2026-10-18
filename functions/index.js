@@ -68,9 +68,9 @@ const AL_MARKERS = ["sa", "kushton", "është", "eshte", "mund", "jam", "për", 
   "pagesa", "pagese", "këste", "keste", "dua", "ju", "tuaj", "aplikim", "faleminderit",
   "përshëndetje", "pershendetje", "trajnim", "certifikata", "mënyra"];
 const EN_MARKERS = ["the", "how", "much", "does", "cost", "price", "academy", "when", "can", "you",
-  "your", "what", "are", "and", "with", "about", "where", "tuition", "payment", "installments",
-  "installment", "modules", "start", "duration", "hello", "hi", "thanks", "please", "apply",
-  "certificate", "schedule"];
+  "your", "what", "are", "and", "with", "about", "where", "who", "is", "tuition", "payment",
+  "installments", "installment", "modules", "start", "duration", "hello", "hi", "thanks", "please",
+  "apply", "certificate", "schedule"];
 
 function detectLanguage(text) {
   const raw = String(text || "");
@@ -91,15 +91,12 @@ function detectLanguage(text) {
 function safetyFallback(lang) {
   const c = CONTACTS;
   const intro = lang === "en"
-    ? "I don't have exact information for this question, so I won't guess."
-    : "Për këtë pyetje nuk kam informacion të saktë, prandaj nuk dua të hamendësoj.";
-  const colleagues = lang === "en"
-    ? "My colleagues Flaka and Leonita will be happy to help you with any details."
-    : "Kolegët e mi Flaka dhe Leonita do të jenë të lumtur t'ju ndihmojnë me çdo detaj.";
+    ? "My colleagues know this best, and they will be happy to help you with any details."
+    : "Këtë e dinë më së miri koleget e mia, dhe ato do të jenë të lumtur t'ju ndihmojnë me çdo detaj.";
   return (
-    intro + "\n" + colleagues + "\n" +
-    "• " + GROUP_A_LABEL + ": " + c.flaka.phone + " · " + c.flaka.email + "\n" +
-    "• " + GROUP_B_LABEL + ": " + c.leonita.phone + " · " + c.leonita.email
+    intro + "\n" +
+    "• Flaka (" + GROUP_A_LABEL + "): " + c.flaka.phone + " · " + c.flaka.email + "\n" +
+    "• Leonita (" + GROUP_B_LABEL + "): " + c.leonita.phone + " · " + c.leonita.email
   );
 }
 
