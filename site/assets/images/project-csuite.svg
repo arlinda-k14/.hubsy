@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-label="Two executive agent cards, CSO and CMO, wired to a research engine and a pipeline">
+  <rect width="480" height="320" rx="18" fill="#8B5CF6" fill-opacity="0.09"/>
+
+  <g stroke="#8B5CF6" stroke-opacity="0.45" stroke-width="2" stroke-linecap="round" stroke-dasharray="5 6">
+    <path d="M170 104h50"/>
+    <path d="M170 196h50"/>
+    <path d="M310 104h40v56h30"/>
+    <path d="M310 196h40v-36"/>
+  </g>
+
+  <g>
+    <rect x="46" y="76" width="124" height="56" rx="12" fill="#fff" stroke="#8B5CF6" stroke-opacity="0.4" stroke-width="2"/>
+    <rect x="60" y="90" width="26" height="14" rx="4" fill="#8B5CF6"/>
+    <g fill="#16141F" fill-opacity="0.3">
+      <rect x="94" y="90" width="62" height="7" rx="3.5"/>
+      <rect x="94" y="103" width="44" height="6" rx="3"/>
+      <rect x="60" y="114" width="80" height="5" rx="2.5"/>
+    </g>
+  </g>
+  <g>
+    <rect x="46" y="168" width="124" height="56" rx="12" fill="#fff" stroke="#8B5CF6" stroke-opacity="0.4" stroke-width="2"/>
+    <rect x="60" y="182" width="26" height="14" rx="4" fill="#EC4899"/>
+    <g fill="#16141F" fill-opacity="0.3">
+      <rect x="94" y="182" width="62" height="7" rx="3.5"/>
+      <rect x="94" y="195" width="50" height="6" rx="3"/>
+      <rect x="60" y="206" width="72" height="5" rx="2.5"/>
+    </g>
+  </g>
+
+  <g>
+    <rect x="220" y="76" width="90" height="56" rx="12" fill="#8B5CF6"/>
+    <g fill="#fff" fill-opacity="0.9">
+      <rect x="234" y="90" width="54" height="7" rx="3.5"/>
+      <rect x="234" y="103" width="40" height="6" rx="3"/>
+      <rect x="234" y="115" width="48" height="5" rx="2.5"/>
+    </g>
+  </g>
+  <g>
+    <rect x="220" y="168" width="90" height="56" rx="12" fill="#8B5CF6" fill-opacity="0.85"/>
+    <g fill="#fff" fill-opacity="0.9">
+      <rect x="234" y="182" width="54" height="7" rx="3.5"/>
+      <rect x="234" y="195" width="36" height="6" rx="3"/>
+      <rect x="234" y="207" width="46" height="5" rx="2.5"/>
+    </g>
+  </g>
+
+  <g>
+    <rect x="380" y="132" width="64" height="64" rx="16" fill="#fff" stroke="#8B5CF6" stroke-opacity="0.4" stroke-width="2"/>
+    <path d="M398 156h28M398 166h20M398 176h24" stroke="#8B5CF6" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="428" cy="156" r="4" fill="#EC4899"/>
+  </g>
+
+  <g fill="#8B5CF6" fill-opacity="0.5">
+    <circle cx="352" cy="48" r="4"/>
+    <circle cx="40" cy="268" r="3"/>
+  </g>
+  <path d="M444 60c1.2 3.4 1.2 3.4 4.6 4.6-3.4 1.2-3.4 1.2-4.6 4.6-1.2-3.4-1.2-3.4-4.6-4.6 3.4-1.2 3.4-1.2 4.6-4.6Z" fill="#F5A524"/>
+</svg>

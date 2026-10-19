@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 320" role="img" aria-label="A chat widget with a mascot avatar, typing dots, and booking action buttons">
+  <rect width="480" height="320" rx="18" fill="#0EA5E9" fill-opacity="0.09"/>
+
+  <rect x="58" y="44" width="230" height="232" rx="18" fill="#fff" stroke="#0EA5E9" stroke-opacity="0.35" stroke-width="2"/>
+  <rect x="58" y="44" width="230" height="40" rx="18" fill="#0EA5E9" fill-opacity="0.12"/>
+  <rect x="58" y="66" width="230" height="18" fill="#0EA5E9" fill-opacity="0.12"/>
+  <circle cx="82" cy="64" r="11" fill="#0EA5E9"/>
+  <circle cx="78" cy="62" r="2.2" fill="#fff"/>
+  <circle cx="86" cy="62" r="2.2" fill="#fff"/>
+  <path d="M78 68c2.6 2.4 5.4 2.4 8 0" stroke="#fff" stroke-width="1.8" stroke-linecap="round" fill="none"/>
+  <g fill="#16141F" fill-opacity="0.3">
+    <rect x="100" y="58" width="70" height="7" rx="3.5"/>
+    <rect x="100" y="70" width="46" height="5" rx="2.5"/>
+  </g>
+
+  <g>
+    <rect x="74" y="100" width="150" height="34" rx="12" fill="#16141F" fill-opacity="0.07"/>
+    <g fill="#16141F" fill-opacity="0.26">
+      <rect x="86" y="110" width="120" height="6" rx="3"/>
+      <rect x="86" y="121" width="88" height="6" rx="3"/>
+    </g>
+  </g>
+  <g>
+    <rect x="120" y="144" width="150" height="34" rx="12" fill="#0EA5E9" fill-opacity="0.16"/>
+    <g fill="#16141F" fill-opacity="0.34">
+      <rect x="132" y="154" width="116" height="6" rx="3"/>
+      <rect x="132" y="165" width="74" height="6" rx="3"/>
+    </g>
+  </g>
+
+  <g>
+    <rect x="74" y="188" width="64" height="24" rx="12" fill="#fff" stroke="#0EA5E9" stroke-opacity="0.4" stroke-width="2"/>
+    <circle cx="92" cy="200" r="3" fill="#0EA5E9"/>
+    <circle cx="104" cy="200" r="3" fill="#0EA5E9" fill-opacity="0.65"/>
+    <circle cx="116" cy="200" r="3" fill="#0EA5E9" fill-opacity="0.35"/>
+  </g>
+
+  <g>
+    <rect x="74" y="226" width="96" height="26" rx="13" fill="#0EA5E9"/>
+    <rect x="84" y="236" width="52" height="6" rx="3" fill="#fff" fill-opacity="0.85"/>
+    <rect x="180" y="226" width="42" height="26" rx="13" fill="none" stroke="#16141F" stroke-opacity="0.35" stroke-width="2"/>
+    <rect x="190" y="236" width="22" height="6" rx="3" fill="#16141F" fill-opacity="0.35"/>
+  </g>
+
+  <path d="M316 96h44c14 0 26 12 26 26v56c0 14-12 26-26 26h-16l-18 18v-18h-10c-14 0-26-12-26-26v-56c0-14 12-26 26-26Z" fill="#0EA5E9" fill-opacity="0.14" stroke="#0EA5E9" stroke-opacity="0.4" stroke-width="2"/>
+  <g fill="#16141F" fill-opacity="0.24">
+    <rect x="308" y="118" width="76" height="7" rx="3.5"/>
+    <rect x="308" y="133" width="58" height="7" rx="3.5"/>
+    <rect x="308" y="148" width="66" height="7" rx="3.5"/>
+  </g>
+
+  <g>
+    <rect x="330" y="204" width="96" height="26" rx="13" fill="#fff" stroke="#0EA5E9" stroke-opacity="0.4" stroke-width="2"/>
+    <rect x="342" y="214" width="52" height="6" rx="3" fill="#16141F" fill-opacity="0.3"/>
+    <rect x="330" y="238" width="96" height="26" rx="13" fill="#fff" stroke="#16141F" stroke-opacity="0.22" stroke-width="2"/>
+    <rect x="342" y="248" width="44" height="6" rx="3" fill="#16141F" fill-opacity="0.25"/>
+  </g>
+
+  <path d="M46 40c1.2 3.4 1.2 3.4 4.6 4.6-3.4 1.2-3.4 1.2-4.6 4.6-1.2-3.4-1.2-3.4-4.6-4.6 3.4-1.2 3.4-1.2 4.6-4.6Z" fill="#0EA5E9"/>
+  <circle cx="436" cy="52" r="4" fill="#0EA5E9" fill-opacity="0.4"/>
+</svg>
