@@ -1,0 +1,79 @@
+[
+  {
+    "name": null,
+    "title": "Leadership & Executive Development practice",
+    "organization": "XPR Consulting L.L.C",
+    "url": "https://xpr-consulting.com/services/executive-development/",
+    "region": "kosovo",
+    "language": "en",
+    "contact_channel": "info@xpr-consulting.com",
+    "phone_public": "+383 44 403 166",
+    "academy_fit": ["hr", "product"],
+    "signals": [
+      "Runs executive development and leadership academies for senior teams in Kosovo and the Balkans",
+      "Public page states work is 'Built from a diagnosis, not a course list'",
+      "Opening thesis: management layers assembled by promoting the best technician, not by training managers",
+      "Active public site with insights/cases and Prishtina office hours Mon-Fri 08:30-17:30"
+    ],
+    "score": 92,
+    "score_reasons": [
+      "intent: sells leadership development, natural co-delivery/channel partner",
+      "fit: HR + AI academy maps to their leadership academy buyers",
+      "reachability: public email and phone",
+      "region: Prishtina, Kosovo"
+    ],
+    "blocked": false,
+    "notes": "Best-fit lead. Drafts prepared."
+  },
+  {
+    "name": null,
+    "title": "Cloud HR management software",
+    "organization": "HR Bee Management LLC",
+    "url": "https://hr-bee.com",
+    "region": "kosovo",
+    "language": "en",
+    "contact_channel": "info@hr-bee.com",
+    "phone_public": "038 78 99 99",
+    "academy_fit": ["hr", "digital-marketing"],
+    "signals": [
+      "Cloud-based HR management software with company and jobseeker sides",
+      "Jobseekers enter data once and apply to jobs with one click",
+      "STIKK member listing: founded 2020, 0-10 employees, Prishtina (Dëshmorët e Kombit)",
+      "Public LinkedIn, Facebook and Instagram profiles linked from site"
+    ],
+    "score": 88,
+    "score_reasons": [
+      "intent: two-sided HR platform, clear talent/upskilling adjacency",
+      "fit: HR + AI academy and career-switch audience",
+      "reachability: public email, phone, socials",
+      "region: Prishtina, Kosovo"
+    ],
+    "blocked": false,
+    "notes": "Second priority. No draft yet per brief (best-fit only)."
+  },
+  {
+    "name": null,
+    "title": "HR consulting, executive search and training",
+    "organization": "DIMENSION HR",
+    "url": "https://dimensionhr.al/site/en/services/training-programs/",
+    "region": "albania",
+    "language": "en",
+    "contact_channel": "info@dimensionhr.al",
+    "phone_public": null,
+    "academy_fit": ["hr"],
+    "signals": [
+      "Tirana-based HR consultancy: recruitment, executive search, EOR, HRM consulting, training programs",
+      "Training page argues clients need a partner who designs, implements and evaluates custom solutions",
+      "Public site with blog and platforms section"
+    ],
+    "score": 74,
+    "score_reasons": [
+      "intent: training and HRM consulting overlap",
+      "fit: HR + AI academy for their client companies",
+      "reachability: public email",
+      "region: Albania"
+    ],
+    "blocked": false,
+    "notes": "Third priority. Albania coverage."
+  }
+]
