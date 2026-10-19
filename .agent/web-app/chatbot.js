@@ -674,6 +674,21 @@
     return scriptBase() + "assets/hubsy-avatar.jpg";
   }
 
+  // Photo card shown inside the thread, above the first greeting bubble.
+  function avatarCard() {
+    var fig = el("figure", "hubsy-card");
+    var img = document.createElement("img");
+    img.className = "hubsy-card-img";
+    img.src = avatarSrc();
+    img.alt = "Hubsy, asistenti AI i Creative Hub Kosovo";
+    img.decoding = "async";
+    img.addEventListener("error", function () {
+      fig.remove();
+    });
+    fig.appendChild(img);
+    return fig;
+  }
+
   function el(tag, className, text) {
     var n = document.createElement(tag);
     if (className) n.className = className;
@@ -777,6 +792,8 @@
       "#hubsy-root .hubsy-cta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}",
       "#hubsy-root .hubsy-cta a{font-size:12.5px;font-weight:600;text-decoration:none;color:" + CFG.navy + ";background:#FFFFFF;border:1px solid #CDEFDF;padding:7px 11px;border-radius:999px}",
       "#hubsy-root .hubsy-cta a:hover{border-color:" + CFG.accentDark + ";background:" + CFG.soft + "}",
+      "#hubsy-root .hubsy-card{margin:0 0 10px;padding:0;display:flex;justify-content:center}",
+      "#hubsy-root .hubsy-card-img{display:block;width:100%;max-width:100%;aspect-ratio:1/1;max-height:220px;object-fit:cover;object-position:center 18%;border-radius:14px;box-shadow:0 6px 18px rgba(5,18,56,.18);background:" + CFG.soft + "}",
       "#hubsy-root .hubsy-row{display:flex;gap:8px;align-items:flex-end;max-width:88%}",
       "#hubsy-root .hubsy-row-bot{align-self:flex-start}",
       "#hubsy-root .hubsy-row .hubsy-msg{align-self:flex-end;max-width:calc(100% - 34px)}",
@@ -911,6 +928,7 @@
     opts = opts || {};
     var b = el("div", "hubsy-msg hubsy-" + (role === "user" ? "user" : "bot"));
     bubbleText(b, text);
+    if (opts.image) b.insertBefore(avatarCard(), b.firstChild);
     if (role !== "user" && opts.cta) b.appendChild(ctaBlock(opts.cta));
     if (role === "user") {
       ui.log.appendChild(b);
@@ -1018,8 +1036,9 @@
   }
 
   function showGreeting() {
-    // First message of the chat: Hubsy's warm intro, always with his avatar beside it.
-    return addBubble("bot", CFG.greeting);
+    // First message of the chat: Hubsy's photo card plus his warm intro, with
+    // his avatar also sitting beside the bubble.
+    return addBubble("bot", CFG.greeting, { image: true });
   }
 
   function open() {
