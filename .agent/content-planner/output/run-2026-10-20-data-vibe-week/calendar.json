@@ -1,0 +1,71 @@
+{
+  "slug": "data-vibe-week",
+  "generated": "2026-10-20",
+  "weeks": 1,
+  "language": "sq + en",
+  "goal": "3 inbound consultation bookings for Data Science & AI and Vibe Coding",
+  "rows": [
+    {
+      "date": "2026-10-21",
+      "time": "19:30",
+      "timezone": "Europe/Prishtina",
+      "channel": "instagram",
+      "format": "reel",
+      "pillar": "ai-trends",
+      "academy": "vibe-coding",
+      "language": "sq",
+      "hook": "Në Prishtinë të gjithë 'ndërtojnë me AI'. Punësohen ata që dinë ta rregullojnë kur prishet.",
+      "caption_summary": "Prompting is common now; shipping and debugging is the paid skill. Vibe Coding Mastery: 9 weeks, 16 live sessions, 8 real deliverables.",
+      "cta": "Book a 20-minute call with Flaka",
+      "coordinator": "Flaka Dermaku",
+      "booking_url": "https://calendly.com/flaka-creativehub/30min",
+      "asset_notes": "Talking head + screen recording of a broken AI-generated app being fixed",
+      "sources": [
+        "https://www.youtube.com/results?search_query=vibe+coding+beginners+2026+ai+agents",
+        "https://www.ibm.com/think/topics/vibe-coding"
+      ],
+      "status": "draft"
+    },
+    {
+      "date": "2026-10-23",
+      "time": "09:00",
+      "timezone": "Europe/Prishtina",
+      "channel": "linkedin",
+      "format": "text",
+      "pillar": "ai-trends",
+      "academy": "data-science",
+      "language": "en",
+      "hook": "Data analyst roles aren't dying. The job description changed, and most courses didn't.",
+      "caption_summary": "The market shifted from tool familiarity to portfolio proof plus AI-assisted analysis. Data Science & Analytics + AI: 18 weeks, 8 modules, 7 portfolio projects.",
+      "cta": "Book a 20-minute call with Leonita",
+      "coordinator": "Leonita Krasniqi",
+      "booking_url": "https://calendly.com/leonita-creativehubkos/30min",
+      "asset_notes": "One clean image: 7 project thumbnails or a laptop with a dashboard",
+      "sources": [
+        "https://365datascience.com/career-advice/the-future-of-data-science/",
+        "https://www.refontelearning.com/blog/data-science-2026-definitive-guide"
+      ],
+      "status": "draft"
+    },
+    {
+      "date": "2026-10-25",
+      "time": "11:00",
+      "timezone": "Europe/Prishtina",
+      "channel": "instagram",
+      "format": "reel",
+      "pillar": "career-outcomes",
+      "academy": "data-science",
+      "language": "sq",
+      "hook": "Pyet një punëdhënës çfarë hap i pari: certifikatën apo portofolin.",
+      "caption_summary": "Portfolio beats paper. Students leave with 7 real projects plus a U.S. professional certificate. Hybrid in Prishtina or online.",
+      "cta": "Book a 20-minute call with Leonita",
+      "coordinator": "Leonita Krasniqi",
+      "booking_url": "https://calendly.com/leonita-creativehubkos/30min",
+      "asset_notes": "Screen-record scrolling through 3 student dashboards; end card with Leonita booking link",
+      "sources": [
+        "https://creativehubkos.com/data-science-analytics-ai/"
+      ],
+      "status": "draft"
+    }
+  ]
+}
