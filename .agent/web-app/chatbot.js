@@ -681,6 +681,22 @@
     return n;
   }
 
+  // Avatar as a real <img> so it shows on the very first bubble without waiting
+  // for a probe; the "H" letter is the fallback if the photo fails to load.
+  function makeAvatar(extraClass) {
+    var a = el("div", "hubsy-avatar" + (extraClass ? " " + extraClass : ""));
+    a.setAttribute("aria-hidden", "true");
+    var img = document.createElement("img");
+    img.alt = "";
+    img.src = avatarSrc();
+    img.addEventListener("error", function () {
+      img.remove();
+      a.textContent = "H";
+    });
+    a.appendChild(img);
+    return a;
+  }
+
   var LINK_RE = /([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|(\+?\d[\d\s]{6,}\d)/g;
 
   // Turn bare emails and phone numbers into clickable links.
@@ -723,7 +739,6 @@
     root.id = "hubsy-root";
 
     var style = document.createElement("style");
-    var AVATAR = avatarSrc();
     style.textContent = [
       "#hubsy-root,#hubsy-root *{box-sizing:border-box;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}",
       "#hubsy-root{position:fixed;right:20px;bottom:20px;z-index:2147483000}",
@@ -766,7 +781,7 @@
       "#hubsy-root .hubsy-row-bot{align-self:flex-start}",
       "#hubsy-root .hubsy-row .hubsy-msg{align-self:flex-end;max-width:calc(100% - 34px)}",
       "#hubsy-root .hubsy-bavatar{width:26px;height:26px;border-radius:50%;background:" + CFG.accentBright + ";color:" + CFG.navy + ";display:grid;place-items:center;font-weight:800;font-size:13px;flex:none;box-shadow:0 1px 3px rgba(5,18,56,.22)}",
-      "#hubsy-root.hubsy-has-avatar .hubsy-avatar{background-image:url('" + AVATAR + "');background-size:cover;background-position:center 18%;background-repeat:no-repeat;color:transparent}",
+      "#hubsy-root .hubsy-avatar img{width:100%;height:100%;object-fit:cover;object-position:center 18%;border-radius:50%;display:block}",
       "@keyframes hubsy-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}",
       "#hubsy-root .hubsy-msg{animation:hubsy-in .24s ease-out both}",
       "@media(prefers-reduced-motion:reduce){#hubsy-root .hubsy-msg{animation:none}}",
@@ -776,8 +791,8 @@
     var launcher = el("button", "hubsy-launcher");
     launcher.type = "button";
     launcher.setAttribute("aria-label", "Hap bisedën me Hubsy");
-    launcher.innerHTML = '<span class="hubsy-avatar" aria-hidden="true">H</span><span class="hubsy-launcher-label"></span>';
-    launcher.querySelector(".hubsy-launcher-label").textContent = CFG.launcherLabel;
+    launcher.appendChild(makeAvatar());
+    launcher.appendChild(el("span", "hubsy-launcher-label", CFG.launcherLabel));
 
     var win = el("div", "hubsy-window");
     win.setAttribute("role", "dialog");
@@ -785,7 +800,7 @@
     win.setAttribute("aria-label", "Bisedë me Hubsy");
 
     var head = el("div", "hubsy-head");
-    var hAvatar = el("div", "hubsy-avatar", "H");
+    var hAvatar = makeAvatar();
     hAvatar.setAttribute("aria-hidden", "true");
     var headTxt = el("div", "hubsy-head-txt");
     headTxt.appendChild(el("div", "hubsy-title", CFG.title));
@@ -826,15 +841,6 @@
 
   var ui = build();
   if (!ui) return;
-
-  // The letter "H" stays as the fallback until the photo is confirmed to load.
-  (function probeAvatar() {
-    var img = new Image();
-    img.onload = function () {
-      ui.root.classList.add("hubsy-has-avatar");
-    };
-    img.src = avatarSrc();
-  })();
 
   var history = loadHistory();
   var busy = false;
@@ -910,9 +916,7 @@
       ui.log.appendChild(b);
     } else {
       var row = el("div", "hubsy-row hubsy-row-bot");
-      var av = el("div", "hubsy-avatar hubsy-bavatar", "H");
-      av.setAttribute("aria-hidden", "true");
-      row.appendChild(av);
+      row.appendChild(makeAvatar("hubsy-bavatar"));
       row.appendChild(b);
       ui.log.appendChild(row);
     }
@@ -1013,10 +1017,15 @@
     ui.input.style.height = Math.min(ui.input.scrollHeight, 120) + "px";
   }
 
+  function showGreeting() {
+    // First message of the chat: Hubsy's warm intro, always with his avatar beside it.
+    return addBubble("bot", CFG.greeting);
+  }
+
   function open() {
     ui.root.classList.add("hubsy-open");
     ui.launcher.setAttribute("aria-label", "Mbyll bisedën me Hubsy");
-    if (!ui.log.childElementCount) addBubble("bot", CFG.greeting);
+    if (!ui.log.childElementCount) showGreeting();
     else ui.log.scrollTop = ui.log.scrollHeight;
     ui.input.focus();
   }
