@@ -767,6 +767,9 @@
       "#hubsy-root .hubsy-row .hubsy-msg{align-self:flex-end;max-width:calc(100% - 34px)}",
       "#hubsy-root .hubsy-bavatar{width:26px;height:26px;border-radius:50%;background:" + CFG.accentBright + ";color:" + CFG.navy + ";display:grid;place-items:center;font-weight:800;font-size:13px;flex:none;box-shadow:0 1px 3px rgba(5,18,56,.22)}",
       "#hubsy-root.hubsy-has-avatar .hubsy-avatar{background-image:url('" + AVATAR + "');background-size:cover;background-position:center 18%;background-repeat:no-repeat;color:transparent}",
+      "@keyframes hubsy-in{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}",
+      "#hubsy-root .hubsy-msg{animation:hubsy-in .24s ease-out both}",
+      "@media(prefers-reduced-motion:reduce){#hubsy-root .hubsy-msg{animation:none}}",
       "@media(max-width:480px){#hubsy-root{right:12px;bottom:12px;left:12px}#hubsy-root .hubsy-window{right:0;left:0;bottom:68px;width:auto;height:calc(100vh - 100px);max-height:none}#hubsy-root .hubsy-launcher{width:100%;justify-content:center}}"
     ].join("\n");
 
@@ -986,7 +989,13 @@
     addBubble("user", text);
     var typing = showTyping();
 
-    ask(text).then(function (result) {
+    // Keep the typing indicator visible for at least 2-2.5s so replies feel typed.
+    var minDelay = 2000 + Math.floor(Math.random() * 501);
+    Promise.all([
+      ask(text),
+      new Promise(function (resolve) { setTimeout(resolve, minDelay); })
+    ]).then(function (out) {
+      var result = out[0];
       typing.remove();
       if (!result) result = { reply: CFG.greeting, fallback: false };
       history.push({ role: "assistant", content: result.reply });
