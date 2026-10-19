@@ -37,6 +37,8 @@
     muted: "#5A647E",
     mutedLight: "#8891AE",
     languageDefault: "sq",
+    // Avatar image, resolved next to chatbot.js when left empty.
+    avatarUrl: "",
     contacts: {
       flaka: {
         name: "Flaka",
@@ -55,9 +57,9 @@
     maxHistory: 12,
     storageKey: "hubsy.chat.history.v1",
     greeting:
-      "Përshëndetje! Unë jam Hubsy, asistenti AI i Creative Hub Kosovo. " +
-      "Mund t'ju ndihmoj me pyetje rreth akademive tona: kurse, module, orare, " +
-      "çmime, certifikime dhe aplikim. Si mund t'ju ndihmoj?"
+      "Përshëndetje! ✌️ Unë jam Hubsy, asistenti AI në Creative Hub Kosovo. " +
+      "Jam këtu për t'ju ndihmuar të gjeni akademinë ideale, planet e pagesës me këste, " +
+      "apo t'ju lidh me koleget e mia, Flakën dhe Leonitën. Si mund t'ju ndihmoj sot?"
   };
 
   // Generated messages are single-language: pick the variant that matches the user.
@@ -65,9 +67,9 @@
     greeting: {
       sq: DEFAULTS.greeting,
       en:
-        "Hello! I'm Hubsy, the AI assistant for Creative Hub Kosovo. " +
-        "I can help with questions about our academies: courses, modules, schedules, " +
-        "pricing, certifications, and applying. How can I help you?"
+        "Hey there! ✌️ I'm Hubsy, your cool AI assistant at Creative Hub Kosovo. " +
+        "I'm here to help you pick the right academy, figure out payment plans up to 15 installments, " +
+        "or get you connected with my colleagues, Flaka and Leonita. What can I do for you today?"
     },
     thanks: {
       sq: "Me kënaqësi! Nëse keni pyetje të tjera për akademitë e Creative Hub Kosovo, jam këtu.",
@@ -665,6 +667,13 @@
     return s.src.replace(/[^/]*$/, "");
   }
 
+  // Absolute URL of the avatar image. Injected <style> rules resolve relative
+  // URLs against the host page, not against chatbot.js, so this must be absolute.
+  function avatarSrc() {
+    if (CFG.avatarUrl) return CFG.avatarUrl;
+    return scriptBase() + "assets/hubsy-avatar.jpg";
+  }
+
   function el(tag, className, text) {
     var n = document.createElement(tag);
     if (className) n.className = className;
@@ -714,6 +723,7 @@
     root.id = "hubsy-root";
 
     var style = document.createElement("style");
+    var AVATAR = avatarSrc();
     style.textContent = [
       "#hubsy-root,#hubsy-root *{box-sizing:border-box;font-family:Inter,-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif}",
       "#hubsy-root{position:fixed;right:20px;bottom:20px;z-index:2147483000}",
@@ -752,6 +762,11 @@
       "#hubsy-root .hubsy-cta{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}",
       "#hubsy-root .hubsy-cta a{font-size:12.5px;font-weight:600;text-decoration:none;color:" + CFG.navy + ";background:#FFFFFF;border:1px solid #CDEFDF;padding:7px 11px;border-radius:999px}",
       "#hubsy-root .hubsy-cta a:hover{border-color:" + CFG.accentDark + ";background:" + CFG.soft + "}",
+      "#hubsy-root .hubsy-row{display:flex;gap:8px;align-items:flex-end;max-width:88%}",
+      "#hubsy-root .hubsy-row-bot{align-self:flex-start}",
+      "#hubsy-root .hubsy-row .hubsy-msg{align-self:flex-end;max-width:calc(100% - 34px)}",
+      "#hubsy-root .hubsy-bavatar{width:26px;height:26px;border-radius:50%;background:" + CFG.accentBright + ";color:" + CFG.navy + ";display:grid;place-items:center;font-weight:800;font-size:13px;flex:none;box-shadow:0 1px 3px rgba(5,18,56,.22)}",
+      "#hubsy-root.hubsy-has-avatar .hubsy-avatar{background-image:url('" + AVATAR + "');background-size:cover;background-position:center 18%;background-repeat:no-repeat;color:transparent}",
       "@media(max-width:480px){#hubsy-root{right:12px;bottom:12px;left:12px}#hubsy-root .hubsy-window{right:0;left:0;bottom:68px;width:auto;height:calc(100vh - 100px);max-height:none}#hubsy-root .hubsy-launcher{width:100%;justify-content:center}}"
     ].join("\n");
 
@@ -808,6 +823,15 @@
 
   var ui = build();
   if (!ui) return;
+
+  // The letter "H" stays as the fallback until the photo is confirmed to load.
+  (function probeAvatar() {
+    var img = new Image();
+    img.onload = function () {
+      ui.root.classList.add("hubsy-has-avatar");
+    };
+    img.src = avatarSrc();
+  })();
 
   var history = loadHistory();
   var busy = false;
@@ -879,7 +903,16 @@
     var b = el("div", "hubsy-msg hubsy-" + (role === "user" ? "user" : "bot"));
     bubbleText(b, text);
     if (role !== "user" && opts.cta) b.appendChild(ctaBlock(opts.cta));
-    ui.log.appendChild(b);
+    if (role === "user") {
+      ui.log.appendChild(b);
+    } else {
+      var row = el("div", "hubsy-row hubsy-row-bot");
+      var av = el("div", "hubsy-avatar hubsy-bavatar", "H");
+      av.setAttribute("aria-hidden", "true");
+      row.appendChild(av);
+      row.appendChild(b);
+      ui.log.appendChild(row);
+    }
     ui.log.scrollTop = ui.log.scrollHeight;
     return b;
   }
@@ -992,9 +1025,7 @@
 
   if (history.length) {
     history.forEach(function (m) {
-      var b = el("div", "hubsy-msg hubsy-" + (m.role === "user" ? "user" : "bot"));
-      bubbleText(b, m.content);
-      ui.log.appendChild(b);
+      addBubble(m.role, m.content);
     });
   }
 

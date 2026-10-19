@@ -10,7 +10,7 @@ const root = resolve(here, "..");
 const src = resolve(root, ".agent/web-app");
 const dest = resolve(root, "widget");
 
-const files = ["index.html", "chatbot.js", "knowledge-base.json", "_headers"];
+const files = ["index.html", "chatbot.js", "knowledge-base.json", "_headers", "assets/hubsy-avatar.jpg"];
 
 rmSync(dest, { recursive: true, force: true });
 mkdirSync(dest, { recursive: true });
@@ -21,6 +21,8 @@ for (const name of files) {
     console.error(`[sync-widget] missing source file: ${from}`);
     process.exit(1);
   }
-  copyFileSync(from, resolve(dest, name));
+  const to = resolve(dest, name);
+  mkdirSync(dirname(to), { recursive: true });
+  copyFileSync(from, to);
   console.log(`[sync-widget] ${name} -> widget/${name}`);
 }
