@@ -351,6 +351,41 @@
     return tiers;
   }
 
+  // People entries in the knowledge base are stored as one dense paragraph:
+  // "Name - Title: Bio. Name - Title: Bio." This matches a capitalised name
+  // of two to four words followed by " - ".
+  var PERSON_RE = /((?:\p{Lu}[\p{L}'’-]*)(?:\s+(?:\p{Lu}[\p{L}'’-]*)){1,3})\s+-\s+/gu;
+  // Topics that hold a list of people (lecturers, mentors, trainers, team).
+  var PEOPLE_TOPIC_RE = /trajner|trainer|lecturer|mentor|ekip|team|staff/i;
+
+  // Turn a dense people paragraph into the bullet format the system prompt
+  // requires: one person per bullet, bold name, title after an em dash, and
+  // the bio on the indented line below.
+  function formatPeopleList(answer) {
+    if (!answer) return null;
+    PERSON_RE.lastIndex = 0;
+    var marks = [];
+    var m;
+    while ((m = PERSON_RE.exec(answer)) !== null) {
+      marks.push({ name: m[1].trim(), nameAt: m.index, bodyAt: m.index + m[0].length });
+    }
+    if (!marks.length) return null;
+
+    var blocks = [];
+    for (var i = 0; i < marks.length; i++) {
+      var end = i + 1 < marks.length ? marks[i + 1].nameAt : answer.length;
+      var body = answer.slice(marks[i].bodyAt, end).trim();
+      var cut = body.indexOf(":");
+      var title = (cut === -1 ? body : body.slice(0, cut)).trim();
+      var bio = cut === -1 ? "" : body.slice(cut + 1).trim();
+      if (!title) continue;
+      var line = "• **" + marks[i].name + "** — " + title;
+      if (bio) line += "\n  " + bio;
+      blocks.push(line);
+    }
+    return blocks.length ? blocks.join("\n\n") : null;
+  }
+
   var GREETINGS = ["pershendetje", "përshëndetje", "tung", "tungjatjeta", "miredita", "mirëdita", "dita e mire", "hello", "hi", "hey", "good morning", "good afternoon"];
   var THANKS = ["faleminderit", "flm", "thanks", "thank you", "rrofsh"];
 
@@ -612,7 +647,14 @@
 
       var MIN = 2.6;
       if (best && bestScore >= MIN) {
-        return { reply: best.answer, fallback: false, kind: "entry", topic: best.topic, score: bestScore, lang: lang };
+        var reply = best.answer;
+        // Lecturer, mentor, and team lists are stored as a dense paragraph.
+        // Reformat them so people always come back as scannable bullets.
+        if (PEOPLE_TOPIC_RE.test(best.topic || "")) {
+          var people = formatPeopleList(best.answer);
+          if (people) reply = people;
+        }
+        return { reply: reply, fallback: false, kind: "entry", topic: best.topic, score: bestScore, lang: lang };
       }
       return fallbackFor(qAcad, lang);
     }
@@ -635,6 +677,7 @@
     detectLanguage: detectLanguage,
     parseAmount: parseAmount,
     parseTiers: parseTiers,
+    formatPeopleList: formatPeopleList,
     buildIndex: buildIndex,
     scoreEntry: scoreEntry,
     createResponder: createResponder,
@@ -713,6 +756,11 @@
   }
 
   var LINK_RE = /([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|(\+?\d[\d\s]{6,}\d)/g;
+  var BOLD_RE = /\*\*([^*\n]+)\*\*/g;
+  // A line indented by two spaces or a tab continues the bullet above it.
+  var CONT_RE = /^[ \t]{2,}/;
+  // ...unless the indented line is itself a bullet, which stays flush.
+  var BULLET_RE = /^[ \t]{2,}(?:[•\-\*]\s|\d+[.)]\s)/;
 
   // Turn bare emails and phone numbers into clickable links.
   function appendLinkified(p, line) {
@@ -736,12 +784,38 @@
     if (last < line.length) p.appendChild(document.createTextNode(line.slice(last)));
   }
 
+  // Render **bold** as real bold text, keeping links clickable inside it.
+  function appendInline(p, line) {
+    var last = 0;
+    var m;
+    BOLD_RE.lastIndex = 0;
+    while ((m = BOLD_RE.exec(line)) !== null) {
+      if (m.index > last) appendLinkified(p, line.slice(last, m.index));
+      var strong = document.createElement("strong");
+      appendLinkified(strong, m[1]);
+      p.appendChild(strong);
+      last = m.index + m[0].length;
+    }
+    if (last < line.length) appendLinkified(p, line.slice(last));
+  }
+
   function bubbleText(container, text) {
     String(text).split(/\n{2,}/).forEach(function (block) {
       var p = el("p", "hubsy-p");
       block.split("\n").forEach(function (line, i) {
         if (i > 0) p.appendChild(document.createElement("br"));
-        appendLinkified(p, line);
+        var target = p;
+        if (CONT_RE.test(line)) {
+          if (BULLET_RE.test(line)) {
+            line = line.replace(/^[ \t]+/, "");
+          } else {
+            // Indented bio line: hangs under the bullet it belongs to.
+            target = el("span", "hubsy-cont");
+            p.appendChild(target);
+            line = line.replace(CONT_RE, "");
+          }
+        }
+        appendInline(target, line);
       });
       container.appendChild(p);
     });
@@ -775,6 +849,7 @@
       "#hubsy-root .hubsy-msg.hubsy-bot{background:" + CFG.soft + ";color:" + CFG.navy + ";border:1px solid #D6F2E5;border-bottom-left-radius:6px;align-self:flex-start}",
       "#hubsy-root .hubsy-msg.hubsy-user{background:#FFFFFF;color:" + CFG.navy + ";border:1px solid " + CFG.border + ";border-bottom-right-radius:6px;align-self:flex-end;box-shadow:0 1px 2px rgba(5,18,56,.06)}",
       "#hubsy-root .hubsy-p{margin:0 0 8px}",
+      "#hubsy-root .hubsy-cont{display:inline-block;padding-left:16px}",
       "#hubsy-root .hubsy-p a{color:" + CFG.accentDark + ";font-weight:600;text-decoration:underline}",
       "#hubsy-root .hubsy-msg .hubsy-p:last-child{margin-bottom:0}",
       "#hubsy-root .hubsy-typing{align-self:flex-start;display:flex;gap:5px;background:" + CFG.soft + ";border:1px solid #D6F2E5;padding:12px 14px;border-radius:16px;border-bottom-left-radius:6px}",
