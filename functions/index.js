@@ -43,7 +43,15 @@ const KNOWLEDGE_BASE = JSON.parse(
 
 const KB_TEXT = KNOWLEDGE_BASE
   .filter((e) => e && e.topic && e.answer)
-  .map((e) => `- ${e.topic}: ${e.answer}`)
+  .map((e) => {
+    const people =
+      Array.isArray(e.lecturers) && e.lecturers.length
+        ? `\n  [lecturers mapped: ${e.lecturers
+            .map((p) => `${p.name} (${p.title})`)
+            .join("; ")}]`
+        : "";
+    return `- ${e.topic}: ${e.answer}${people}`;
+  })
   .join("\n");
 
 const SYSTEM_INSTRUCTION =

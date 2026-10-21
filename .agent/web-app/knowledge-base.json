@@ -63,7 +63,6 @@
     "topic": "Personi përgjegjës – Vibe Coding & AI Agents Academy",
     "answer": "Flakë Dermaku - Koordinatore e Akademisë së Vibe Coding & AI Agents. +383 49 334 437, flaka@creativehubkos.com"
   },
-
   {
     "topic": "Çfarë është Digital Marketing & AI Academy?",
     "answer": "Digital Marketing & AI Academy është një program praktik 24-javor, i dizajnuar për t'i përgatitur studentët për një karrierë në marketingun digjital. Gjatë programit, studentët mësojnë Meta Ads, Google Ads, SEO & GEO, Copywriting, Email Marketing, Analytics dhe përdorimin e mjeteve të AI për marketing, duke punuar në projekte praktike gjatë gjithë akademisë. Në përfundim, studentët ndërtojnë një portfolio me 7 projekte praktike dhe kanë mundësinë të pajisen me Certifikatë Profesionale Amerikane në Digital Marketing & AI."
@@ -122,9 +121,51 @@
   },
   {
     "topic": "Trajnerët – Digital Marketing & AI Academy",
-    "answer": "Arlinda Kaloshi - Head of Growth & Marketing: Ka kontribuar në transformimin e karrierës së mbi 500 personave në fushën e marketingut digjital. Diana Bajraktari - Content Manager: Eksperte në copywriting, content marketing, ndërtimin e brand voice dhe krijimin e kampanjave digjitale me konvertime të larta. Taulant Binxhia - Marketing Manager: Ekspert në paid media, growth marketing dhe strategji të rrjeteve sociale për brende lokale dhe ndërkombëtare. Endrit Kryeziu - Performance Marketing & AI Search Manager: Mbi 8 vite përvojë me klientë ndërkombëtarë, duke zhvilluar strategji të bazuara në të dhëna në Google Ads, Meta Ads, SEO dhe content marketing. Petrit Halitaj - AI SEO Lead: Ka ndihmuar mbi 10 biznese të përmirësojnë prezencën e tyre online përmes SEO teknike, optimizimit të përmbajtjes, strategjive të fjalëve kyçe dhe praktikave të kërkimit të përmirësuara me AI. Zeki Veliu - Senior Global Marketing Director: Udhëheq një ekip ndërkombëtar të marketingut dhe zhvillon strategji të rritjes të bazuara në të dhëna për një brend global. Arbër Hajrizaj - Customer Insights Researcher: Mbi 15 vite përvojë në ndihmën e kompanive për të kuptuar më mirë klientët e tyre dhe për të shndërruar të dhënat në strategji të qarta dhe të zbatueshme. Florent Bajrami - Senior Recruiter: Rekrutues i specializuar në tërheqjen e talenteve, përvojën e kandidatëve dhe ndërtimin e ekipeve me performancë të lartë për organizatat globale."
+    "lecturers": [
+      {
+        "name": "Arlinda Kaloshi",
+        "title": "Head of Growth & Marketing",
+        "bio": "Ka kontribuar në transformimin e karrierës së mbi 500 personave në fushën e marketingut digjital."
+      },
+      {
+        "name": "Diana Bajraktari",
+        "title": "Content Manager",
+        "bio": "Eksperte në copywriting, content marketing, ndërtimin e brand voice dhe krijimin e kampanjave digjitale me konvertime të larta."
+      },
+      {
+        "name": "Taulant Binxhia",
+        "title": "Marketing Manager",
+        "bio": "Ekspert në paid media, growth marketing dhe strategji të rrjeteve sociale për brende lokale dhe ndërkombëtare."
+      },
+      {
+        "name": "Endrit Kryeziu",
+        "title": "Performance Marketing & AI Search Manager",
+        "bio": "Mbi 8 vite përvojë me klientë ndërkombëtarë, duke zhvilluar strategji të bazuara në të dhëna në Google Ads, Meta Ads, SEO dhe content marketing."
+      },
+      {
+        "name": "Petrit Halitaj",
+        "title": "AI SEO Lead",
+        "bio": "Ka ndihmuar mbi 10 biznese të përmirësojnë prezencën e tyre online përmes SEO teknike, optimizimit të përmbajtjes, strategjive të fjalëve kyçe dhe praktikave të kërkimit të përmirësuara me AI."
+      },
+      {
+        "name": "Zeki Veliu",
+        "title": "Senior Global Marketing Director",
+        "bio": "Udhëheq një ekip ndërkombëtar të marketingut dhe zhvillon strategji të rritjes të bazuara në të dhëna për një brend global."
+      },
+      {
+        "name": "Arbër Hajrizaj",
+        "title": "Customer Insights Researcher",
+        "bio": "Mbi 15 vite përvojë në ndihmën e kompanive për të kuptuar më mirë klientët e tyre dhe për të shndërruar të dhënat në strategji të qarta dhe të zbatueshme."
+      },
+      {
+        "name": "Florent Bajrami",
+        "title": "Senior Recruiter",
+        "bio": "Rekrutues i specializuar në tërheqjen e talenteve, përvojën e kandidatëve dhe ndërtimin e ekipeve me performancë të lartë për organizatat globale.",
+        "mentor": true
+      }
+    ],
+    "answer": "Ligjëruesit në Akademinë e Digital Marketing & AI:\n\n• **Arlinda Kaloshi** — Head of Growth & Marketing\n  Ka kontribuar në transformimin e karrierës së mbi 500 personave në fushën e marketingut digjital.\n\n• **Diana Bajraktari** — Content Manager\n  Eksperte në copywriting, content marketing, ndërtimin e brand voice dhe krijimin e kampanjave digjitale me konvertime të larta.\n\n• **Taulant Binxhia** — Marketing Manager\n  Ekspert në paid media, growth marketing dhe strategji të rrjeteve sociale për brende lokale dhe ndërkombëtare.\n\n• **Endrit Kryeziu** — Performance Marketing & AI Search Manager\n  Mbi 8 vite përvojë me klientë ndërkombëtarë, duke zhvilluar strategji të bazuara në të dhëna në Google Ads, Meta Ads, SEO dhe content marketing.\n\n• **Petrit Halitaj** — AI SEO Lead\n  Ka ndihmuar mbi 10 biznese të përmirësojnë prezencën e tyre online përmes SEO teknike, optimizimit të përmbajtjes, strategjive të fjalëve kyçe dhe praktikave të kërkimit të përmirësuara me AI.\n\n• **Zeki Veliu** — Senior Global Marketing Director\n  Udhëheq një ekip ndërkombëtar të marketingut dhe zhvillon strategji të rritjes të bazuara në të dhëna për një brend global.\n\n• **Arbër Hajrizaj** — Customer Insights Researcher\n  Mbi 15 vite përvojë në ndihmën e kompanive për të kuptuar më mirë klientët e tyre dhe për të shndërruar të dhënat në strategji të qarta dhe të zbatueshme.\n\n• **Florent Bajrami** — Senior Recruiter\n  Rekrutues i specializuar në tërheqjen e talenteve, përvojën e kandidatëve dhe ndërtimin e ekipeve me performancë të lartë për organizatat globale."
   },
-
   {
     "topic": "Çfarë është Akademia e AI-Powered Product & Project Management?",
     "answer": "Akademia e AI-Powered Product & Project Management është një program 18-javor që të përgatit për karrierë në Product dhe Project Management, duke kombinuar Agile, Scrum, Jira dhe mjete të AI. Programi është praktik, përfshin projekte reale dhe mundësi për të përfituar një certifikatë profesionale amerikane."
@@ -163,9 +204,21 @@
   },
   {
     "topic": "Trajnerët – AI-powered Product & Project Management Academy",
-    "answer": "Arbër Berisha - Head of Project Management: Menaxher Projektesh me përvojë, me një historik të dëshmuar në udhëheqjen e iniciativave të transformimit digjital, marketingut dhe teknologjisë në tregje ndërkombëtare. Florent Bajrami - Senior Recruiter: Rekrutues me përvojë dhe me një historik të dëshmuar në ndihmën e Menaxherëve të Projekteve për të siguruar mundësi karriere në kompani kryesore ndërkombëtare."
+    "lecturers": [
+      {
+        "name": "Arbër Berisha",
+        "title": "Head of Project Management",
+        "bio": "Menaxher Projektesh me përvojë, me një historik të dëshmuar në udhëheqjen e iniciativave të transformimit digjital, marketingut dhe teknologjisë në tregje ndërkombëtare."
+      },
+      {
+        "name": "Florent Bajrami",
+        "title": "Senior Recruiter",
+        "bio": "Rekrutues me përvojë dhe me një historik të dëshmuar në ndihmën e Menaxherëve të Projekteve për të siguruar mundësi karriere në kompani kryesore ndërkombëtare.",
+        "mentor": true
+      }
+    ],
+    "answer": "Ligjëruesit në Akademinë e AI-powered Product & Project Management:\n\n• **Arbër Berisha** — Head of Project Management\n  Menaxher Projektesh me përvojë, me një historik të dëshmuar në udhëheqjen e iniciativave të transformimit digjital, marketingut dhe teknologjisë në tregje ndërkombëtare.\n\n• **Florent Bajrami** — Senior Recruiter\n  Rekrutues me përvojë dhe me një historik të dëshmuar në ndihmën e Menaxherëve të Projekteve për të siguruar mundësi karriere në kompani kryesore ndërkombëtare."
   },
-
   {
     "topic": "Çfarë është Akademia e Data Engineering, Cloud & AI?",
     "answer": "Akademia e Data Engineering, Cloud & AI nga Creative Hub Kosovo është një program intensiv 18-javor, me format hibrid, i dizajnuar për t'i shndërruar fillestarët në inxhinierë të të dhënave të gatshëm për tregun e punës. I zhvilluar në gjuhën shqipe përmes ligjëratave live dhe 7 projekteve praktike për portfolio, programi mbulon teknologjitë kryesore si Python, SQL, PySpark, Databricks dhe sistemet Cloud, duke u përmbyllur me një Certifikatë Profesionale nga SHBA-ja të njohur ndërkombëtarisht."
@@ -220,9 +273,36 @@
   },
   {
     "topic": "Trajnerët – Data Engineering, Cloud & AI Academy",
-    "answer": "Lorik Berisha - Engineering Manager: Ekspert në ETL, SQL, Python dhe platformat e të dhënave në shkallë të gjerë. Alina Fazliu - Data Engineering Team Lead: Eksperte në SQL, PySpark, Databricks dhe Analytics Engineering. Jon Maxharraj - Cloud & Data Specialist: Ekspert në databricks, sistemet e shpërndara, streaming, production platforms. Elsa Nishori - Data Engineer & AI Specialist: Mbi 4 vite përvojë në ndërtimin e data pipeline-ve dhe sistemeve të bazuara në AI. Agrina Sadiku - Tech Recruiter: Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri."
+    "lecturers": [
+      {
+        "name": "Lorik Berisha",
+        "title": "Engineering Manager",
+        "bio": "Ekspert në ETL, SQL, Python dhe platformat e të dhënave në shkallë të gjerë."
+      },
+      {
+        "name": "Alina Fazliu",
+        "title": "Data Engineering Team Lead",
+        "bio": "Eksperte në SQL, PySpark, Databricks dhe Analytics Engineering."
+      },
+      {
+        "name": "Jon Maxharraj",
+        "title": "Cloud & Data Specialist",
+        "bio": "Ekspert në databricks, sistemet e shpërndara, streaming, production platforms."
+      },
+      {
+        "name": "Elsa Nishori",
+        "title": "Data Engineer & AI Specialist",
+        "bio": "Mbi 4 vite përvojë në ndërtimin e data pipeline-ve dhe sistemeve të bazuara në AI."
+      },
+      {
+        "name": "Agrina Sadiku",
+        "title": "Tech Recruiter",
+        "bio": "Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri.",
+        "mentor": true
+      }
+    ],
+    "answer": "Ligjëruesit në Akademinë e Data Engineering, Cloud & AI:\n\n• **Lorik Berisha** — Engineering Manager\n  Ekspert në ETL, SQL, Python dhe platformat e të dhënave në shkallë të gjerë.\n\n• **Alina Fazliu** — Data Engineering Team Lead\n  Eksperte në SQL, PySpark, Databricks dhe Analytics Engineering.\n\n• **Jon Maxharraj** — Cloud & Data Specialist\n  Ekspert në databricks, sistemet e shpërndara, streaming, production platforms.\n\n• **Elsa Nishori** — Data Engineer & AI Specialist\n  Mbi 4 vite përvojë në ndërtimin e data pipeline-ve dhe sistemeve të bazuara në AI.\n\n• **Agrina Sadiku** — Tech Recruiter\n  Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri."
   },
-
   {
     "topic": "Çfarë është Akademia e Data Science & Analytics + AI?",
     "answer": "Akademia e Data Science & Analytics + AI është një program praktik 34-javor, i dizajnuar për t'i përgatitur studentët për një karrierë në Data Science, Data Analytics dhe AI. Gjatë programit, studentët mësojnë Python, SQL, Statistics, Power BI, Machine Learning dhe Generative AI, duke punuar në projekte praktike gjatë gjithë akademisë. Në përfundim, studentët ndërtojnë një portfolio me 7 projekte praktike dhe kanë mundësinë të pajisen me Certifikatë Profesionale Amerikane në Data Science & Analytics + AI."
@@ -289,9 +369,41 @@
   },
   {
     "topic": "Trajnerët – Data Science & Analytics + AI Academy",
-    "answer": "Diellza Reçica - Senior Data Scientist: Mbi 7 vite ekspertizë në LLM, Prompt Engineering, Data Analytics, Machine Learning dhe Python. Olti Roka - Senior Data Scientist: Me përvojë në industrinë financiare dhe bankare, me specializim në Machine Learning, Data Science dhe Python. Fitim Gashi - Business Intelligence Specialist: I specializuar në SQL, menaxhimin e databazave, ETL, integrimin e të dhënave dhe Power BI. Shkumbin Halabaku - Data Analytics Specialist: Ekspertizë të avancuar në Power BI, data storytelling dhe vizualizimin e të dhënave. Albin Bahtiri - Data Engineer: Me përvojë të gjerë në analizën e të dhënave, proceset e inxhinierisë së të dhënave, vizualizimin e të dhënave dhe proceset ETL. Agrina Sadiku - Tech Recruiter: Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri."
+    "lecturers": [
+      {
+        "name": "Diellza Reçica",
+        "title": "Senior Data Scientist",
+        "bio": "Mbi 7 vite ekspertizë në LLM, Prompt Engineering, Data Analytics, Machine Learning dhe Python."
+      },
+      {
+        "name": "Olti Roka",
+        "title": "Senior Data Scientist",
+        "bio": "Me përvojë në industrinë financiare dhe bankare, me specializim në Machine Learning, Data Science dhe Python."
+      },
+      {
+        "name": "Fitim Gashi",
+        "title": "Business Intelligence Specialist",
+        "bio": "I specializuar në SQL, menaxhimin e databazave, ETL, integrimin e të dhënave dhe Power BI."
+      },
+      {
+        "name": "Shkumbin Halabaku",
+        "title": "Data Analytics Specialist",
+        "bio": "Ekspertizë të avancuar në Power BI, data storytelling dhe vizualizimin e të dhënave."
+      },
+      {
+        "name": "Albin Bahtiri",
+        "title": "Data Engineer",
+        "bio": "Me përvojë të gjerë në analizën e të dhënave, proceset e inxhinierisë së të dhënave, vizualizimin e të dhënave dhe proceset ETL."
+      },
+      {
+        "name": "Agrina Sadiku",
+        "title": "Tech Recruiter",
+        "bio": "Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri.",
+        "mentor": true
+      }
+    ],
+    "answer": "Ligjëruesit në Akademinë e Data Science & Analytics + AI:\n\n• **Diellza Reçica** — Senior Data Scientist\n  Mbi 7 vite ekspertizë në LLM, Prompt Engineering, Data Analytics, Machine Learning dhe Python.\n\n• **Olti Roka** — Senior Data Scientist\n  Me përvojë në industrinë financiare dhe bankare, me specializim në Machine Learning, Data Science dhe Python.\n\n• **Fitim Gashi** — Business Intelligence Specialist\n  I specializuar në SQL, menaxhimin e databazave, ETL, integrimin e të dhënave dhe Power BI.\n\n• **Shkumbin Halabaku** — Data Analytics Specialist\n  Ekspertizë të avancuar në Power BI, data storytelling dhe vizualizimin e të dhënave.\n\n• **Albin Bahtiri** — Data Engineer\n  Me përvojë të gjerë në analizën e të dhënave, proceset e inxhinierisë së të dhënave, vizualizimin e të dhënave dhe proceset ETL.\n\n• **Agrina Sadiku** — Tech Recruiter\n  Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri."
   },
-
   {
     "topic": "Çfarë është Akademia e Full-stack Development + AI?",
     "answer": "Akademia e Full-stack Development + AI është një program praktik që u ofron studentëve njohuritë dhe aftësitë e nevojshme për të dizajnuar, zhvilluar dhe implementuar aplikacione moderne web. Kurrikula përfshin HTML, CSS, JavaScript, React, Python, Django, API, databaza dhe Generative AI, të kombinuara me punë praktike në 5 projekte të bazuara në raste reale. Përmes 130 orëve live, studentët fitojnë përvojë praktike në zhvillim, ndërtojnë një portfolio profesionale dhe pajisen me një Certifikatë Profesionale nga SHBA pas përfundimit të programit."
@@ -350,9 +462,26 @@
   },
   {
     "topic": "Trajnerët – Full-stack Development + AI Academy",
-    "answer": "Qëndrim Krasniqi - Software Engineer: Python Developer me mbi 9 vite përvojë dhe mbi 4 vite përvojë si instruktor i Python. Ardit Curri - Software Developer: Ekspert në Zhvillimin e Softuerëve të Personalizuar, Zhvillimin e Bazave të të Dhënave dhe Zhvillimin Web. Agrina Sadiku - Tech Recruiter: Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri."
+    "lecturers": [
+      {
+        "name": "Qëndrim Krasniqi",
+        "title": "Software Engineer",
+        "bio": "Python Developer me mbi 9 vite përvojë dhe mbi 4 vite përvojë si instruktor i Python."
+      },
+      {
+        "name": "Ardit Curri",
+        "title": "Software Developer",
+        "bio": "Ekspert në Zhvillimin e Softuerëve të Personalizuar, Zhvillimin e Bazave të të Dhënave dhe Zhvillimin Web."
+      },
+      {
+        "name": "Agrina Sadiku",
+        "title": "Tech Recruiter",
+        "bio": "Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri.",
+        "mentor": true
+      }
+    ],
+    "answer": "Ligjëruesit në Akademinë e Full-stack Development + AI:\n\n• **Qëndrim Krasniqi** — Software Engineer\n  Python Developer me mbi 9 vite përvojë dhe mbi 4 vite përvojë si instruktor i Python.\n\n• **Ardit Curri** — Software Developer\n  Ekspert në Zhvillimin e Softuerëve të Personalizuar, Zhvillimin e Bazave të të Dhënave dhe Zhvillimin Web.\n\n• **Agrina Sadiku** — Tech Recruiter\n  Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri."
   },
-
   {
     "topic": "Çfarë është Akademia e Human Resources + AI?",
     "answer": "Akademia e Human Resources + AI është një program praktik që u ofron studentëve njohuritë dhe aftësitë e nevojshme për të menaxhuar në mënyrë moderne proceset e burimeve njerëzore dhe talentet në organizata. Kurrikula përfshin rekrutimin dhe selektimin, menaxhimin e performancës, employer branding, talent management, HR analytics dhe përdorimin e Generative AI për të optimizuar dhe automatizuar proceset HR, të kombinuara me punë praktike në projekte të bazuara në raste reale. Përmes orëve live dhe ushtrimeve praktike, studentët zhvillojnë aftësi të aplikueshme në tregun e punës, ndërtojnë një portfolio profesionale dhe pajisen me një Certifikatë Profesionale nga SHBA pas përfundimit të programit."
@@ -411,9 +540,49 @@
   },
   {
     "topic": "Trajnerët – Human Resources + AI Academy",
-    "answer": "Arta Celina - Head of People, Culture & Learning: 22+ vite drejtuese e Burimeve Njerëzore me ekspertizë në strategjinë, menaxhimin e talenteve dhe zhvillimin organizativ. Kaltrina Lloncari Cena - Senior HR Business Partner: HR Business Partner në Mercedes-Benz, e specializuar në strategjinë e burimeve njerëzore, zhvillimin e talenteve dhe krijimin e kulturave të shëndetshme dhe të suksesshme në vendin e punës. Ardian Rexha - Managing Partner: Profesionist ligjor me mbi 11 vite përvojë në të drejtat dhe marrëdhëniet e punës dhe pajtueshmërinë me legjislacionin në vendin e punës. Hana Gashi Salihu - Head of Human Resources: Eksperte në Menaxhimin e Ndryshimeve, Menaxhimin e Performancës, Parashikimin e nevojave të HR-së dhe Planifikimin Strategjik Organizativ, etj. Lavdrim Reçica - Lead of Talent Management & Retention: Udhëheqës i Talenteve në Gjirafa, Inc., i specializuar në strategjinë e menaxhimit të talenteve, mbajtjen e punonjësve, analitikën dhe kulturën organizative. Fortesa Manaj - HR Head of Unit: Ekspertizë në menaxhimin financiar të HR, planifikimin e fuqisë punëtore dhe përafrimin e strategjive të burimeve njerëzore me objektivat e biznesit. Florent Bajrami - Senior Recruiter: Rekrutues i specializuar në tërheqjen e talenteve, përvojën e kandidatëve dhe ndërtimin e ekipeve me performancë të lartë për organizatat globale."
+    "lecturers": [
+      {
+        "name": "Arta Celina",
+        "title": "Head of People, Culture & Learning",
+        "bio": "22+ vite drejtuese e Burimeve Njerëzore me ekspertizë në strategjinë, menaxhimin e talenteve dhe zhvillimin organizativ.",
+        "mentor": true
+      },
+      {
+        "name": "Kaltrina Lloncari Cena",
+        "title": "Senior HR Business Partner",
+        "bio": "HR Business Partner në Mercedes-Benz, e specializuar në strategjinë e burimeve njerëzore, zhvillimin e talenteve dhe krijimin e kulturave të shëndetshme dhe të suksesshme në vendin e punës.",
+        "mentor": true
+      },
+      {
+        "name": "Ardian Rexha",
+        "title": "Managing Partner",
+        "bio": "Profesionist ligjor me mbi 11 vite përvojë në të drejtat dhe marrëdhëniet e punës dhe pajtueshmërinë me legjislacionin në vendin e punës."
+      },
+      {
+        "name": "Hana Gashi Salihu",
+        "title": "Head of Human Resources",
+        "bio": "Eksperte në Menaxhimin e Ndryshimeve, Menaxhimin e Performancës, Parashikimin e nevojave të HR-së dhe Planifikimin Strategjik Organizativ, etj."
+      },
+      {
+        "name": "Lavdrim Reçica",
+        "title": "Lead of Talent Management & Retention",
+        "bio": "Udhëheqës i Talenteve në Gjirafa, Inc., i specializuar në strategjinë e menaxhimit të talenteve, mbajtjen e punonjësve, analitikën dhe kulturën organizative.",
+        "mentor": true
+      },
+      {
+        "name": "Fortesa Manaj",
+        "title": "HR Head of Unit",
+        "bio": "Ekspertizë në menaxhimin financiar të HR, planifikimin e fuqisë punëtore dhe përafrimin e strategjive të burimeve njerëzore me objektivat e biznesit."
+      },
+      {
+        "name": "Florent Bajrami",
+        "title": "Senior Recruiter",
+        "bio": "Rekrutues i specializuar në tërheqjen e talenteve, përvojën e kandidatëve dhe ndërtimin e ekipeve me performancë të lartë për organizatat globale.",
+        "mentor": true
+      }
+    ],
+    "answer": "Ligjëruesit në Akademinë e HR:\n\n• **Arta Celina** — Head of People, Culture & Learning\n  22+ vite drejtuese e Burimeve Njerëzore me ekspertizë në strategjinë, menaxhimin e talenteve dhe zhvillimin organizativ.\n\n• **Kaltrina Lloncari Cena** — Senior HR Business Partner\n  HR Business Partner në Mercedes-Benz, e specializuar në strategjinë e burimeve njerëzore, zhvillimin e talenteve dhe krijimin e kulturave të shëndetshme dhe të suksesshme në vendin e punës.\n\n• **Ardian Rexha** — Managing Partner\n  Profesionist ligjor me mbi 11 vite përvojë në të drejtat dhe marrëdhëniet e punës dhe pajtueshmërinë me legjislacionin në vendin e punës.\n\n• **Hana Gashi Salihu** — Head of Human Resources\n  Eksperte në Menaxhimin e Ndryshimeve, Menaxhimin e Performancës, Parashikimin e nevojave të HR-së dhe Planifikimin Strategjik Organizativ, etj.\n\n• **Lavdrim Reçica** — Lead of Talent Management & Retention\n  Udhëheqës i Talenteve në Gjirafa, Inc., i specializuar në strategjinë e menaxhimit të talenteve, mbajtjen e punonjësve, analitikën dhe kulturën organizative.\n\n• **Fortesa Manaj** — HR Head of Unit\n  Ekspertizë në menaxhimin financiar të HR, planifikimin e fuqisë punëtore dhe përafrimin e strategjive të burimeve njerëzore me objektivat e biznesit.\n\n• **Florent Bajrami** — Senior Recruiter\n  Rekrutues i specializuar në tërheqjen e talenteve, përvojën e kandidatëve dhe ndërtimin e ekipeve me performancë të lartë për organizatat globale."
   },
-
   {
     "topic": "Çfarë është Akademia e Vibe Coding & AI Agents?",
     "answer": "Akademia e Vibe Coding është një program praktik që u mëson studentëve si të përdorin Inteligjencën Artificiale për të krijuar website, aplikacione dhe produkte digjitale nga ideja deri te implementimi. Kurrikula fokusohet në AI-assisted coding, prompt engineering, zhvillimin e aplikacioneve, UI/UX dhe përdorimin e mjeteve moderne të AI për të përshpejtuar procesin e zhvillimit. Përmes projekteve praktike dhe rasteve reale, studentët ndërtojnë produkte funksionale, zhvillojnë një portfolio profesionale dhe fitojnë aftësi të aplikueshme në tregun modern të teknologjisë."
@@ -496,6 +665,13 @@
   },
   {
     "topic": "Trajnerët – Vibe Coding & AI Agents Academy",
-    "answer": "Richmond Taylor - Lead AI Lecturer: Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet."
+    "lecturers": [
+      {
+        "name": "Richmond Taylor",
+        "title": "Lead AI Lecturer",
+        "bio": "Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet."
+      }
+    ],
+    "answer": "Ligjëruesit në Akademinë e Vibe Coding & AI Agents:\n\n• **Richmond Taylor** — Lead AI Lecturer\n  Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet."
   }
 ]

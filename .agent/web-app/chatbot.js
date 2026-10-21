@@ -119,12 +119,14 @@
 
   // Keyword match tolerant of Albanian/English suffixes: single-word keywords
   // match as a word prefix ("kontakt" matches "kontakti"); phrases match whole.
+  // Tokens are stripped of punctuation first, so "HR?" still matches "hr".
   function matchKeyword(text, kw) {
     if (kw.indexOf(" ") !== -1) return text.indexOf(kw) !== -1;
     var toks = text.split(/\s+/);
     for (var i = 0; i < toks.length; i++) {
-      if (toks[i] === kw) return true;
-      if (kw.length >= 3 && toks[i].indexOf(kw) === 0) return true;
+      var tok = toks[i].replace(/[^\p{L}\p{N}]+/gu, "");
+      if (tok === kw) return true;
+      if (kw.length >= 3 && tok.indexOf(kw) === 0) return true;
     }
     return false;
   }
@@ -152,7 +154,7 @@
     location: ["kampus", "lokacion", "adres", "adresa", "ku ndodhet", "where", "location", "prishtin", "zyra"],
     prerequisites: ["parakusht", "parakushtet", "kushtet", "pranimit", "requirements", "prerequisite", "aplikim", "apply", "aplikoj"],
     projects: ["projekte", "projekt", "portfolio", "projects", "project"],
-    trainers: ["trajner", "trajneret", "trainer", "trainers", "instruktor", "profesor", "lecturer"],
+    people: ["ligjerues", "trajner", "trainer", "instruktor", "instructor", "profesor", "professor", "professors", "mentor", "lecturer", "mësues", "mesues", "who teaches", "kush mëson", "kush meson", "ekip", "team", "staff", "people"],
     audience: ["audienca", "target", "profili", "profile", "kush mund", "për kë", "per ke", "audience"],
     certification: ["certifikatë", "certifikate", "certifikim", "diplom", "diplomë", "certification", "certificate", "cert"],
     contact: ["kontakt", "kontakto", "contact", "përgjegjës", "pergjegjes", "person", "personi", "telefon", "telefoni", "email", "numri", "numero", "flas", "njeri", "takim", "cakto", "ndihmo", "ndihmë", "ndihme", "help", "assist", "këshill", "keshill", "bisedo", "talk", "speak"]
@@ -165,7 +167,7 @@
 
   // Intents that only make sense when we know which academy is meant.
   var ACADEMY_SPECIFIC = {
-    price: 1, payment: 1, duration: 1, modules: 1, projects: 1, trainers: 1, audience: 1, certification: 1
+    price: 1, payment: 1, duration: 1, modules: 1, projects: 1, people: 1, audience: 1, certification: 1
   };
 
   function detectAcademies(text) {
@@ -227,6 +229,13 @@
         tokenize(e.answer).forEach(function (t) {
           answerStems[stem(t)] = true;
         });
+        var people = null;
+        if (Array.isArray(e.lecturers)) {
+          var named = e.lecturers.filter(function (l) {
+            return l && l.name && l.title;
+          });
+          if (named.length) people = named;
+        }
         return {
           topic: e.topic,
           answer: e.answer,
@@ -234,6 +243,8 @@
           academies: detectAcademies(topicLc),
           intents: detectIntents(topicLc),
           isSummary: /modulet|module|kurrikul|programi/i.test(topicLc),
+          isPeople: /trajner|ligjerues|lecturer|mentor|instruktor|profesor/i.test(topicLc),
+          people: people,
           topicStems: topicStems,
           topicTokens: topicTokens,
           answerStems: answerStems,
@@ -355,23 +366,17 @@
   // "Name - Title: Bio. Name - Title: Bio." This matches a capitalised name
   // of two to four words followed by " - ".
   var PERSON_RE = /((?:\p{Lu}[\p{L}'’-]*)(?:\s+(?:\p{Lu}[\p{L}'’-]*)){1,3})\s+-\s+/gu;
-  // Topics that hold a list of people (lecturers, mentors, trainers, team).
-  var PEOPLE_TOPIC_RE = /trajner|trainer|lecturer|mentor|ekip|team|staff/i;
 
-  // Turn a dense people paragraph into the bullet format the system prompt
-  // requires: one person per bullet, bold name, title after an em dash, and
-  // the bio on the indented line below.
-  function formatPeopleList(answer) {
-    if (!answer) return null;
+  // Split a dense people paragraph into structured people.
+  function parsePeople(answer) {
+    if (!answer) return [];
     PERSON_RE.lastIndex = 0;
     var marks = [];
     var m;
     while ((m = PERSON_RE.exec(answer)) !== null) {
       marks.push({ name: m[1].trim(), nameAt: m.index, bodyAt: m.index + m[0].length });
     }
-    if (!marks.length) return null;
-
-    var blocks = [];
+    var people = [];
     for (var i = 0; i < marks.length; i++) {
       var end = i + 1 < marks.length ? marks[i + 1].nameAt : answer.length;
       var body = answer.slice(marks[i].bodyAt, end).trim();
@@ -379,11 +384,66 @@
       var title = (cut === -1 ? body : body.slice(0, cut)).trim();
       var bio = cut === -1 ? "" : body.slice(cut + 1).trim();
       if (!title) continue;
-      var line = "• **" + marks[i].name + "** — " + title;
-      if (bio) line += "\n  " + bio;
-      blocks.push(line);
+      people.push({ name: marks[i].name, title: title, bio: bio });
     }
-    return blocks.length ? blocks.join("\n\n") : null;
+    return people;
+  }
+
+  // Render people as the bullet list the widget shows:
+  // "• **Name** — Title" with the bio on the indented line below.
+  function formatPeopleBullets(people) {
+    return people
+      .map(function (p) {
+        var line = "• **" + p.name + "** — " + p.title;
+        if (p.bio) line += "\n  " + p.bio;
+        return line;
+      })
+      .join("\n\n");
+  }
+
+  // Parse the bullet layout back into structured people.
+  function parsePeopleBullets(answer) {
+    var people = [];
+    var current = null;
+    String(answer || "")
+      .split("\n")
+      .forEach(function (line) {
+        var head = line.match(/^\s*[•\-\*]\s+\*\*(.+?)\*\*\s+—\s+(.+?)\s*$/);
+        if (head) {
+          current = { name: head[1].trim(), title: head[2].trim(), bio: "" };
+          people.push(current);
+          return;
+        }
+        var cont = line.match(/^\s{2,}(\S.*)$/);
+        if (cont && current) {
+          current.bio = (current.bio ? current.bio + " " : "") + cont[1].trim();
+        }
+      });
+    return people;
+  }
+
+  // The people of a knowledge-base entry: the lecturers schema when present,
+  // otherwise the answer parsed back into people.
+  function peopleOf(entry) {
+    if (!entry) return [];
+    if (entry.people && entry.people.length) return entry.people;
+    var dense = parsePeople(entry.answer);
+    if (dense.length) return dense;
+    return parsePeopleBullets(entry.answer);
+  }
+
+  // Roles that can mentor a student: people development, recruiting, coaching.
+  var MENTOR_TITLE_RE = /recruit|talent|people|culture|learning|business partner|coach|mentor|leadership/i;
+
+  function isMentor(p) {
+    if (!p) return false;
+    if (p.mentor === true) return true;
+    return MENTOR_TITLE_RE.test(p.title || "");
+  }
+
+  function formatPeopleList(answer) {
+    var people = parsePeople(answer);
+    return people.length ? formatPeopleBullets(people) : null;
   }
 
   var GREETINGS = ["pershendetje", "përshëndetje", "tung", "tungjatjeta", "miredita", "mirëdita", "dita e mire", "hello", "hi", "hey", "good morning", "good afternoon"];
@@ -402,6 +462,17 @@
       de: "Data Engineering, Cloud & AI",
       fs: "Full-stack Development + AI",
       hr: "Human Resources + AI",
+      pm: "AI-powered Product & Project Management",
+      vc: "Vibe Coding & AI Agents"
+    };
+
+    // Short labels used in the people-list header ("Ligjëruesit në Akademinë e HR:").
+    var PEOPLE_LABELS = {
+      dm: "Digital Marketing & AI",
+      ds: "Data Science & Analytics + AI",
+      de: "Data Engineering, Cloud & AI",
+      fs: "Full-stack Development + AI",
+      hr: "HR",
       pm: "AI-powered Product & Project Management",
       vc: "Vibe Coding & AI Agents"
     };
@@ -541,6 +612,76 @@
       return { reply: reply, fallback: false, kind: "clarify", lang: lang };
     }
 
+    // The people entry (lecturers / mentors / trainers) of one academy.
+    function peopleEntryFor(id) {
+      for (var i = 0; i < index.length; i++) {
+        if (index[i].isPeople && index[i].academies[id]) return index[i];
+      }
+      return null;
+    }
+
+    // Mentor-style profiles available for an academy: its own first, then the
+    // ones from the other academies.
+    function mentorProfiles(id) {
+      var out = [];
+      var seen = {};
+      function push(p) {
+        if (!p || !p.name) return;
+        var key = p.name.toLowerCase();
+        if (seen[key]) return;
+        seen[key] = true;
+        out.push(p);
+      }
+      var order = id ? [id] : [];
+      keys(ACADEMIES).forEach(function (a) {
+        if (a !== id) order.push(a);
+      });
+      order.forEach(function (a) {
+        var e = peopleEntryFor(a);
+        if (!e) return;
+        peopleOf(e).forEach(function (p) {
+          if (isMentor(p)) push(p);
+        });
+      });
+      return out.slice(0, 5);
+    }
+
+    // People questions always resolve to that academy's lecturer list, never
+    // to module hours or course blurbs. When an academy has no named lecturer
+    // mapped, answer with the available mentor profiles instead.
+    function peopleReply(qAcad, lang) {
+      var ids = keys(qAcad);
+      var entry = null;
+      var id = null;
+      for (var i = 0; i < ids.length && !entry; i++) {
+        var cand = peopleEntryFor(ids[i]);
+        if (cand) {
+          entry = cand;
+          id = ids[i];
+        }
+      }
+      if (!id) id = ids[0];
+
+      if (entry && entry.people && entry.people.length) {
+        var head = "Ligjëruesit në Akademinë e " + (PEOPLE_LABELS[id] || "këtë akademi") + ":";
+        return {
+          reply: head + "\n\n" + formatPeopleBullets(entry.people),
+          fallback: false,
+          kind: "people",
+          lang: lang
+        };
+      }
+
+      var body = "Ligjëruesit tanë për këtë akademi janë ekspertë të industrisë, " +
+        "me përvojë të verifikuar dhe praktika reale në fusha të ndryshme.";
+      var mentors = mentorProfiles(id);
+      if (mentors.length) {
+        body += "\n\nProfilet e mentorëve në dispozicion:\n\n" + formatPeopleBullets(mentors);
+      }
+      body += "\n\n" + routingText(qAcad, lang);
+      return { reply: body, fallback: true, kind: "people", lang: lang, cta: routingTargets(qAcad) };
+    }
+
     function formatEuro(n) {
       return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
@@ -623,6 +764,11 @@
         return clarify(lang);
       }
 
+      // "Kush janë ligjeruesit e ..." -> the lecturer list of that academy.
+      if (qIntent.people && keys(qAcad).length) {
+        return peopleReply(qAcad, lang);
+      }
+
       if (qIntent.payment && keys(qAcad).length) {
         var inst = installmentReply(qAcad, lang);
         if (inst) return inst;
@@ -648,9 +794,9 @@
       var MIN = 2.6;
       if (best && bestScore >= MIN) {
         var reply = best.answer;
-        // Lecturer, mentor, and team lists are stored as a dense paragraph.
-        // Reformat them so people always come back as scannable bullets.
-        if (PEOPLE_TOPIC_RE.test(best.topic || "")) {
+        // A people entry without the lecturers schema still comes back as one
+        // dense paragraph: split it into the same bullet layout.
+        if (best.isPeople && !best.people) {
           var people = formatPeopleList(best.answer);
           if (people) reply = people;
         }
@@ -664,6 +810,8 @@
       index: index,
       detectAcademies: detectAcademies,
       detectIntents: detectIntents,
+      peopleReply: peopleReply,
+      mentorProfiles: mentorProfiles,
       _score: scoreEntry
     };
   }
@@ -677,7 +825,11 @@
     detectLanguage: detectLanguage,
     parseAmount: parseAmount,
     parseTiers: parseTiers,
+    parsePeople: parsePeople,
+    parsePeopleBullets: parsePeopleBullets,
     formatPeopleList: formatPeopleList,
+    formatPeopleBullets: formatPeopleBullets,
+    isMentor: isMentor,
     buildIndex: buildIndex,
     scoreEntry: scoreEntry,
     createResponder: createResponder,
@@ -757,10 +909,6 @@
 
   var LINK_RE = /([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,})|(\+?\d[\d\s]{6,}\d)/g;
   var BOLD_RE = /\*\*([^*\n]+)\*\*/g;
-  // A line indented by two spaces or a tab continues the bullet above it.
-  var CONT_RE = /^[ \t]{2,}/;
-  // ...unless the indented line is itself a bullet, which stays flush.
-  var BULLET_RE = /^[ \t]{2,}(?:[•\-\*]\s|\d+[.)]\s)/;
 
   // Turn bare emails and phone numbers into clickable links.
   function appendLinkified(p, line) {
@@ -799,25 +947,64 @@
     if (last < line.length) appendLinkified(p, line.slice(last));
   }
 
+  // Parse the reply markdown into DOM nodes:
+  //   "**text**"  -> <strong>
+  //   blank line  -> new paragraph
+  //   newline     -> <br>
+  //   "• item"    -> <ul><li>, with indented lines kept inside the item
   function bubbleText(container, text) {
-    String(text).split(/\n{2,}/).forEach(function (block) {
-      var p = el("p", "hubsy-p");
-      block.split("\n").forEach(function (line, i) {
-        if (i > 0) p.appendChild(document.createElement("br"));
-        var target = p;
-        if (CONT_RE.test(line)) {
-          if (BULLET_RE.test(line)) {
-            line = line.replace(/^[ \t]+/, "");
-          } else {
-            // Indented bio line: hangs under the bullet it belongs to.
-            target = el("span", "hubsy-cont");
-            p.appendChild(target);
-            line = line.replace(CONT_RE, "");
-          }
+    var lines = String(text).split("\n");
+    var p = null;
+    var ul = null;
+    var li = null;
+
+    lines.forEach(function (raw) {
+      var line = raw.replace(/\s+$/, "");
+      var bullet = line.match(/^\s*(?:[•\-\*]|\d+[.)])\s+(.*)$/);
+
+      if (bullet) {
+        p = null;
+        // Reuse the open list so bullets stay in one <ul> across blank lines.
+        var last = container.lastChild;
+        if (!ul || !last || last !== ul) {
+          ul = el("ul", "hubsy-list");
+          container.appendChild(ul);
         }
-        appendInline(target, line);
-      });
-      container.appendChild(p);
+        li = el("li", "hubsy-li");
+        ul.appendChild(li);
+        appendInline(li, bullet[1]);
+        return;
+      }
+
+      if (!line.trim()) {
+        p = null;
+        li = null;
+        return;
+      }
+
+      // Indented line inside the current bullet: the bio under its name.
+      if (li && /^[ \t]{2,}/.test(raw)) {
+        li.appendChild(document.createElement("br"));
+        appendInline(li, raw.replace(/^[ \t]{2,}/, ""));
+        return;
+      }
+
+      ul = null;
+      li = null;
+      if (!p) {
+        p = el("p", "hubsy-p");
+        container.appendChild(p);
+      } else {
+        p.appendChild(document.createElement("br"));
+      }
+      if (/^[ \t]{2,}/.test(raw)) {
+        // Indented continuation of a plain line.
+        var cont = el("span", "hubsy-cont");
+        p.appendChild(cont);
+        appendInline(cont, raw.replace(/^[ \t]{2,}/, ""));
+        return;
+      }
+      appendInline(p, line);
     });
   }
 
@@ -850,6 +1037,10 @@
       "#hubsy-root .hubsy-msg.hubsy-user{background:#FFFFFF;color:" + CFG.navy + ";border:1px solid " + CFG.border + ";border-bottom-right-radius:6px;align-self:flex-end;box-shadow:0 1px 2px rgba(5,18,56,.06)}",
       "#hubsy-root .hubsy-p{margin:0 0 8px}",
       "#hubsy-root .hubsy-cont{display:inline-block;padding-left:16px}",
+      "#hubsy-root .hubsy-list{margin:2px 0 8px;padding-left:20px}",
+      "#hubsy-root .hubsy-li{margin:0 0 8px}",
+      "#hubsy-root .hubsy-li:last-child{margin-bottom:0}",
+      "#hubsy-root .hubsy-msg .hubsy-list:last-child{margin-bottom:0}",
       "#hubsy-root .hubsy-p a{color:" + CFG.accentDark + ";font-weight:600;text-decoration:underline}",
       "#hubsy-root .hubsy-msg .hubsy-p:last-child{margin-bottom:0}",
       "#hubsy-root .hubsy-typing{align-self:flex-start;display:flex;gap:5px;background:" + CFG.soft + ";border:1px solid #D6F2E5;padding:12px 14px;border-radius:16px;border-bottom-left-radius:6px}",
