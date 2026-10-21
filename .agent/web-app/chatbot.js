@@ -23,7 +23,7 @@
     endpoint: "",
     knowledgeBaseUrl: "",
     title: "Hubsy | Creative Hub Kosovo",
-    subtitle: "Asistenti AI · Përgjigjet në shqip ose anglisht",
+    subtitle: "Asistenti AI për Creative Hub",
     launcherLabel: "Hubsy",
     // creativehubkos.com brand colors
     navy: "#051238",
@@ -62,19 +62,10 @@
       "apo t'ju lidh me koleget e mia, Flakën dhe Leonitën. Si mund t'ju ndihmoj sot?"
   };
 
-  // Generated messages are single-language: pick the variant that matches the user.
+  // Hubsy always answers in Albanian, whatever language the visitor writes in.
   var STRINGS = {
-    greeting: {
-      sq: DEFAULTS.greeting,
-      en:
-        "Hey there! ✌️ I'm Hubsy, your cool AI assistant at Creative Hub Kosovo. " +
-        "I'm here to help you pick the right academy, figure out payment plans up to 15 installments, " +
-        "or get you connected with my colleagues, Flaka and Leonita. What can I do for you today?"
-    },
-    thanks: {
-      sq: "Me kënaqësi! Nëse keni pyetje të tjera për akademitë e Creative Hub Kosovo, jam këtu.",
-      en: "You're welcome! If you have more questions about Creative Hub Kosovo academies, I'm here."
-    }
+    greeting: DEFAULTS.greeting,
+    thanks: "Me kënaqësi! Nëse keni pyetje të tjera për akademitë e Creative Hub Kosovo, jam këtu."
   };
 
   // ---------------------------------------------------------------------------
@@ -156,7 +147,7 @@
     projects: ["projekte", "projekt", "portfolio", "projects", "project"],
     people: ["ligjerues", "trajner", "trainer", "instruktor", "instructor", "profesor", "professor", "professors", "mentor", "lecturer", "mësues", "mesues", "who teaches", "kush mëson", "Kush meson", "ekip", "team", "staff", "people"],
     audience: ["audienca", "target", "profili", "profile", "Kush mund", "për kë", "per ke", "audience"],
-    certification: ["certifikatë", "certifikate", "certifikim", "diplom", "diplomë", "certification", "certificate", "cert"],
+    certification: ["certifikatë", "certifikate", "certifikim", "diplom", "diplomë", "certification", "certificate", "cert", "licencë", "licence", "license"],
     contact: ["kontakt", "kontakto", "contact", "përgjegjës", "pergjegjes", "person", "personi", "telefon", "telefoni", "email", "numri", "numero", "flas", "njeri", "takim", "cakto", "ndihmo", "ndihmë", "ndihme", "help", "assist", "këshill", "keshill", "bisedo", "talk", "speak"],
     // A question about a whole academy, not about one aspect of it.
     overview: ["dua te di per", "dua me dite per", "dua di per", "duan me dit", "duan te dit",
@@ -355,29 +346,10 @@
     return String(text).toLowerCase().replace(/\s+/g, " ").trim();
   }
 
-  var AL_MARKERS = ["sa", "kushton", "është", "eshte", "mund", "jam", "për", "per", "dhe", "kam",
-    "cila", "cili", "kur", "ku", "kush", "akademia", "akademi", "kursi", "orar", "çmimi", "cmimi",
-    "pagesa", "pagese", "këste", "keste", "dua", "ju", "tuaj", "aplikim", "faleminderit",
-    "përshëndetje", "pershendetje", "trajnim", "certifikata", "mënyra"];
-  var EN_MARKERS = ["the", "how", "much", "does", "cost", "price", "academy", "when", "can", "you",
-    "your", "what", "are", "and", "with", "about", "where", "who", "is", "tuition", "payment",
-    "installments", "installment", "modules", "start", "duration", "hello", "hi", "thanks", "please",
-    "apply", "certificate", "schedule"];
-
-  // Best-effort language detection: Albanian by default, English when clearly English.
-  function detectLanguage(text) {
-    var raw = String(text || "");
-    if (/[ëç]/i.test(raw)) return "sq";
-    var padded = " " + raw.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ") + " ";
-    var al = 0;
-    var en = 0;
-    AL_MARKERS.forEach(function (w) { if (padded.indexOf(" " + w + " ") !== -1) al++; });
-    EN_MARKERS.forEach(function (w) { if (padded.indexOf(" " + w + " ") !== -1) en++; });
-    if (en > al) return "en";
-    if (al > 0) return "sq";
-    if (en > 0) return "en";
-    return "sq";
-  }
+  // Hubsy answers in Albanian only, whatever language the visitor writes in.
+  // English wording is still understood (it is part of the intent keywords),
+  // it is only never used in a reply.
+  var REPLY_LANG = "sq";
 
   function parseAmount(s) {
     s = String(s).replace(/\s/g, "");
@@ -549,19 +521,14 @@
     }
 
     var COLLEAGUE_GROUP = {
-      flaka: { sq: "Data Engineering, Vibe Coding, Full-stack dhe Project Management", en: "Data Engineering, Vibe Coding, Full-stack, and Project Management" },
-      leonita: { sq: "Data Science, Digital Marketing dhe HR", en: "Data Science, Digital Marketing, and HR" }
+      flaka: "Data Engineering, Vibe Coding, Full-stack dhe Project Management",
+      leonita: "Data Science, Digital Marketing dhe HR"
     };
 
     // Warm name-only introduction. Contact details live in the clickable buttons,
     // so the text never repeats a phone number or email.
-    function routingText(qAcad, lang) {
+    function routingText(qAcad) {
       var t = routingTargets(qAcad);
-      if (lang === "en") {
-        if (t.single === "flaka") return "My colleague Flaka knows this best, and she will be happy to help you with any details.";
-        if (t.single === "leonita") return "My colleague Leonita knows this best, and she will be happy to help you with any details.";
-        return "My colleagues Flaka and Leonita will be happy to help you with any details.";
-      }
       if (t.single === "flaka") return "Këtë e di më së miri kolegia ime Flaka, dhe ajo do të jetë e lumtur t'ju ndihmojë me çdo detaj.";
       if (t.single === "leonita") return "Këtë e di më së miri kolegia ime Leonita, dhe ajo do të jetë e lumtur t'ju ndihmojë me çdo detaj.";
       return "Koleget e mia Flaka dhe Leonita do të jenë të lumtur t'ju ndihmojnë me çdo detaj.";
@@ -569,18 +536,12 @@
 
     // Exact coordinator introductions used when a user asks to talk to a person.
     var CONTACT_INTRO = {
-      flaka: {
-        sq: "Patjetër! Flaka është Koordinatorja e Akademisë. Ti mund të caktosh një takim fizikisht në kampusin tonë në Prishtinë ose online.",
-        en: "Of course! Flaka is the Academy Coordinator. You can book a meeting with her in person at our campus in Prishtina or online."
-      },
-      leonita: {
-        sq: "Patjetër! Leonita është Koordinatorja e Akademisë se Data Science & Analytics + AI (dhe Akademive të tjera si Digital Marketing & HR). Ti mund të caktosh një takim fizikisht në kampusin tonë në Prishtinë ose online.",
-        en: "Of course! Leonita is the Coordinator of the Data Science & Analytics + AI Academy (and other academies such as Digital Marketing & HR). You can book a meeting with her in person at our campus in Prishtina or online."
-      },
-      both: {
-        sq: "Patjetër! Koleget e mia Flaka dhe Leonita janë koordinatoret tona. Ti mund të caktosh një takim fizikisht në kampusin tonë në Prishtinë ose online për të biseduar mbi programet tona.",
-        en: "Of course! My colleagues Flaka and Leonita are our coordinators. You can book a meeting with them in person at our campus in Prishtina or online to talk about our programs."
-      }
+      flaka:
+        "Patjetër! Flaka është Koordinatorja e Akademisë. Ti mund të caktosh një takim fizikisht në kampusin tonë në Prishtinë ose online.",
+      leonita:
+        "Patjetër! Leonita është Koordinatorja e Akademisë se Data Science & Analytics + AI (dhe Akademive të tjera si Digital Marketing & HR). Ti mund të caktosh një takim fizikisht në kampusin tonë në Prishtinë ose online.",
+      both:
+        "Patjetër! Koleget e mia Flaka dhe Leonita janë koordinatoret tona. Ti mund të caktosh një takim fizikisht në kampusin tonë në Prishtinë ose online për të biseduar mbi programet tona."
     };
 
     function mentionTarget(text) {
@@ -595,24 +556,18 @@
       return mentionTarget(text) || routingTargets(qAcad);
     }
 
-    function contactIntro(lang, single) {
-      return CONTACT_INTRO[single][lang];
+    function contactIntro(single) {
+      return CONTACT_INTRO[single];
     }
 
     function bios() {
       return {
-        leonita: {
-          sq: "Leonita Krasniqi është kolegia ime dhe koordinatore për akademitë si " + COLLEAGUE_GROUP.leonita.sq +
+        leonita:
+          "Leonita Krasniqi është kolegia ime dhe koordinatore për akademitë si " + COLLEAGUE_GROUP.leonita +
             ". Ajo do të jetë e lumtur t'ju ndihmojë me çdo detaj!",
-          en: "Leonita Krasniqi is my colleague and the coordinator for academies such as " + COLLEAGUE_GROUP.leonita.en +
-            ". She will be happy to help you with any details!"
-        },
-        flaka: {
-          sq: "Flaka Dermaku është kolegia ime dhe koordinatore për akademitë si " + COLLEAGUE_GROUP.flaka.sq +
-            ". Ajo do të jetë e lumtur t'ju ndihmojë me çdo detaj!",
-          en: "Flaka Dermaku is my colleague and the coordinator for academies such as " + COLLEAGUE_GROUP.flaka.en +
-            ". She will be happy to help you with any details!"
-        }
+        flaka:
+          "Flaka Dermaku është kolegia ime dhe koordinatore për akademitë si " + COLLEAGUE_GROUP.flaka +
+            ". Ajo do të jetë e lumtur t'ju ndihmojë me çdo detaj!"
       };
     }
 
@@ -629,30 +584,30 @@
       return null;
     }
 
-    function bioReply(who, lang) {
+    function bioReply(who) {
       return {
-        reply: bios()[who][lang],
+        reply: bios()[who],
         fallback: false,
         kind: "bio",
-        lang: lang,
         cta: who === "flaka" ? { flaka: true, leonita: false, single: "flaka" } : { flaka: false, leonita: true, single: "leonita" }
       };
     }
 
-    function fallbackFor(qAcad, lang) {
-      return { reply: routingText(qAcad, lang), fallback: true, kind: "fallback", lang: lang, cta: routingTargets(qAcad) };
+    function fallbackFor(qAcad) {
+      return { reply: routingText(qAcad), fallback: true, kind: "fallback", cta: routingTargets(qAcad) };
     }
 
-    function contactReply(text, qAcad, lang) {
+    function contactReply(text, qAcad) {
       var t = contactTargets(text, qAcad);
-      return { reply: contactIntro(lang, t.single), fallback: true, kind: "contact", lang: lang, cta: t };
+      return { reply: contactIntro(t.single), fallback: true, kind: "contact", cta: t };
     }
 
-    function clarify(lang) {
-      var reply = lang === "en"
-        ? "I can help with that. Which academy do you mean?\n" + academyNames() + "\nLet me know which one."
-        : "Mund t'ju ndihmoj. Për cilën akademi bëhet fjalë?\n" + academyNames() + "\nMë tregoni për cilën.";
-      return { reply: reply, fallback: false, kind: "clarify", lang: lang };
+    function clarify() {
+      return {
+        reply: "Mund t'ju ndihmoj. Për cilën akademi bëhet fjalë?\n" + academyNames() + "\nMë tregoni për cilën.",
+        fallback: false,
+        kind: "clarify"
+      };
     }
 
     // The people entry (lecturers / mentors / trainers) of one academy.
@@ -692,7 +647,7 @@
     // People questions always resolve to that academy's lecturer list, never
     // to module hours or course blurbs. When an academy has no named lecturer
     // mapped, answer with the available mentor profiles instead.
-    function peopleReply(qAcad, lang) {
+    function peopleReply(qAcad) {
       var ids = keys(qAcad);
       var entry = null;
       var id = null;
@@ -710,8 +665,7 @@
         return {
           reply: head + "\n\n" + formatPeopleBullets(entry.people),
           fallback: false,
-          kind: "people",
-          lang: lang
+          kind: "people"
         };
       }
 
@@ -721,8 +675,8 @@
       if (mentors.length) {
         body += "\n\nProfilet e mentorëve në dispozicion:\n\n" + formatPeopleBullets(mentors);
       }
-      body += "\n\n" + routingText(qAcad, lang);
-      return { reply: body, fallback: true, kind: "people", lang: lang, cta: routingTargets(qAcad) };
+      body += "\n\n" + routingText(qAcad);
+      return { reply: body, fallback: true, kind: "people", cta: routingTargets(qAcad) };
     }
 
     function formatEuro(n) {
@@ -754,7 +708,7 @@
       return lines.join("\n");
     }
 
-    function overviewReply(qAcad, lang) {
+    function overviewReply(qAcad) {
       var ids = keys(qAcad);
       var blocks = [];
       for (var i = 0; i < ids.length; i++) {
@@ -763,14 +717,11 @@
         blocks.push(formatOverview(e.overview || {}, e.answer));
       }
       if (!blocks.length) return null;
-      // The knowledge base is Albanian-only, so the closing line stays in the
-      // same language as the body of the reply.
       var tail = "A dëshironi të shihni syllabus-in e plotë apo të flisni me një këshilltar karriere?";
       return {
         reply: blocks.join("\n\n") + "\n\n" + tail,
         fallback: false,
-        kind: "overview",
-        lang: lang
+        kind: "overview"
       };
     }
 
@@ -782,26 +733,22 @@
     }
 
     // Up to 15 monthly installments, with total / 15 estimated for each tier.
-    function installmentReply(qAcad, lang) {
+    function installmentReply(qAcad) {
       var lines = [];
       keys(qAcad).forEach(function (id) {
         var e = findPriceEntry(id);
         if (!e) return;
         parseTiers(e.answer).forEach(function (t) {
           var monthly = Math.round(t.total / 15);
-          var label = lang === "en" && t.label ? t.label.split(/\s*-\s*/)[0].trim() : t.label;
+          var label = t.label;
           lines.push("• " + academyLabel(id) + (label ? " (" + label + ")" : "") + ": €" + formatEuro(t.total) +
-            (lang === "en" ? " total, about €" + monthly + " per month" : " gjithsej, rreth €" + monthly + " në muaj"));
+            " gjithsej, rreth €" + monthly + " në muaj");
         });
       });
       if (!lines.length) return null;
-      var head = lang === "en"
-        ? "Creative Hub Kosovo offers flexible payment plans of up to 15 monthly installments."
-        : "Creative Hub Kosovo ofron plane fleksibile pagese deri në 15 këste mujore.";
-      var tail = lang === "en"
-        ? "These are estimates based on the total tuition, so the team can confirm the exact plan for you."
-        : "Këto janë vlera të përllogaritura bazuar në çmimin total, ndaj ekipi mund t'ju konfirmojë planin e saktë.";
-      return { reply: head + "\n" + lines.join("\n") + "\n" + tail, fallback: false, kind: "installments", lang: lang };
+      var head = "Creative Hub Kosovo ofron plane fleksibile pagese deri në 15 këste mujore.";
+      var tail = "Këto janë vlera të përllogaritura bazuar në çmimin total, ndaj ekipi mund t'ju konfirmojë planin e saktë.";
+      return { reply: head + "\n" + lines.join("\n") + "\n" + tail, fallback: false, kind: "installments" };
     }
 
     function inferAcademyFromHistory(history) {
@@ -819,21 +766,20 @@
       var text = normalize(message);
       if (!text) return null;
 
-      var lang = detectLanguage(message);
       var words = text.split(" ").filter(Boolean);
       var isGreeting = words.length <= 4 && GREETINGS.some(function (g) { return hasWord(text, g); });
       if (isGreeting) {
         return {
-          reply: lang === "en" ? STRINGS.greeting.en : (cfg.greeting || STRINGS.greeting.sq),
-          fallback: false, kind: "greeting", lang: lang
+          reply: cfg.greeting || STRINGS.greeting,
+          fallback: false, kind: "greeting"
         };
       }
       if (words.length <= 3 && THANKS.some(function (g) { return hasWord(text, g); })) {
-        return { reply: STRINGS.thanks[lang], fallback: false, kind: "thanks", lang: lang };
+        return { reply: STRINGS.thanks, fallback: false, kind: "thanks" };
       }
 
       var bioWho = detectBioTarget(text);
-      if (bioWho) return bioReply(bioWho, lang);
+      if (bioWho) return bioReply(bioWho);
 
       var qAcad = detectAcademies(text);
       if (!keys(qAcad).length) {
@@ -844,17 +790,17 @@
 
       var strongContact = CONTACT_STRONG.some(function (k) { return matchKeyword(text, k); });
       if (strongContact || (qIntent.contact && !keys(qAcad).length)) {
-        return contactReply(text, qAcad, lang);
+        return contactReply(text, qAcad);
       }
 
       var wantsSpecific = keys(qIntent).some(function (i) { return ACADEMY_SPECIFIC[i]; });
       if (wantsSpecific && keys(qAcad).length === 0) {
-        return clarify(lang);
+        return clarify();
       }
 
       // "Kush janë ligjeruesit e ..." -> the lecturer list of that academy.
       if (qIntent.people && keys(qAcad).length) {
-        return peopleReply(qAcad, lang);
+        return peopleReply(qAcad);
       }
 
       // "Dua te di per HR" / "tell me about the Data Science academy" ->
@@ -862,12 +808,12 @@
       var wantsOverview = keys(qAcad).length &&
         (qIntent.overview || !hasSpecificIntent(qIntent));
       if (wantsOverview) {
-        var ov = overviewReply(qAcad, lang);
+        var ov = overviewReply(qAcad);
         if (ov) return ov;
       }
 
       if (qIntent.payment && keys(qAcad).length) {
-        var inst = installmentReply(qAcad, lang);
+        var inst = installmentReply(qAcad);
         if (inst) return inst;
       }
 
@@ -897,9 +843,9 @@
           var people = formatPeopleList(best.answer);
           if (people) reply = people;
         }
-        return { reply: reply, fallback: false, kind: "entry", topic: best.topic, score: bestScore, lang: lang };
+        return { reply: reply, fallback: false, kind: "entry", topic: best.topic, score: bestScore };
       }
-      return fallbackFor(qAcad, lang);
+      return fallbackFor(qAcad);
     }
 
     return {
@@ -921,7 +867,6 @@
     hasWord: hasWord,
     detectAcademies: detectAcademies,
     detectIntents: detectIntents,
-    detectLanguage: detectLanguage,
     parseAmount: parseAmount,
     parseTiers: parseTiers,
     parsePeople: parsePeople,
@@ -1201,7 +1146,7 @@
     var foot = el("div", "hubsy-foot");
     var input = el("textarea", "hubsy-input");
     input.setAttribute("rows", "1");
-    input.setAttribute("placeholder", "Shkruani një mesazh… (Type a message…)");
+    input.setAttribute("placeholder", "Shkruani një mesazh…");
     input.setAttribute("aria-label", "Mesazh për Hubsy");
     var send = el("button", "hubsy-send", "\u27A4");
     send.type = "button";
@@ -1285,7 +1230,7 @@
     }
     if (showFlaka) person(CFG.contacts.flaka);
     if (showLeonita) person(CFG.contacts.leonita);
-    if (CFG.applyUrl) link("Apliko / Apply", CFG.applyUrl);
+    if (CFG.applyUrl) link("Apliko", CFG.applyUrl);
     return wrap;
   }
 
@@ -1332,12 +1277,11 @@
   }
 
   function ask(message) {
-    var lang = detectLanguage(message);
     if (CFG.endpoint) {
       return fetch(CFG.endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message: message, history: history.slice(-CFG.maxHistory), language: lang })
+        body: JSON.stringify({ message: message, history: history.slice(-CFG.maxHistory), language: REPLY_LANG })
       })
         .then(function (res) {
           if (!res.ok) throw new Error("HTTP " + res.status);
@@ -1357,9 +1301,7 @@
       .then(function (r) { return r.respond(message, history); })
       .catch(function (err) {
         if (global.console && console.warn) console.warn("[Hubsy] knowledge base error:", err);
-        var head = lang === "en"
-          ? "I can't load the information right now, but my colleagues Flaka and Leonita are here for you."
-          : "Nuk mund t'i ngarkoj një çast informacionet, por koleget e mia Flaka dhe Leonita janë këtu për ju.";
+        var head = "Nuk mund t'i ngarkoj një çast informacionet, por koleget e mia Flaka dhe Leonita janë këtu për ju.";
         return { reply: head, fallback: true, cta: { flaka: true, leonita: true } };
       });
   }

@@ -2,7 +2,7 @@
  * Hubsy — Creative Hub Kosovo AI Brand Assistant
  * Firebase Functions (v2, HTTPS) backend for the embeddable chat widget.
  *
- * Endpoint: POST { message, history?, language? }
+ * Endpoint: POST { message, history? }
  * Response: { reply, fallback }
  *
  * Requires the GEMINI_API_KEY secret:
@@ -64,7 +64,7 @@ const SYSTEM_INSTRUCTION =
   "use the fallback routing described above.\n\n" +
   KB_TEXT;
 
-// --- Language handling: Hubsy replies in one language only ---
+// --- Language: Hubsy always replies in Albanian ---
 const CONTACTS = {
   flaka: {
     name: "Flaka",
@@ -84,36 +84,12 @@ const GROUP_A_LABEL =
   "Data Engineering, Vibe Coding, Product & Project Management, Full-stack Development";
 const GROUP_B_LABEL = "Data Science, Digital Marketing, HR";
 
-const AL_MARKERS = ["sa", "kushton", "është", "eshte", "mund", "jam", "për", "per", "dhe", "kam",
-  "cila", "cili", "kur", "ku", "kush", "akademia", "akademi", "kursi", "orar", "çmimi", "cmimi",
-  "pagesa", "pagese", "këste", "keste", "dua", "ju", "tuaj", "aplikim", "faleminderit",
-  "përshëndetje", "pershendetje", "trajnim", "certifikata", "mënyra"];
-const EN_MARKERS = ["the", "how", "much", "does", "cost", "price", "academy", "when", "can", "you",
-  "your", "what", "are", "and", "with", "about", "where", "who", "is", "tuition", "payment",
-  "installments", "installment", "modules", "start", "duration", "hello", "hi", "thanks", "please",
-  "apply", "certificate", "schedule"];
-
-function detectLanguage(text) {
-  const raw = String(text || "");
-  if (/[ëç]/i.test(raw)) return "sq";
-  const padded = " " + raw.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, " ") + " ";
-  let al = 0;
-  let en = 0;
-  AL_MARKERS.forEach((w) => { if (padded.includes(" " + w + " ")) al++; });
-  EN_MARKERS.forEach((w) => { if (padded.includes(" " + w + " ")) en++; });
-  if (en > al) return "en";
-  if (al > 0) return "sq";
-  if (en > 0) return "en";
-  return "sq";
-}
-
 // Server-side fallback, used only if the model returns no usable text.
-// Introduces Hubsy's human coordinators and their booking options, in one language.
-function safetyFallback(lang) {
+// Introduces Hubsy's human coordinators and their booking options, in Albanian.
+function safetyFallback() {
   const c = CONTACTS;
-  const intro = lang === "en"
-    ? "Of course! My colleagues Flaka and Leonita are our coordinators. You can book a meeting with them in person at our campus in Prishtina or online."
-    : "Patjetër! Koleget e mia Flaka dhe Leonita janë koordinatoret tona. Ti mund të caktosh një takim fizikisht në kampusin tonë në Prishtinë ose online për të biseduar mbi programet tona.";
+  const intro =
+    "Patjetër! Koleget e mia Flaka dhe Leonita janë koordinatoret tona. Ti mund të caktosh një takim fizikisht në kampusin tonë në Prishtinë ose online për të biseduar mbi programet tona.";
   return (
     intro + "\n" +
     "• Flaka (" + GROUP_A_LABEL + "): " + c.flaka.calendly + " · " + c.flaka.phone + " · " + c.flaka.email + "\n" +
@@ -159,8 +135,6 @@ exports.hubsyChat = onRequest(
       return;
     }
 
-    const lang =
-      body.language === "en" || body.language === "sq" ? body.language : detectLanguage(message);
 
     const contents = sanitizeHistory(body.history);
     contents.push({ role: "user", parts: [{ text: message.slice(0, MAX_MESSAGE_CHARS) }] });
@@ -178,13 +152,13 @@ exports.hubsyChat = onRequest(
 
       const reply = (response && typeof response.text === "string" ? response.text : "").trim();
       if (!reply) {
-        res.status(200).json({ reply: safetyFallback(lang), fallback: true });
+        res.status(200).json({ reply: safetyFallback(), fallback: true });
         return;
       }
       res.status(200).json({ reply: reply, fallback: false });
     } catch (err) {
       console.error("[hubsyChat] Gemini error:", err);
-      res.status(502).json({ error: "Upstream model error", reply: safetyFallback(lang), fallback: true });
+      res.status(502).json({ error: "Upstream model error", reply: safetyFallback(), fallback: true });
     }
   }
 );

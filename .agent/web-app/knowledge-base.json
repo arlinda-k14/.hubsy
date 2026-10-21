@@ -9,7 +9,7 @@
   },
   {
     "topic": "Licenca e akademisë",
-    "answer": "License Number: 12690 issued by Commission For Independent Education of The State of Florida. Creative Hub Academy - 111 NE 1st Street, Unit 906, Miami, Florida 33132"
+    "answer": "Numri i licencës: 12690, lëshuar nga Komisioni i Arsimit të Pavarur të Shtetit të Floridës. Creative Hub Academy - 111 NE 1st Street, Unit 906, Miami, Florida 33132"
   },
   {
     "topic": "Ku ndodhet kampusit në Prishtinë? / Lokacioni",
@@ -29,7 +29,7 @@
   },
   {
     "topic": "Parakushtet për pjesëmarrje / Kushtet e pranimit",
-    "answer": "Nuk Ka. (Asnjë parakusht për pjesëmarrje në asnjërën nga akademitë.)"
+    "answer": "Nuk ka asnjë parakusht për pjesëmarrje në asnjërën nga akademitë."
   },
   {
     "topic": "Kontakti i përgjithshëm / Takim informues",
@@ -122,13 +122,13 @@
   },
   {
     "topic": "Cili është profili i studentit / Target Audienca – Digital Marketing & AI Academy",
-    "answer": "Studentë dhe të sapodiplomuar nga Marketingu dhe fusha të tjera; Career Changers / Personat që dëshirojnë të ndryshojnë karrierë; Junior Marketerët që dëshirojnë të avancojnë në karrierën e tyre.",
+    "answer": "Studentë dhe të sapodiplomuar nga Marketingu dhe fusha të tjera; Ndryshuesit e karrierës / Personat që dëshirojnë të ndryshojnë karrierë; Junior Marketerët që dëshirojnë të avancojnë në karrierën e tyre.",
     "academy": "dm",
     "kind": "audience"
   },
   {
     "topic": "Cilat projekte përfundon studenti – Digital Marketing & AI Academy",
-    "answer": "Studenti përfundon programin me 7 projekte reale në portofolin e tij: Projekti 1: Buyer Persona; Projekti 2: Kampanjë në Copywriting; Projekti 3: Kampanjë në Meta Ads; Projekti 4: Kampanjë me Google Search; Projekti 5: Seo Audit & Optimized Website; Projekti 6: Kampanjë në Email Marketing; Projekti 7: Startegji në Digital Marketing.",
+    "answer": "Studenti përfundon programin me 7 projekte reale në portofolin e tij: Projekti 1: Buyer Persona; Projekti 2: Kampanjë në Copywriting; Projekti 3: Kampanjë në Meta Ads; Projekti 4: Kampanjë me Google Search; Projekti 5: Seo Audit & Optimized Website; Projekti 6: Kampanjë në Email Marketing; Projekti 7: Strategji në Digital Marketing.",
     "academy": "dm",
     "kind": "projects"
   },
@@ -267,13 +267,13 @@
   },
   {
     "topic": "Cili është profili i studentit / Target Audienca – AI-powered Product & Project Management Academy",
-    "answer": "Studentë dhe të sapo diplomuar nga fusha të ndryshme; Career Changers / Personat që dëshirojnë të ndryshojnë karrierë; Menaxherë & Team Leads që dëshirojnë të zhvillojnë aftësitë e tyre nga menaxhmenti tradicional në atë modern me AI.",
+    "answer": "Studentë dhe të sapo diplomuar nga fusha të ndryshme; Ndryshuesit e karrierës / Personat që dëshirojnë të ndryshojnë karrierë; Menaxherë & Team Leads që dëshirojnë të zhvillojnë aftësitë e tyre nga menaxhmenti tradicional në atë modern me AI.",
     "academy": "pm",
     "kind": "audience"
   },
   {
     "topic": "Cilat projekte përfundon studenti – AI-powered Product & Project Management Academy",
-    "answer": "Studenti përfundon programin me 1 projektfinal real në portofolin e tij: Dizajno një plan produkti ose projekti të integruar me AI, duke kombinuar aftësitë tradicionale dhe ato të menaxhimit të fuqizuara nga AI.",
+    "answer": "Studenti përfundon programin me 1 projekt final real në portofolin e tij: Dizajno një plan produkti ose projekti të integruar me AI, duke kombinuar aftësitë tradicionale dhe ato të menaxhimit të fuqizuara nga AI.",
     "academy": "pm",
     "kind": "projects"
   },
@@ -353,7 +353,7 @@
   },
   {
     "topic": "Cili është profili i studentit / Target Audienca – Data Engineering, Cloud & AI",
-    "answer": "Studentë dhe të sapodiplomuar nga Shkencat Kompjuterike dhe fusha të tjera; Career Changers / Personat që dëshirojnë të ndryshojnë karrierë; Analistë të të Dhënave që dëshirojnë të avancojnë në karrierën e tyre.",
+    "answer": "Studentë dhe të sapodiplomuar nga Shkencat Kompjuterike dhe fusha të tjera; Ndryshuesit e karrierës / Personat që dëshirojnë të ndryshojnë karrierë; Analistë të të Dhënave që dëshirojnë të avancojnë në karrierën e tyre.",
     "academy": "de",
     "kind": "audience"
   },
@@ -478,7 +478,7 @@
   },
   {
     "topic": "Cili është profili i studentit / Target Audienca – Data Science & Analytics + AI",
-    "answer": "Studentë dhe të sapodiplomuar nga Shkencat Kompjuterike dhe fusha të tjera; Career Changers / Personat që dëshirojnë të ndryshojnë karrierë; Analistë të të Dhënave që dëshirojnë të avancojnë në karrierën e tyre.",
+    "answer": "Studentë dhe të sapodiplomuar nga Shkencat Kompjuterike dhe fusha të tjera; Ndryshuesit e karrierës / Personat që dëshirojnë të ndryshojnë karrierë; Analistë të të Dhënave që dëshirojnë të avancojnë në karrierën e tyre.",
     "academy": "ds",
     "kind": "audience"
   },
@@ -626,7 +626,7 @@
   },
   {
     "topic": "Cili është profili i studentit / Target Audienca – Full-stack Development + AI",
-    "answer": "Studentë dhe të sapo diplomuar nga fusha të ndryshme; Career Changers / Personat që dëshirojnë të ndryshojnë karrierë; Studentët e CSE (Shkencat Kompjuterike apo Inxhinieria) që dëshirojnë të zhvillojnë aftësitë praktike dhe të përgaditen për tregun e punës.",
+    "answer": "Studentë dhe të sapo diplomuar nga fusha të ndryshme; Ndryshuesit e karrierës / Personat që dëshirojnë të ndryshojnë karrierë; Studentët e CSE (Shkencat Kompjuterike apo Inxhinieria) që dëshirojnë të zhvillojnë aftësitë praktike dhe të përgaditen për tregun e punës.",
     "academy": "fs",
     "kind": "audience"
   },
@@ -747,7 +747,7 @@
   },
   {
     "topic": "Cili është profili i studentit / Target Audienca – Human Resources + AI",
-    "answer": "Studentë dhe të sapodiplomuar nga Psikologjia & Juridiku; Career Changers / Personat që dëshirojnë të ndryshojnë karrierë; HR Junior / HR-ët e rinjë që dëshirojnë të zhvillohen nga detyrat administrative manuale në Operacione Njerëzore strategjike të bazuara në të dhëna.",
+    "answer": "Studentë dhe të sapodiplomuar nga Psikologjia & Juridiku; Ndryshuesit e karrierës / Personat që dëshirojnë të ndryshojnë karrierë; HR Junior / HR-ët e rinjë që dëshirojnë të zhvillohen nga detyrat administrative manuale në Operacione Njerëzore strategjike të bazuara në të dhëna.",
     "academy": "hr",
     "kind": "audience"
   },
@@ -909,7 +909,7 @@
   },
   {
     "topic": "Cili është profili i studentit / Target Audienca – Vibe Coding & AI Agents Academy",
-    "answer": "Studentë dhe të sapodiplomuar nga fusha të ndryshme, që dëshirojnë të hyjnë në industrinë e teknologjisë pa pasur nevojë të dinë kod; Career Changers / Personat që dëshirojnë të ndryshojnë karrierë (Profesionistë nga industri të ndryshme që duan të ndërtojnë një karrierë të re në një fushë me kërkesë të lartë në treg dhe potencial më të madh për të ardhura).",
+    "answer": "Studentë dhe të sapodiplomuar nga fusha të ndryshme, që dëshirojnë të hyjnë në industrinë e teknologjisë pa pasur nevojë të dinë kod; Ndryshuesit e karrierës / Personat që dëshirojnë të ndryshojnë karrierë (Profesionistë nga industri të ndryshme që duan të ndërtojnë një karrierë të re në një fushë me kërkesë të lartë në treg dhe potencial më të madh për të ardhura).",
     "academy": "vc",
     "kind": "audience"
   },
