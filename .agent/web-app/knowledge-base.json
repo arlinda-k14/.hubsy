@@ -32,6 +32,12 @@
     "answer": "Nuk ka asnjë parakusht për pjesëmarrje në asnjërën nga akademitë."
   },
   {
+    "topic": "A duhet eksperience paraprake? / Si janë ndërtuar programet?",
+    "answer": "Jo, programet janë ndërtuar nga ekspertë të fushës të cilët e kanë paraparë që ky program të ndihmojë studentin të fillojë një karrierë të re nga 0.",
+    "kind": "faq",
+    "tag": "experience"
+  },
+  {
     "topic": "Kontakti i përgjithshëm / Takim informues",
     "answer": "Ofrohet Takim Informues Online. Kontakt: Flakë Dermaku +383 49 334 437 flaka@creativehubkos.com ose Leonita Krasniqi +383 49 334 438 leonita@creativehubkos.com."
   },
@@ -991,5 +997,33 @@
     "answer": "Ligjëruesit në Akademinë e Vibe Coding & AI Agents:\n\n• **Richmond Taylor** — Lead AI Lecturer\n  Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet.",
     "academy": "vc",
     "kind": "people"
+  },
+  {
+    "topic": "Historia e suksesit – Human Resources + AI Academy",
+    "answer": "Ylberina Bajraktari kishte diplomë bachelor në Juridik dhe në atë kohë po punonte si koordinatore në një universitet. Ajo filloi akademinë e Human Resources + AI në Creative Hub nga 0 dhe për disa muaj mori aftësitë profesionale dhe sot punon si HR & Admin Officer në Eurolab Internacional Grup.",
+    "academy": "hr",
+    "kind": "story",
+    "tag": "success-story"
+  },
+  {
+    "topic": "Historia e suksesit – Data Science & Analytics + AI Academy",
+    "answer": "Aulona Selishta, kur erdhi në akademi punonte si research assistant. Në akademinë e Data Science & Analytics ajo filloi nga zero, u zgjodh një nga studentet më të motivuara të grupit të saj dhe sot ajo punon si Senior Reporting, Data Management dhe Portfolio Analysis Specialist në Fondi Kosovar për Garanci Kreditore.",
+    "academy": "ds",
+    "kind": "story",
+    "tag": "success-story"
+  },
+  {
+    "topic": "Historia e suksesit – Digital Marketing & AI Academy",
+    "answer": "Elma Maxhuni — Ajo ishte një bibliotekare kur erdhi në akademinë e Digital Marketing + AI. Edhe pse filloi nga 0, ajo në akademi shkëlqeu me projektet që ka realizuar dhe sot ka arritur të promovohet në Marketing & Publishing Coordinator në Dukagjini Bookstore.",
+    "academy": "dm",
+    "kind": "story",
+    "tag": "success-story"
+  },
+  {
+    "topic": "Historia e suksesit – AI-Powered Product & Project Management Academy",
+    "answer": "Kristijan Ramaj — Me master në Juridik, erdhi në Akademinë e AI-Powered Product & Project Management që të mësonte menaxhimin e projekteve me AI. Filloi nga 0 dhe në fund arriti të ndërtojë aplikacionin markatregtare.com.",
+    "academy": "pm",
+    "kind": "story",
+    "tag": "success-story"
   }
 ]

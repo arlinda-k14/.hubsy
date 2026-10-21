@@ -148,6 +148,10 @@
     people: ["ligjerues", "trajner", "trainer", "instruktor", "instructor", "profesor", "professor", "professors", "mentor", "lecturer", "mësues", "mesues", "who teaches", "kush mëson", "Kush meson", "ekip", "team", "staff", "people"],
     audience: ["audienca", "target", "profili", "profile", "Kush mund", "për kë", "per ke", "audience"],
     certification: ["certifikatë", "certifikate", "certifikim", "diplom", "diplomë", "certification", "certificate", "cert", "licencë", "licence", "license"],
+    // "Do I need prior experience / knowledge before I start?"
+    experience: ["eksperienc", "experience", "përvoj", "pervoj", "njohuri paraprake", "njohur paraprake",
+      "njohuri të mëparshme", "njohuri te meparshme", "njohuri fillestare", "prior knowledge", "prior experience",
+      "background", "from scratch", "nga zero", "nga 0", "i fëmijë", "i femij"],
     contact: ["kontakt", "kontakto", "contact", "përgjegjës", "pergjegjes", "person", "personi", "telefon", "telefoni", "email", "numri", "numero", "flas", "njeri", "takim", "cakto", "ndihmo", "ndihmë", "ndihme", "help", "assist", "këshill", "keshill", "bisedo", "talk", "speak"],
     // A question about a whole academy, not about one aspect of it.
     overview: ["dua te di per", "dua me dite per", "dua di per", "duan me dit", "duan te dit",
@@ -164,7 +168,7 @@
   // is present the question is not a general academy overview.
   var SPECIFIC_INTENTS = ["price", "payment", "duration", "start", "modules", "format",
     "language", "location", "prerequisites", "projects", "people", "audience",
-    "certification", "contact"];
+    "certification", "contact", "experience"];
 
   function hasSpecificIntent(qIntent) {
     for (var i = 0; i < SPECIFIC_INTENTS.length; i++) {
@@ -262,6 +266,7 @@
           academies: academies,
           academyId: academyId,
           kind: kind,
+          tag: e.tag || null,
           overview: e.overview || null,
           isOverview: kind === "overview" && !!academyId,
           isModule: kind === "module",
@@ -762,6 +767,131 @@
       return null;
     }
 
+    // Prior experience and success stories ---------------------------------
+    // The core answer lives in the knowledge base as the "experience" FAQ
+    // entry; the success stories live there as "story" entries, one per
+    // academy. Academies without a story entry (Full-stack, Data
+    // Engineering, Vibe Coding) never get the follow-up question.
+    var STORY_OFFER = "Dëshiron të të tregoj një histori suksesi?";
+    var STORY_CTX_RE = /histori[\p{L}\p{N}]*(\s+e)?\s+sukses/iu;
+    var DEFAULT_EXPERIENCE_ANSWER =
+      "Jo, programet janë ndërtuar nga ekspertë të fushës të cilët e kanë paraparë që ky program të ndihmojë studentin të fillojë një karrierë të re nga 0.";
+
+    var AFFIRMATIVE = ["po", "yes", "yeah", "yep", "sure", "sigurisht", "ok", "okay",
+      "trego", "tregoje", "tregon", "shfaq", "më trego", "me trego", "po dua",
+      "po dëshiroj", "po më trego", "më tregoni", "dua ta shoh", "dua të shoh"];
+
+    function isAffirmative(text) {
+      var t = normalize(text);
+      var words = t.split(/\s+/).filter(Boolean);
+      if (words.length > 5) return false;
+      for (var i = 0; i < AFFIRMATIVE.length; i++) {
+        var k = AFFIRMATIVE[i];
+        if (k.indexOf(" ") !== -1) {
+          if (t.indexOf(k) !== -1) return true;
+        } else if (hasWord(t, k)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function entryByKind(kind, tag) {
+      for (var i = 0; i < index.length; i++) {
+        if (index[i].kind === kind && index[i].tag === tag) return index[i];
+      }
+      return null;
+    }
+
+    function coreExperienceAnswer() {
+      var faq = entryByKind("faq", "experience");
+      return faq ? faq.answer : DEFAULT_EXPERIENCE_ANSWER;
+    }
+
+    function storyEntry(academyId) {
+      if (!academyId) return null;
+      for (var i = 0; i < index.length; i++) {
+        if (index[i].kind === "story" && index[i].academyId === academyId) return index[i];
+      }
+      return null;
+    }
+
+    function storyAcademies() {
+      return ["hr", "ds", "dm", "pm"].filter(function (id) { return !!storyEntry(id); });
+    }
+
+    // The last assistant turn offered a success story and waits for a yes.
+    // What the last assistant turn was, for the success-story flow:
+    // "offer" = Hubsy asked whether to show a story, "clarify" = Hubsy asked
+    // which academy, "story" = Hubsy already told a story.
+    function storyContext(history) {
+      if (!Array.isArray(history)) return null;
+      for (var i = history.length - 1; i >= 0; i--) {
+        var m = history[i];
+        if (!m) continue;
+        if (m.role === "assistant") {
+          if (typeof m.content !== "string") return null;
+          if (m.content.indexOf(STORY_OFFER) !== -1) return "offer";
+          if (STORY_CTX_RE.test(m.content)) return "clarify";
+          var isStory = storyAcademies().some(function (id) {
+            var st = storyEntry(id);
+            return !!st && st.answer === m.content;
+          });
+          return isStory ? "story" : null;
+        }
+      }
+      return null;
+    }
+
+    // "Po" / "Po dua" / "Trego" after the offer, or the academy name alone.
+    function isStoryChoice(text, qIntent) {
+      var words = text.split(/\s+/).filter(Boolean);
+      if (words.length > 3) return false;
+      var other = keys(qIntent).filter(function (i) { return i !== "experience"; });
+      return other.length === 0;
+    }
+
+    // The last assistant turn was the plain experience answer, so a "yes"
+    // repeats it (that academy has no success story to offer).
+    function experiencePending(history) {
+      if (!Array.isArray(history)) return false;
+      for (var i = history.length - 1; i >= 0; i--) {
+        var m = history[i];
+        if (!m) continue;
+        if (m.role === "assistant") {
+          return typeof m.content === "string" &&
+            m.content.indexOf(coreExperienceAnswer()) !== -1;
+        }
+      }
+      return false;
+    }
+
+    function experienceReply(academyId) {
+      var core = coreExperienceAnswer();
+      // A known academy without a success story gets the plain answer only.
+      if (academyId && !storyEntry(academyId)) {
+        return { reply: core, fallback: false, kind: "experience" };
+      }
+      return { reply: core + "\n\n" + STORY_OFFER, fallback: false, kind: "experience" };
+    }
+
+    function storyReply(academyId) {
+      if (academyId) {
+        var story = storyEntry(academyId);
+        if (story) {
+          return { reply: story.answer, fallback: false, kind: "story", topic: story.topic };
+        }
+        return { reply: coreExperienceAnswer(), fallback: false, kind: "experience" };
+      }
+      var names = storyAcademies().map(function (id) { return academyLabel(id); }).join(", ");
+      return {
+        reply: "Me kënaqësi! Mbi cilën akademi dëshiron të dëgjoj historinë e suksesit? Kam histori për " + names + ".",
+        fallback: false, kind: "story"
+      };
+    }
+
+    // The last assistant turn was a success story: a short "yes" is only an
+    // acknowledgement.
     function respond(message, history) {
       var text = normalize(message);
       if (!text) return null;
@@ -793,6 +923,27 @@
         return contactReply(text, qAcad);
       }
 
+      // Success-story flow: the visitor answers "Po" to the offer, or names
+      // the academy whose story they want.
+      var storyCtx = storyContext(history);
+      if (storyCtx === "offer") {
+        var saidYes = isAffirmative(text);
+        var picked = keys(qAcad).length && isStoryChoice(text, qIntent);
+        if (saidYes || picked) {
+          return storyReply(keys(qAcad)[0] || inferAcademyFromHistory(history));
+        }
+      } else if (storyCtx === "clarify" || storyCtx === "story") {
+        if (storyCtx === "story" && isAffirmative(text)) {
+          return { reply: STRINGS.thanks, fallback: false, kind: "thanks" };
+        }
+        if (keys(qAcad).length && isStoryChoice(text, qIntent)) {
+          return storyReply(keys(qAcad)[0]);
+        }
+      } else if (experiencePending(history) && isAffirmative(text)) {
+        // That academy has no success story: keep the plain answer.
+        return experienceReply(keys(qAcad)[0] || inferAcademyFromHistory(history));
+      }
+
       var wantsSpecific = keys(qIntent).some(function (i) { return ACADEMY_SPECIFIC[i]; });
       if (wantsSpecific && keys(qAcad).length === 0) {
         return clarify();
@@ -801,6 +952,12 @@
       // "Kush janë ligjeruesit e ..." -> the lecturer list of that academy.
       if (qIntent.people && keys(qAcad).length) {
         return peopleReply(qAcad);
+      }
+
+      // "A duhet eksperience paraprake?" -> the plain answer, plus the
+      // success-story offer for the academies that have one.
+      if (qIntent.experience) {
+        return experienceReply(keys(qAcad)[0] || inferAcademyFromHistory(history));
       }
 
       // "Dua te di per HR" / "tell me about the Data Science academy" ->
