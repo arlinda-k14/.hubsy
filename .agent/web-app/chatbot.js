@@ -154,11 +154,34 @@
     location: ["kampus", "lokacion", "adres", "adresa", "ku ndodhet", "where", "location", "prishtin", "zyra"],
     prerequisites: ["parakusht", "parakushtet", "kushtet", "pranimit", "requirements", "prerequisite", "aplikim", "apply", "aplikoj"],
     projects: ["projekte", "projekt", "portfolio", "projects", "project"],
-    people: ["ligjerues", "trajner", "trainer", "instruktor", "instructor", "profesor", "professor", "professors", "mentor", "lecturer", "mësues", "mesues", "who teaches", "kush mëson", "kush meson", "ekip", "team", "staff", "people"],
-    audience: ["audienca", "target", "profili", "profile", "kush mund", "për kë", "per ke", "audience"],
+    people: ["ligjerues", "trajner", "trainer", "instruktor", "instructor", "profesor", "professor", "professors", "mentor", "lecturer", "mësues", "mesues", "who teaches", "kush mëson", "Kush meson", "ekip", "team", "staff", "people"],
+    audience: ["audienca", "target", "profili", "profile", "Kush mund", "për kë", "per ke", "audience"],
     certification: ["certifikatë", "certifikate", "certifikim", "diplom", "diplomë", "certification", "certificate", "cert"],
-    contact: ["kontakt", "kontakto", "contact", "përgjegjës", "pergjegjes", "person", "personi", "telefon", "telefoni", "email", "numri", "numero", "flas", "njeri", "takim", "cakto", "ndihmo", "ndihmë", "ndihme", "help", "assist", "këshill", "keshill", "bisedo", "talk", "speak"]
+    contact: ["kontakt", "kontakto", "contact", "përgjegjës", "pergjegjes", "person", "personi", "telefon", "telefoni", "email", "numri", "numero", "flas", "njeri", "takim", "cakto", "ndihmo", "ndihmë", "ndihme", "help", "assist", "këshill", "keshill", "bisedo", "talk", "speak"],
+    // A question about a whole academy, not about one aspect of it.
+    overview: ["dua te di per", "dua me dite per", "dua di per", "duan me dit", "duan te dit",
+      "dëshiroj me dit", "deshiroj me dit", "dua me shume info", "dua te shume info",
+      "me trego per", "më trego për", "trego per", "trego akademine", "trego akademinë",
+      "info per", "informacion per", "informacion mbi", "me shume informacion", "më shumë informacion",
+      "gjej me shume", "gjej info", "gjej gjithçka", "gjej gjithcka", "çdo gjë rreth", "gjej per",
+      "per akademine", "per akademinë", "mbi akademine", "mbi akademinë", "rreth akademine", "rreth akademinë",
+      "na intereson", "me intereson", "kam interes", "tell me about", "about the academy", "info about",
+      "overview of", "summary of", "overview", "rreth kësaj akademie", "rreth kesaj akademie"]
   };
+
+  // Intents that answer one specific aspect of an academy. When one of these
+  // is present the question is not a general academy overview.
+  var SPECIFIC_INTENTS = ["price", "payment", "duration", "start", "modules", "format",
+    "language", "location", "prerequisites", "projects", "people", "audience",
+    "certification", "contact"];
+
+  function hasSpecificIntent(qIntent) {
+    for (var i = 0; i < SPECIFIC_INTENTS.length; i++) {
+      if (qIntent[SPECIFIC_INTENTS[i]]) return true;
+    }
+    return false;
+  }
+
 
   // Explicit contact requests: these always route to a coordinator, even when an
   // academy is mentioned in the same message.
@@ -167,7 +190,7 @@
 
   // Intents that only make sense when we know which academy is meant.
   var ACADEMY_SPECIFIC = {
-    price: 1, payment: 1, duration: 1, modules: 1, projects: 1, people: 1, audience: 1, certification: 1
+    price: 1, payment: 1, duration: 1, modules: 1, projects: 1, people: 1, audience: 1, certification: 1, overview: 1
   };
 
   function detectAcademies(text) {
@@ -236,11 +259,22 @@
           });
           if (named.length) people = named;
         }
+        var academies = detectAcademies(topicLc);
+        var kind = e.kind || null;
+        // Explicit academy id from the knowledge base, otherwise infer it from
+        // the entry title.
+        var academyId = e.academy || keys(academies)[0] || null;
         return {
           topic: e.topic,
           answer: e.answer,
           topicLc: topicLc,
-          academies: detectAcademies(topicLc),
+          academies: academies,
+          academyId: academyId,
+          kind: kind,
+          overview: e.overview || null,
+          isOverview: kind === "overview" && !!academyId,
+          isModule: kind === "module",
+          isPerson: kind === "person",
           intents: detectIntents(topicLc),
           isSummary: /modulet|module|kurrikul|programi/i.test(topicLc),
           isPeople: /trajner|ligjerues|lecturer|mentor|instruktor|profesor/i.test(topicLc),
@@ -248,7 +282,7 @@
           topicStems: topicStems,
           topicTokens: topicTokens,
           answerStems: answerStems,
-          isGeneral: keys(detectAcademies(topicLc)).length === 0
+          isGeneral: keys(academies).length === 0
         };
       });
   }
@@ -304,6 +338,15 @@
     }
 
     if (entry.isSummary && qIntent.modules) score += 2;
+
+    // A question about a whole academy must land on the academy overview
+    // entry, never on one of its modules or on the coordinator card.
+    if (entry.isOverview && keys(qAcad).length) {
+      if (qIntent.overview) score += 5;
+      else if (!hasSpecificIntent(qIntent)) score += 4;
+    }
+    if (entry.isModule && !qIntent.modules) score -= 3;
+    if (entry.isPerson && !qIntent.contact) score -= 2;
 
     return score;
   }
@@ -686,6 +729,51 @@
       return String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, ",");
     }
 
+    // A general question about an academy ("dua te di per HR") must resolve to
+    // the structured overview of that academy, never to one of its modules.
+    function overviewEntryFor(id) {
+      for (var i = 0; i < index.length; i++) {
+        if (index[i].isOverview && index[i].academyId === id) return index[i];
+      }
+      return null;
+    }
+
+    function formatOverview(o, fallbackAnswer) {
+      var lines = [];
+      lines.push("**" + (o.title || "") + "**");
+      lines.push("");
+      lines.push(o.summary || fallbackAnswer || "");
+      lines.push("");
+      lines.push("• **Kohëzgjatja:** " + (o.duration || "—"));
+      lines.push("• **Modulet Kryesore:** " +
+        (Array.isArray(o.modules) && o.modules.length ? o.modules.join(", ") : "—"));
+      lines.push("• **Çertifikimi:** " +
+        (o.certification || "Çertifikatë e njohur ndërkombëtarisht"));
+      lines.push("• **Ligjëruesit:** " +
+        (o.lecturers || "Ekspertë të industrisë nga kompani udhëheqëse"));
+      return lines.join("\n");
+    }
+
+    function overviewReply(qAcad, lang) {
+      var ids = keys(qAcad);
+      var blocks = [];
+      for (var i = 0; i < ids.length; i++) {
+        var e = overviewEntryFor(ids[i]);
+        if (!e) continue;
+        blocks.push(formatOverview(e.overview || {}, e.answer));
+      }
+      if (!blocks.length) return null;
+      // The knowledge base is Albanian-only, so the closing line stays in the
+      // same language as the body of the reply.
+      var tail = "A dëshironi të shihni syllabus-in e plotë apo të flisni me një këshilltar karriere?";
+      return {
+        reply: blocks.join("\n\n") + "\n\n" + tail,
+        fallback: false,
+        kind: "overview",
+        lang: lang
+      };
+    }
+
     function findPriceEntry(id) {
       for (var i = 0; i < index.length; i++) {
         if (index[i].academies[id] && index[i].intents.price) return index[i];
@@ -769,6 +857,15 @@
         return peopleReply(qAcad, lang);
       }
 
+      // "Dua te di per HR" / "tell me about the Data Science academy" ->
+      // the structured overview of that academy.
+      var wantsOverview = keys(qAcad).length &&
+        (qIntent.overview || !hasSpecificIntent(qIntent));
+      if (wantsOverview) {
+        var ov = overviewReply(qAcad, lang);
+        if (ov) return ov;
+      }
+
       if (qIntent.payment && keys(qAcad).length) {
         var inst = installmentReply(qAcad, lang);
         if (inst) return inst;
@@ -811,6 +908,8 @@
       detectAcademies: detectAcademies,
       detectIntents: detectIntents,
       peopleReply: peopleReply,
+      overviewReply: overviewReply,
+      overviewEntryFor: overviewEntryFor,
       mentorProfiles: mentorProfiles,
       _score: scoreEntry
     };

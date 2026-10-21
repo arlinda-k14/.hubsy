@@ -50,7 +50,10 @@ const KB_TEXT = KNOWLEDGE_BASE
             .map((p) => `${p.name} (${p.title})`)
             .join("; ")}]`
         : "";
-    return `- ${e.topic}: ${e.answer}${people}`;
+    const ov = e.overview
+      ? `\n  [academy overview: ${e.overview.title} | ${e.overview.summary} | duration: ${e.overview.duration} | key modules: ${(e.overview.modules || []).join(", ")} | certification: ${e.overview.certification} | lecturers: ${e.overview.lecturers}]`
+      : "";
+    return `- ${e.topic}: ${e.answer}${people}${ov}`;
   })
   .join("\n");
 
