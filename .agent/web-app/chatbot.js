@@ -145,7 +145,7 @@
     location: ["kampus", "lokacion", "adres", "adresa", "ku ndodhet", "where", "location", "prishtin", "zyra"],
     prerequisites: ["parakusht", "parakushtet", "kushtet", "pranimit", "requirements", "prerequisite", "aplikim", "apply", "aplikoj"],
     projects: ["projekte", "projekt", "portfolio", "projects", "project"],
-    people: ["ligjerues", "trajner", "trainer", "instruktor", "instructor", "profesor", "professor", "professors", "mentor", "lecturer", "mësues", "mesues", "who teaches", "kush mëson", "Kush meson", "ekip", "team", "staff", "people"],
+    people: ["ligjerues", "ligjërues", "trajner", "trainer", "instruktor", "instructor", "profesor", "professor", "professors", "mentor", "lecturer", "mësues", "mesues", "who teaches", "kush mëson", "Kush meson", "ekip", "team", "staff", "people"],
     audience: ["audienca", "target", "profili", "profile", "Kush mund", "për kë", "per ke", "audience"],
     certification: ["certifikatë", "certifikate", "certifikim", "diplom", "diplomë", "certification", "certificate", "cert", "licencë", "licence", "license"],
     // "Do I need prior experience / knowledge before I start?"
@@ -256,6 +256,20 @@
         }
         var academies = detectAcademies(topicLc);
         var kind = e.kind || null;
+        // Module entries carry their own structure: name, academy, hours,
+        // weeks, description and the lecturer of that module.
+        var module = null;
+        var lecturer = null;
+        var aliasKeys = [];
+        if (kind === "module") {
+          module = e.module || null;
+          lecturer = e.lecturer || null;
+          var aliases = Array.isArray(e.aliases) ? e.aliases.slice() : [];
+          if (module && module.name) aliases.push(module.name);
+          aliasKeys = aliases.map(normalizeKey).filter(function (a) {
+            return a.length > 1;
+          });
+        }
         // Explicit academy id from the knowledge base, otherwise infer it from
         // the entry title.
         var academyId = e.academy || keys(academies)[0] || null;
@@ -268,6 +282,9 @@
           kind: kind,
           tag: e.tag || null,
           overview: e.overview || null,
+          module: module,
+          lecturer: lecturer,
+          aliasKeys: aliasKeys,
           isOverview: kind === "overview" && !!academyId,
           isModule: kind === "module",
           isPerson: kind === "person",
@@ -349,6 +366,37 @@
 
   function normalize(text) {
     return String(text).toLowerCase().replace(/\s+/g, " ").trim();
+  }
+
+  // Module matching ---------------------------------------------------------
+  // Module names, aliases and the visitor's question are compared without
+  // diacritics and without punctuation, so "Back-end me Python (Django)" is
+  // found by "back end" and "Django".
+  function deaccent(text) {
+    return String(text)
+      .replace(/ë/g, "e").replace(/Ë/g, "E")
+      .replace(/ç/g, "c").replace(/Ç/g, "C");
+  }
+
+  function normalizeKey(text) {
+    return deaccent(String(text)).toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, " ")
+      .replace(/\s+/g, " ")
+      .trim();
+  }
+
+  // Whole-word phrase match: "python" matches "python", not "pythonista".
+  function phraseIn(text, phrase) {
+    if (!phrase) return false;
+    var i = -1;
+    while ((i = text.indexOf(phrase, i + 1)) !== -1) {
+      var before = i === 0 ? "" : text[i - 1];
+      var after = i + phrase.length >= text.length ? "" : text[i + phrase.length];
+      var bOk = before === "" || !/[\p{L}\p{N}]/u.test(before);
+      var aOk = after === "" || !/[\p{L}\p{N}]/u.test(after);
+      if (bOk && aOk) return true;
+    }
+    return false;
   }
 
   // Hubsy answers in Albanian only, whatever language the visitor writes in.
@@ -890,6 +938,210 @@
       };
     }
 
+    // Module details --------------------------------------------------------
+    // Every module entry in the knowledge base carries its own structure:
+    // name, academy, description, hours, weeks and the lecturer of that
+    // module. A question about one module ("sa zgjat moduli i Python",
+    // "kush e ligjëron Copywriting") gets that card instead of the raw
+    // knowledge-base answer.
+
+    // A list of modules is not a single module.
+    var MODULE_LIST_CUES = [
+      "cilat janë modulet", "cilat modulet", "sa modulet", "cfare module",
+      "çfare module", "te gjitha modulet", "të gjitha modulet", "lista e moduleve",
+      "kurrikul", "syllabus", "modulet e", "modulet te", "modulet të",
+      "what are the modules", "which modules", "modules of", "list of modules",
+      "curriculum", "module list"
+    ];
+
+    // Academy-wide questions keep their own answers: a module card would
+    // not answer them. Contact requests are handled earlier, but a contact
+    // word that is part of a module name ("email marketing") is not one.
+    var MODULE_BLOCKING_INTENTS = ["price", "payment", "prerequisites",
+      "certification", "audience", "start"];
+
+    // "modul"/"lenda" asks about one module, "akademi" asks about the whole
+    // academy.
+    var MODULE_WORD_RE = /\b(modul\w*|module\w*|lend[ae]\b|subjekt\w*)/;
+    var ACADEMY_WORD_RE = /akademi|academy/i;
+
+    // The subject of a module question is what follows "moduli i" /
+    // "modul e". It ends at the first word that starts a new clause, so
+    // "moduli i SQL në Data Engineering" is about SQL, not about Data
+    // Engineering.
+    var SUBJECT_BOUNDARY = /^(ne|te|nga|per|me|dhe|ose|apo|in|at|for|and|or|as|with|on|to|qka|cka)$/;
+
+    // "dallimi mes Python dhe JavaScript" compares modules, it does not ask
+    // for one of them.
+    var COMPARISON_RE = /\b(dallim\w*|ndryshim\w*|versus|vs|krahas\w*)\b/;
+
+    function moduleEntries() {
+      var out = [];
+      for (var i = 0; i < index.length; i++) {
+        if (index[i].module) out.push(index[i]);
+      }
+      return out;
+    }
+
+    // The subject of a module question is what follows "moduli i" /
+    // "modul e". It ends at the first word that starts a new clause, so
+    // "moduli i SQL në Data Engineering" asks about SQL, not about Data
+    // Engineering.
+    function moduleSubject(key) {
+      var m = key.match(MODULE_WORD_RE);
+      if (!m) return "";
+      var rest = key.slice(m.index + m[0].length).trim();
+      if (!rest) return "";
+      var parts = rest.split(/\s+/);
+      if (parts[0] === "i" || parts[0] === "e") parts.shift();
+      var out = [];
+      for (var i = 0; i < parts.length; i++) {
+        if (SUBJECT_BOUNDARY.test(parts[i])) break;
+        out.push(parts[i]);
+      }
+      return out.join(" ");
+    }
+
+    // All module entries whose name or alias appears in the scope. The
+    // longest alias wins, so "google analytics" beats "analytics".
+    function matchInScope(scope, entries) {
+      var out = [];
+      for (var i = 0; i < entries.length; i++) {
+        var e = entries[i];
+        var best = 0;
+        var hit = "";
+        for (var a = 0; a < e.aliasKeys.length; a++) {
+          var alias = e.aliasKeys[a];
+          if (!phraseIn(scope, alias)) continue;
+          var score = alias.length + (alias.indexOf(" ") !== -1 ? 6 : 0);
+          if (score > best) {
+            best = score;
+            hit = alias;
+          }
+        }
+        if (best > 0) out.push({ entry: e, score: best, alias: hit });
+      }
+      return out;
+    }
+
+    function moduleMatches(key) {
+      var entries = moduleEntries();
+      var subject = moduleSubject(key);
+      if (subject) {
+        var scoped = matchInScope(subject, entries);
+        if (scoped.length) return scoped;
+      }
+      return matchInScope(key, entries);
+    }
+
+    // The best module hit of a question, or null.
+    function bestModuleMatch(text) {
+      var matches = moduleMatches(normalizeKey(text));
+      if (!matches.length) return null;
+      matches.sort(function (a, b) { return b.score - a.score; });
+      return matches[0];
+    }
+
+    function moduleCard(entry) {
+      var m = entry.module;
+      var l = entry.lecturer || {};
+      var lines = [];
+      lines.push("**Moduli: " + m.name + "** (" + m.academy + ")");
+      lines.push("");
+      lines.push(m.description || "");
+      lines.push("");
+      lines.push("• **Kohëzgjatja:** " + m.hours + " Orë (" + m.weeks + " Javë)");
+      lines.push("• **Ligjëruesi i Modulit:** **" + (l.name || "—") + "** — " + (l.title || "—"));
+      if (l.expertise) lines.push("  " + l.expertise);
+      lines.push("");
+      lines.push("A dëshironi të shihni modulin e ardhshëm apo syllabus-in e plotë të akademisë?");
+      return lines.join("\n");
+    }
+
+    function clarifyModule(name, academies) {
+      var names = academies.map(function (id) {
+        return academyLabel(id);
+      }).join(" dhe ");
+      return {
+        reply: "Moduli " + name + " gjendet në disa akademi: " + names +
+          ". Për cilën dëshironi detajet, kohëzgjatjen dhe ligjëruesin?",
+        fallback: false,
+        kind: "module-clarify"
+      };
+    }
+
+    function moduleReply(text, qAcad, qIntent, history) {
+      var key = normalizeKey(text);
+      if (!key) return null;
+
+      for (var i = 0; i < MODULE_LIST_CUES.length; i++) {
+        if (key.indexOf(normalizeKey(MODULE_LIST_CUES[i])) !== -1) return null;
+      }
+      for (var j = 0; j < MODULE_BLOCKING_INTENTS.length; j++) {
+        if (qIntent[MODULE_BLOCKING_INTENTS[j]]) return null;
+      }
+      // "tell me about the X academy" is a question about the academy.
+      if (ACADEMY_WORD_RE.test(key) && !MODULE_WORD_RE.test(key)) return null;
+
+      // A question about the prior experience is not a question about a
+      // module, unless it also asks for the duration of one.
+      if (qIntent.experience && !qIntent.duration) return null;
+
+      var hasModuleWord = MODULE_WORD_RE.test(key);
+      var qIds = keys(qAcad);
+      var matches = moduleMatches(key);
+      if (!hasModuleWord) {
+        // Several academy names are also module names ("Data Engineering",
+        // "Data Science", "Project Management"). Without the word "module"
+        // such a name points at the academy, not at that module.
+        matches = matches.filter(function (m) {
+          var label = normalizeKey(academyLabel(m.entry.academyId));
+          var alias = normalizeKey(m.alias);
+          return !(alias.length > 3 && label.indexOf(alias) !== -1);
+        });
+      }
+      if (!matches.length) return null;
+      if (matches.length > 1 && COMPARISON_RE.test(key)) return null;
+
+      matches.sort(function (a, b) { return b.score - a.score; });
+      var best = matches[0].score;
+      var top = matches.filter(function (m) { return m.score === best; });
+      var academies = [];
+      top.forEach(function (m) {
+        if (academies.indexOf(m.entry.academyId) === -1) {
+          academies.push(m.entry.academyId);
+        }
+      });
+
+      var picked = null;
+      if (academies.length > 1) {
+        // The same module exists in several academies: use the academy the
+        // visitor mentioned, the one from the conversation, or ask.
+        for (var k = 0; k < qIds.length; k++) {
+          if (academies.indexOf(qIds[k]) !== -1) {
+            picked = qIds[k];
+            break;
+          }
+        }
+        if (!picked) {
+          var carried = inferAcademyFromHistory(history);
+          if (carried && academies.indexOf(carried) !== -1) picked = carried;
+        }
+        if (!picked) return clarifyModule(top[0].entry.module.name, academies);
+      }
+
+      var chosen = top.filter(function (m) {
+        return !picked || m.entry.academyId === picked;
+      })[0];
+      if (!chosen) return null;
+      return {
+        reply: moduleCard(chosen.entry),
+        fallback: false,
+        kind: "module",
+        topic: chosen.entry.topic
+      };
+    }
+
     // The last assistant turn was a success story: a short "yes" is only an
     // acknowledgement.
     function respond(message, history) {
@@ -918,8 +1170,20 @@
       }
       var qIntent = detectIntents(text);
 
-      var strongContact = CONTACT_STRONG.some(function (k) { return matchKeyword(text, k); });
-      if (strongContact || (qIntent.contact && !keys(qAcad).length)) {
+      // A contact word that is part of a module name ("email marketing")
+      // belongs to the module, not to a contact request.
+      var contactWord = null;
+      for (var ci = 0; ci < CONTACT_STRONG.length; ci++) {
+        if (matchKeyword(text, CONTACT_STRONG[ci])) {
+          contactWord = CONTACT_STRONG[ci];
+          break;
+        }
+      }
+      var modHit = contactWord ? bestModuleMatch(text) : null;
+      var contactFromModule = !!(modHit && contactWord &&
+        modHit.alias.indexOf(normalizeKey(contactWord)) !== -1);
+      var strongContact = !!contactWord;
+      if (!contactFromModule && (strongContact || (qIntent.contact && !keys(qAcad).length))) {
         return contactReply(text, qAcad);
       }
 
@@ -943,6 +1207,11 @@
         // That academy has no success story: keep the plain answer.
         return experienceReply(keys(qAcad)[0] || inferAcademyFromHistory(history));
       }
+
+      // A question about one module gets that module's card: hours, weeks,
+      // description and the lecturer of that module.
+      var mod = moduleReply(text, qAcad, qIntent, history);
+      if (mod) return mod;
 
       var wantsSpecific = keys(qIntent).some(function (i) { return ACADEMY_SPECIFIC[i]; });
       if (wantsSpecific && keys(qAcad).length === 0) {
@@ -1014,6 +1283,8 @@
       overviewReply: overviewReply,
       overviewEntryFor: overviewEntryFor,
       mentorProfiles: mentorProfiles,
+      moduleReply: moduleReply,
+      moduleMatches: moduleMatches,
       _score: scoreEntry
     };
   }

@@ -53,7 +53,15 @@ const KB_TEXT = KNOWLEDGE_BASE
     const ov = e.overview
       ? `\n  [academy overview: ${e.overview.title} | ${e.overview.summary} | duration: ${e.overview.duration} | key modules: ${(e.overview.modules || []).join(", ")} | certification: ${e.overview.certification} | lecturers: ${e.overview.lecturers}]`
       : "";
-    return `- ${e.topic}: ${e.answer}${people}${ov}`;
+    // Module entries carry their own structure: hours, weeks and the
+    // lecturer of that module.
+    const mod = e.module
+      ? `\n  [module: ${e.module.name} | academy: ${e.module.academy} | ${e.module.hours} orë / ${e.module.weeks} javë | ${e.module.description}]`
+      : "";
+    const lecturer = e.lecturer
+      ? `\n  [module lecturer: ${e.lecturer.name} (${e.lecturer.title}) | ${e.lecturer.expertise}]`
+      : "";
+    return `- ${e.topic}: ${e.answer}${people}${ov}${mod}${lecturer}`;
   })
   .join("\n");
 

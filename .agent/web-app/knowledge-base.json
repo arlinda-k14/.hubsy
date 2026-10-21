@@ -142,43 +142,203 @@
     "topic": "Moduli: Hyrje në Marketing (Digital Marketing & AI Academy)",
     "answer": "4 orë. Studentët do të mësojnë bazat e marketingut, si të përcaktojnë audiencën e tyre përmes buyer personas dhe si të përdorin mjetet e AI në marketing. Do të njihen me 4P-të e marketingut, do të kuptojnë marketing funnel-in, do të mësojnë të ndërtojnë një strategji bazike të marketingut digjital dhe do të eksplorojnë mundësitë e karrierës në këtë fushë.",
     "academy": "dm",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Hyrje në Marketing",
+      "hours": 4,
+      "weeks": 1,
+      "description": "Studentët do të mësojnë bazat e marketingut, si të përcaktojnë audiencën e tyre përmes buyer personas dhe si të përdorin mjetet e AI në marketing. Do të njihen me 4P-të e marketingut, do të kuptojnë marketing funnel-in, do të mësojnë të ndërtojnë një strategji bazike të marketingut digjital dhe do të eksplorojnë mundësitë e karrierës në këtë fushë.",
+      "academy": "Digital Marketing & AI Academy"
+    },
+    "aliases": [
+      "hyrje ne marketing",
+      "hyrje marketingu",
+      "hyrje ne marketingu"
+    ],
+    "lecturer": {
+      "name": "Arlinda Kaloshi",
+      "title": "Head of Growth & Marketing",
+      "bio": "Ka kontribuar në transformimin e karrierës së mbi 500 personave në fushën e marketingut digjital.",
+      "expertise": "Ndihmon në kuptimin e funksionit të marketingut dhe në marrjen e vendimeve të bazuara në të dhëna."
+    }
   },
   {
     "topic": "Moduli: Copywriting + AI (Digital Marketing & AI Academy)",
     "answer": "14 orë. Studentët do të mësojnë si të krijojnë përmbajtje bindëse duke përdorur teknikat e copywriting dhe mjetet e AI. Do të mësojnë të analizojnë audiencën, të shkruajnë për SEO, email dhe rrjete sociale, të bëjnë keyword research, të ndërtojnë një content calendar dhe të aplikojnë njohuritë përmes një workshop-i praktik të plotë të përmbajtjes.",
     "academy": "dm",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Copywriting + AI",
+      "hours": 14,
+      "weeks": 4,
+      "description": "Studentët do të mësojnë si të krijojnë përmbajtje bindëse duke përdorur teknikat e copywriting dhe mjetet e AI. Do të mësojnë të analizojnë audiencën, të shkruajnë për SEO, email dhe rrjete sociale, të bëjnë keyword research, të ndërtojnë një content calendar dhe të aplikojnë njohuritë përmes një workshop-i praktik të plotë të përmbajtjes.",
+      "academy": "Digital Marketing & AI Academy"
+    },
+    "aliases": [
+      "copywriting",
+      "copywriting ai",
+      "copywriting me ai",
+      "content writing",
+      "shkrimi i pergjimeve"
+    ],
+    "lecturer": {
+      "name": "Diana Bajraktari",
+      "title": "Content Manager",
+      "bio": "Eksperte në copywriting, content marketing, ndërtimin e brand voice dhe krijimin e kampanjave digjitale me konvertime të larta.",
+      "expertise": "Eksperte në copywriting, content marketing, ndërtimin e brand voice dhe krijimin e kampanjave digjitale me konvertime të larta."
+    }
   },
   {
     "topic": "Moduli: Meta Ads (Digital Marketing & AI Academy)",
     "answer": "14 orë. Studentët do të mësojnë si të krijojnë dhe menaxhojnë fushata reklamuese në Meta Ads Manager, të përcaktojnë objektivat dhe audiencat, si dhe të optimizojnë dhe analizojnë performancën e kampanjave. Do të mësojnë gjithashtu përdorimin e Meta Pixel dhe Canva AI për krijimin dhe përmirësimin e materialeve reklamuese.",
     "academy": "dm",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Meta Ads",
+      "hours": 14,
+      "weeks": 4,
+      "description": "Studentët do të mësojnë si të krijojnë dhe menaxhojnë fushata reklamuese në Meta Ads Manager, të përcaktojnë objektivat dhe audiencat, si dhe të optimizojnë dhe analizojnë performancën e kampanjave. Do të mësojnë gjithashtu përdorimin e Meta Pixel dhe Canva AI për krijimin dhe përmirësimin e materialeve reklamuese.",
+      "academy": "Digital Marketing & AI Academy"
+    },
+    "aliases": [
+      "meta ads",
+      "meta",
+      "meta advertising",
+      "facebook ads",
+      "reklama ne facebook"
+    ],
+    "lecturer": {
+      "name": "Taulant Binxhia",
+      "title": "Marketing Manager",
+      "bio": "Ekspert në paid media, growth marketing dhe strategji të rrjeteve sociale për brende lokale dhe ndërkombëtare.",
+      "expertise": "Ekspert në paid media, growth marketing dhe strategji të rrjeteve sociale për brende lokale dhe ndërkombëtare."
+    }
   },
   {
     "topic": "Moduli: Google Ads, Tag Manager & Analytics (Digital Marketing & AI Academy)",
     "answer": "20 orë. Studentët do të mësojnë të përdorin Google Analytics 4, të krijojnë dhe menaxhojnë fushata në Google Ads dhe të zhvillojnë strategji efektive të keyword research. Do të mësojnë gjithashtu Google Tag Manager, event tracking dhe raportimin e rezultateve, duke i zbatuar njohuritë përmes ushtrimeve praktike të bazuara në skenarë realë.",
     "academy": "dm",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Google Ads, Tag Manager & Analytics",
+      "hours": 20,
+      "weeks": 5,
+      "description": "Studentët do të mësojnë të përdorin Google Analytics 4, të krijojnë dhe menaxhojnë fushata në Google Ads dhe të zhvillojnë strategji efektive të keyword research. Do të mësojnë gjithashtu Google Tag Manager, event tracking dhe raportimin e rezultateve, duke i zbatuar njohuritë përmes ushtrimeve praktike të bazuara në skenarë realë.",
+      "academy": "Digital Marketing & AI Academy"
+    },
+    "aliases": [
+      "google ads",
+      "google tag manager",
+      "tag manager",
+      "google analytics",
+      "paid search"
+    ],
+    "lecturer": {
+      "name": "Endrit Kryeziu",
+      "title": "Performance Marketing & AI Search Manager",
+      "bio": "Mbi 8 vite përvojë me klientë ndërkombëtarë, duke zhvilluar strategji të bazuara në të dhëna në Google Ads, Meta Ads, SEO dhe content marketing.",
+      "expertise": "Mbi 8 vite përvojë me klientë ndërkombëtarë, duke zhvilluar strategji të bazuara në të dhëna në Google Ads, Meta Ads, SEO dhe content marketing."
+    }
   },
   {
     "topic": "Moduli: SEO + GEO (Digital Marketing & AI Academy)",
     "answer": "22 orë. Studentët do të mësojnë bazat e SEO, keyword research dhe krijimin e përmbajtjes së optimizuar me AI. Do të eksplorojnë Local SEO, WordPress, On-page SEO, Google Search Console dhe përdorimin e AI për SEO, si dhe do të njihen me GEO për të optimizuar përmbajtjen për kërkimet e gjeneruara nga AI.",
     "academy": "dm",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "SEO + GEO",
+      "hours": 22,
+      "weeks": 6,
+      "description": "Studentët do të mësojnë bazat e SEO, keyword research dhe krijimin e përmbajtjes së optimizuar me AI. Do të eksplorojnë Local SEO, WordPress, On-page SEO, Google Search Console dhe përdorimin e AI për SEO, si dhe do të njihen me GEO për të optimizuar përmbajtjen për kërkimet e gjeneruara nga AI.",
+      "academy": "Digital Marketing & AI Academy"
+    },
+    "aliases": [
+      "seo",
+      "geo",
+      "seo geo",
+      "generative engine optimization",
+      "optimizimi i kerkimeve"
+    ],
+    "lecturer": {
+      "name": "Petrit Halitaj",
+      "title": "AI SEO Lead",
+      "bio": "Ka ndihmuar mbi 10 biznese të përmirësojnë prezencën e tyre online përmes SEO teknike, optimizimit të përmbajtjes, strategjive të fjalëve kyçe dhe praktikave të kërkimit të përmirësuara me AI.",
+      "expertise": "Ka ndihmuar mbi 10 biznese të përmirësojnë prezencën e tyre online përmes SEO teknike, optimizimit të përmbajtjes dhe strategjive të fjalëve kyçe."
+    }
   },
   {
     "topic": "Moduli: Email Marketing (Digital Marketing & AI Academy)",
     "answer": "10 orë. Studentët do të mësojnë bazat e email marketing-ut, krijimin e kampanjave dhe ndërtimin e automation workflows. Do të mësojnë si të segmentojnë audiencën, të analizojnë performancën e kampanjave dhe të përdorin funksionalitetet e AI në Brevo për të krijuar dhe optimizuar email marketing-un.",
     "academy": "dm",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Email Marketing",
+      "hours": 10,
+      "weeks": 2,
+      "description": "Studentët do të mësojnë bazat e email marketing-ut, krijimin e kampanjave dhe ndërtimin e automation workflows. Do të mësojnë si të segmentojnë audiencën, të analizojnë performancën e kampanjave dhe të përdorin funksionalitetet e AI në Brevo për të krijuar dhe optimizuar email marketing-un.",
+      "academy": "Digital Marketing & AI Academy"
+    },
+    "aliases": [
+      "email marketing",
+      "email marketingu",
+      "newsletter",
+      "marketing me email"
+    ],
+    "lecturer": {
+      "name": "Zeki Veliu",
+      "title": "Senior Global Marketing Director",
+      "bio": "Udhëheq një ekip ndërkombëtar të marketingut dhe zhvillon strategji të rritjes të bazuara në të dhëna për një brend global.",
+      "expertise": "Udhëheq një ekip ndërkombëtar të marketingut dhe zhvillon strategji të rritjes të bazuara në të dhëna për një brend global."
+    }
   },
   {
     "topic": "Moduli: Digital Marketing Strategy (Digital Marketing & AI Academy)",
     "answer": "10 orë. Studentët do të mësojnë si të zhvillojnë një strategji të plotë të marketingut digjital, duke filluar nga market research dhe analizimi i klientëve deri te përzgjedhja e kanaleve dhe planifikimi i kampanjave. Do të mësojnë gjithashtu të matin ROI dhe performancën e aktiviteteve të marketingut, si dhe të përdorin Microsoft Copilot dhe AI për krijimin e prezantimeve profesionale.",
     "academy": "dm",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Digital Marketing Strategy",
+      "hours": 10,
+      "weeks": 2,
+      "description": "Studentët do të mësojnë si të zhvillojnë një strategji të plotë të marketingut digjital, duke filluar nga market research dhe analizimi i klientëve deri te përzgjedhja e kanaleve dhe planifikimi i kampanjave. Do të mësojnë gjithashtu të matin ROI dhe performancën e aktiviteteve të marketingut, si dhe të përdorin Microsoft Copilot dhe AI për krijimin e prezantimeve profesionale.",
+      "academy": "Digital Marketing & AI Academy"
+    },
+    "aliases": [
+      "digital marketing strategy",
+      "strategji dixhitale",
+      "strategjia e marketingut dixhital",
+      "marketing strategy"
+    ],
+    "lecturer": {
+      "name": "Arbër Hajrizaj",
+      "title": "Customer Insights Researcher",
+      "bio": "Mbi 15 vite përvojë në ndihmën e kompanive për të kuptuar më mirë klientët e tyre dhe për të shndërruar të dhënat në strategji të qarta dhe të zbatueshme.",
+      "expertise": "Mbi 15 vite përvojë në ndihmën e kompanive për të kuptuar më mirë klientët e tyre dhe të shndërruar të dhënat në strategji të qarta dhe të zbatueshme."
+    }
+  },
+  {
+    "topic": "Moduli: Career Prep (Digital Marketing & AI Academy)",
+    "answer": "6 orë. Studentët mësojnë si të ndërtojnë një profil profesional, si të përgatisin CV dhe si funksionon procesi i rekrutimit për rolet e marketingut. Gjithashtu përgatiten për intervista dhe mësojnë të aplikojnë në mënyrë strategjike.",
+    "academy": "dm",
+    "kind": "module",
+    "module": {
+      "name": "Career Prep",
+      "hours": 6,
+      "weeks": 1,
+      "description": "Studentët mësojnë si të ndërtojnë një profil profesional, si të përgatisin CV dhe si funksionon procesi i rekrutimit për rolet e marketingut. Gjithashtu përgatiten për intervista dhe mësojnë të aplikojnë në mënyrë strategjike.",
+      "academy": "Digital Marketing & AI Academy"
+    },
+    "aliases": [
+      "career prep",
+      "përgatitje karriere",
+      "pergatitje karriere"
+    ],
+    "lecturer": {
+      "name": "Florent Bajrami",
+      "title": "Senior Recruiter",
+      "bio": "Rekrutues i specializuar në tërheqjen e talenteve, përvojën e kandidatëve dhe ndërtimin e ekipeve me performancë të lartë për organizatat globale.",
+      "expertise": "Rekrutues i specializuar në tërheqjen e talenteve, përvojën e kandidatëve dhe ndërtimin e ekipeve me performancë të lartë për organizatat globale."
+    }
   },
   {
     "topic": "Trajnerët – Digital Marketing & AI Academy",
@@ -287,13 +447,75 @@
     "topic": "Moduli: AI Project Management (AI-powered Product & Project Management)",
     "answer": "36 orë. Studentët mësojnë bazat e menaxhimit të projekteve, ciklin jetësor dhe metodologjitë e projekteve, planifikimin dhe menaxhimin e rreziqeve, si dhe përdorimin e platformave si Jira, Trello dhe Asana. Gjithashtu, mësojnë si të integrojnë OpenAI dhe AI në proceset e menaxhimit të projekteve.",
     "academy": "pm",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "AI Project Management",
+      "hours": 36,
+      "weeks": 9,
+      "description": "Studentët mësojnë bazat e menaxhimit të projekteve, ciklin jetësor dhe metodologjitë e projekteve, planifikimin dhe menaxhimin e rreziqeve, si dhe përdorimin e platformave si Jira, Trello dhe Asana. Gjithashtu, mësojnë si të integrojnë OpenAI dhe AI në proceset e menaxhimit të projekteve.",
+      "academy": "AI-powered Product & Project Management Academy"
+    },
+    "aliases": [
+      "ai project management",
+      "project management",
+      "menaxhim i projekteve",
+      "menaxhim projektesh"
+    ],
+    "lecturer": {
+      "name": "Arbër Berisha",
+      "title": "Head of Project Management",
+      "bio": "Menaxher Projektesh me përvojë, me një historik të dëshmuar në udhëheqjen e iniciativave të transformimit digjital, marketingut dhe teknologjisë në tregje ndërkombëtare.",
+      "expertise": "Menaxher Projektesh me përvojë, me një historik të dëshmuar në udhëheqjen e iniciativave të transformimit digjital, marketingut dhe teknologjisë."
+    }
   },
   {
     "topic": "Moduli: AI Product Management (AI-powered Product & Project Management)",
     "answer": "36 orë. Mësojnë bazat e menaxhimit të produkteve, dallimin mes Product dhe Project Management, si dhe planifikimin, implementimin dhe përmbylljen e produkteve. Përfshihet përdorimi i Prompt Engineering dhe AI në menaxhimin e produkteve, strategjia AI, UX, data dhe SEO, së bashku me mjete si Claude, Gemini, Notion, ClickUp, Slack dhe Figma.",
     "academy": "pm",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "AI Product Management",
+      "hours": 36,
+      "weeks": 9,
+      "description": "Mësojnë bazat e menaxhimit të produkteve, dallimin mes Product dhe Project Management, si dhe planifikimin, implementimin dhe përmbylljen e produkteve. Përfshihet përdorimi i Prompt Engineering dhe AI në menaxhimin e produkteve, strategjia AI, UX, data dhe SEO, së bashku me mjete si Claude, Gemini, Notion, ClickUp, Slack dhe Figma.",
+      "academy": "AI-powered Product & Project Management Academy"
+    },
+    "aliases": [
+      "ai product management",
+      "product management",
+      "menaxhim i produkteve",
+      "menaxhim produktesh"
+    ],
+    "lecturer": {
+      "name": "Arbër Berisha",
+      "title": "Head of Project Management",
+      "bio": "Menaxher Projektesh me përvojë, me një historik të dëshmuar në udhëheqjen e iniciativave të transformimit digjital, marketingut dhe teknologjisë në tregje ndërkombëtare.",
+      "expertise": "Menaxher Projektesh me përvojë, i specializuar në zhvillimin e produkteve dixhitale dhe në lidhjen e strategjisë së produktit me rezultatet e biznesit."
+    }
+  },
+  {
+    "topic": "Moduli: Career Prep (AI-powered Product & Project Management Academy)",
+    "answer": "6 orë. Studentët mësojnë si të ndërtojnë një profil profesional, si të përgatisin CV dhe si funksionon procesi i rekrutimit për rolet e menaxhimit të projekteve dhe produkteve. Gjithashtu përgatiten për intervista dhe mësojnë të aplikojnë në mënyrë strategjike.",
+    "academy": "pm",
+    "kind": "module",
+    "module": {
+      "name": "Career Prep",
+      "hours": 6,
+      "weeks": 1,
+      "description": "Studentët mësojnë si të ndërtojnë një profil profesional, si të përgatisin CV dhe si funksionon procesi i rekrutimit për rolet e menaxhimit të projekteve dhe produkteve. Gjithashtu përgatiten për intervista dhe mësojnë të aplikojnë në mënyrë strategjike.",
+      "academy": "AI-powered Product & Project Management Academy"
+    },
+    "aliases": [
+      "career prep",
+      "përgatitje karriere",
+      "pergatitje karriere"
+    ],
+    "lecturer": {
+      "name": "Florent Bajrami",
+      "title": "Senior Recruiter",
+      "bio": "Rekrutues i specializuar në tërheqjen e talenteve, përvojën e kandidatëve dhe ndërtimin e ekipeve me performancë të lartë për organizatat globale.",
+      "expertise": "Rekrutues me përvojë dhe me një historik të dëshmuar në ndihmën e Menaxherëve të Projekteve për të siguruar mundësi karriere në kompani kryesore ndërkombëtare."
+    }
   },
   {
     "topic": "Trajnerët – AI-powered Product & Project Management Academy",
@@ -373,37 +595,183 @@
     "topic": "Moduli: Bazat e Data Engineering & Python (Data Engineering, Cloud & AI)",
     "answer": "10 orë. Studentët ndërtojnë një bazë të fortë në konceptet e inxhinierisë së të dhënave, ndërsa mësojnë Python për përpunimin e të dhënave, automatizimin dhe zhvillimin e rrjedhave të punës (data pipelines).",
     "academy": "de",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Bazat e Data Engineering & Python",
+      "hours": 10,
+      "weeks": 3,
+      "description": "Studentët ndërtojnë një bazë të fortë në konceptet e inxhinierisë së të dhënave, ndërsa mësojnë Python për përpunimin e të dhënave, automatizimin dhe zhvillimin e rrjedhave të punës (data pipelines). Në fund të modulit studentët ndërtojnë një mini-projekt që i lidh konceptet me kod të pastër Python.",
+      "academy": "Data Engineering, Cloud & AI Academy"
+    },
+    "aliases": [
+      "bazat e data engineering",
+      "data engineering",
+      "bazat e data engineering",
+      "python bazat"
+    ],
+    "lecturer": {
+      "name": "Lorik Berisha",
+      "title": "Engineering Manager",
+      "bio": "Ekspert në ETL, SQL, Python dhe platformat e të dhënave në shkallë të gjerë.",
+      "expertise": "Ekspert në ETL, SQL, Python dhe platformat e të dhënave në shkallë të gjerë."
+    }
   },
   {
     "topic": "Moduli: Relational Databases & SQL (Data Engineering, Cloud & AI)",
     "answer": "16 orë. Studentët mësojnë se si të ruajnë, organizojnë, kërkojnë, transformojnë dhe menaxhojnë të dhënat duke përdorur bazat e të dhënave relacionale dhe SQL-in.",
     "academy": "de",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Relational Databases & SQL",
+      "hours": 16,
+      "weeks": 4,
+      "description": "Studentët mësojnë se si të ruajnë, organizojnë, kërkojnë, transformojnë dhe menaxhojnë të dhënat duke përdorur bazat e të dhënave relacionale dhe SQL-in. Moduli përfundon me një projekt ku studentët modelojnë skema reale dhe përgjigjen pyetjeve analitike me SQL.",
+      "academy": "Data Engineering, Cloud & AI Academy"
+    },
+    "aliases": [
+      "sql",
+      "relational databases",
+      "baza te dhenave relacionale",
+      "databaza relacionale",
+      "databases"
+    ],
+    "lecturer": {
+      "name": "Alina Fazliu",
+      "title": "Data Engineering Team Lead",
+      "bio": "Eksperte në SQL, PySpark, Databricks dhe Analytics Engineering.",
+      "expertise": "Eksperte në SQL, PySpark, Databricks dhe Analytics Engineering."
+    }
   },
   {
     "topic": "Moduli: Distributed Processing me PySpark (Data Engineering, Cloud & AI)",
     "answer": "24 orë. Studentët mësojnë se si të përpunojnë grupe të dhënash me volum të madh (large-scale datasets) duke përdorur llogaritjen e shpërndarë (distributed computing) dhe Apache Spark.",
     "academy": "de",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Distributed Processing me PySpark",
+      "hours": 24,
+      "weeks": 6,
+      "description": "Studentët mësojnë se si të përpunojnë grupe të dhënash me volum të madh (large-scale datasets) duke përdorur llogaritjen e shpërndarë (distributed computing) dhe Apache Spark. Studentët përfundojnë me një punë praktike ku përpunohen miliona rreshta të dhënash me Spark.",
+      "academy": "Data Engineering, Cloud & AI Academy"
+    },
+    "aliases": [
+      "pyspark",
+      "distributed processing",
+      "spark",
+      "llogaritje e shperndarur",
+      "procesim i shperndarur"
+    ],
+    "lecturer": {
+      "name": "Alina Fazliu",
+      "title": "Data Engineering Team Lead",
+      "bio": "Eksperte në SQL, PySpark, Databricks dhe Analytics Engineering.",
+      "expertise": "Eksperte në SQL, PySpark, Databricks dhe Analytics Engineering, me fokus në përpunimin e grupeve të dhënash me volum të madh."
+    }
   },
   {
     "topic": "Moduli: Data Stores Beyond Relational Databases (Data Engineering, Cloud & AI)",
     "answer": "26 orë. Studentët eksplorojnë zgjidhje moderne të ruajtjes së të dhënave, të cilat përdoren për të menaxhuar të dhëna gjysmë të strukturuara dhe të pastrukturuara.",
     "academy": "de",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Data Stores Beyond Relational Databases",
+      "hours": 26,
+      "weeks": 6,
+      "description": "Studentët eksplorojnë zgjidhje moderne të ruajtjes së të dhënave, të cilat përdoren për të menaxhuar të dhëna gjysmë të strukturuara dhe të pastrukturuara. Çdo store prejshet përmbledhur me praktikë, ku studentët zgjedhin teknologjinë e duhur sipas llojit të të dhënave.",
+      "academy": "Data Engineering, Cloud & AI Academy"
+    },
+    "aliases": [
+      "data stores",
+      "databaza jo relacionale",
+      "nosql",
+      "mongo",
+      "redis",
+      "baza te dhenave te tjera"
+    ],
+    "lecturer": {
+      "name": "Elsa Nishori",
+      "title": "Data Engineer & AI Specialist",
+      "bio": "Mbi 4 vite përvojë në ndërtimin e data pipeline-ve dhe sistemeve të bazuara në AI.",
+      "expertise": "Mbi 4 vite përvojë në ndërtimin e data pipeline-ve dhe sistemeve të bazuara në AI."
+    }
   },
   {
     "topic": "Moduli: Scheduling, Orchestration & Data Pipelines (Data Engineering, Cloud & AI)",
     "answer": "26 orë. Studentët mësojnë se si organizatat moderne automatizojnë, planifikojnë, monitorojnë dhe mirëmbajnë proceset e të dhënave në prodhim.",
     "academy": "de",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Scheduling, Orchestration & Data Pipelines",
+      "hours": 26,
+      "weeks": 6,
+      "description": "Studentët mësojnë se si organizatat moderne automatizojnë, planifikojnë, monitorojnë dhe mirëmbajnë proceset e të dhënave në prodhim. Moduli mbyllet me një pipeline të orkestruar që monitorohet në kohë reale dhe trajton dështimet.",
+      "academy": "Data Engineering, Cloud & AI Academy"
+    },
+    "aliases": [
+      "scheduling",
+      "orchestration",
+      "data pipelines",
+      "rrjedhat e te dhenave",
+      "airflow",
+      "orkestracioni"
+    ],
+    "lecturer": {
+      "name": "Elsa Nishori",
+      "title": "Data Engineer & AI Specialist",
+      "bio": "Mbi 4 vite përvojë në ndërtimin e data pipeline-ve dhe sistemeve të bazuara në AI.",
+      "expertise": "Mbi 4 vite përvojë në ndërtimin e data pipeline-ve dhe sistemeve të bazuara në AI, me fokus në automatizimin e rrjedhave të punës."
+    }
   },
   {
     "topic": "Moduli: Production Data Engineering, Databricks & Cloud (Data Engineering, Cloud & AI)",
     "answer": "26 orë. Studentët mësojnë praktikat e Data Engineering të përdorura në projekte reale, teknologjitë cloud, sistemet e transmetimit të të dhënave dhe arkitekturën e të dhënave për organizata të mëdha.",
     "academy": "de",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Production Data Engineering, Databricks & Cloud",
+      "hours": 26,
+      "weeks": 6,
+      "description": "Studentët mësojnë praktikat e Data Engineering të përdorura në projekte reale, teknologjitë cloud, sistemet e transmetimit të të dhënave dhe arkitekturën e të dhënave për organizata të mëdha. Studentët punojnë me skema reale cloud dhe Databricks, duke përgatitur një rrjedhë të gatshme për prodhim.",
+      "academy": "Data Engineering, Cloud & AI Academy"
+    },
+    "aliases": [
+      "production data engineering",
+      "databricks",
+      "cloud engineering",
+      "platformat cloud",
+      "streaming",
+      "ne prodhim"
+    ],
+    "lecturer": {
+      "name": "Jon Maxharraj",
+      "title": "Cloud & Data Specialist",
+      "bio": "Ekspert në databricks, sistemet e shpërndara, streaming, production platforms.",
+      "expertise": "Ekspert në Databricks, sistemet e shpërndara, streaming dhe platformat në prodhim."
+    }
+  },
+  {
+    "topic": "Moduli: Career Prep (Data Engineering, Cloud & AI Academy)",
+    "answer": "6 orë. Studentët mësojnë si të ndërtojnë një profil profesional, si të përgatisin CV dhe si funksionon procesi i rekrutimit për rolet e data engineering. Gjithashtu përgatiten për intervista dhe mësojnë të aplikojnë në mënyrë strategjike.",
+    "academy": "de",
+    "kind": "module",
+    "module": {
+      "name": "Career Prep",
+      "hours": 6,
+      "weeks": 2,
+      "description": "Studentët mësojnë si të ndërtojnë një profil profesional, si të përgatisin CV dhe si funksionon procesi i rekrutimit për rolet e data engineering. Gjithashtu përgatiten për intervista dhe mësojnë të aplikojnë në mënyrë strategjike.",
+      "academy": "Data Engineering, Cloud & AI Academy"
+    },
+    "aliases": [
+      "career prep",
+      "përgatitje karriere",
+      "pergatitje karriere"
+    ],
+    "lecturer": {
+      "name": "Agrina Sadiku",
+      "title": "Tech Recruiter",
+      "bio": "Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri.",
+      "expertise": "Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri."
+    }
   },
   {
     "topic": "Trajnerët – Data Engineering, Cloud & AI Academy",
@@ -498,55 +866,220 @@
     "topic": "Moduli: Hyrje në Data Science (Data Science & Analytics + AI)",
     "answer": "4 orë. Studentët njihen me bazat e Data Science & Analytics, nga llojet dhe cilësia e të dhënave deri te statistikat, AI & Machine Learning dhe Prompt Engineering. Gjithashtu, mësojnë si t'i analizojnë dhe prezantojnë të dhënat përmes Data Storytelling.",
     "academy": "ds",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Hyrje në Data Science",
+      "hours": 4,
+      "weeks": 1,
+      "description": "Studentët njihen me bazat e Data Science & Analytics, nga llojet dhe cilësia e të dhënave deri te statistikat, AI & Machine Learning dhe Prompt Engineering. Gjithashtu, mësojnë si t'i analizojnë dhe prezantojnë të dhënat përmes Data Storytelling.",
+      "academy": "Data Science & Analytics + AI Academy"
+    },
+    "aliases": [
+      "hyrje ne data science",
+      "data science",
+      "hyrje data science"
+    ],
+    "lecturer": {
+      "name": "Olti Roka",
+      "title": "Senior Data Scientist",
+      "bio": "Me përvojë në industrinë financiare dhe bankare, me specializim në Machine Learning, Data Science dhe Python.",
+      "expertise": "Me përvojë në industrinë financiare dhe bankare, me specializim në Machine Learning, Data Science dhe Python."
+    }
   },
   {
     "topic": "Moduli: Hyrje në Generative AI (Data Science & Analytics + AI)",
     "answer": "2 orë. Studentët njihen me bazat e Generative AI, mënyrën se si funksionon dhe përdorimin e saj në Data Science & Analytics. Mësojnë të krijojnë prompts efektive dhe të përdorin AI për analizë të të dhënave, gjenerim të insights dhe automatizim të proceseve.",
     "academy": "ds",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Hyrje në Generative AI",
+      "hours": 2,
+      "weeks": 1,
+      "description": "Studentët njihen me bazat e Generative AI, mënyrën se si funksionon dhe përdorimin e saj në Data Science & Analytics. Mësojnë të krijojnë prompts efektive dhe të përdorin AI për analizë të të dhënave, gjenerim të insights dhe automatizim të proceseve.",
+      "academy": "Data Science & Analytics + AI Academy"
+    },
+    "aliases": [
+      "hyrje ne generative ai",
+      "generative ai",
+      "genai",
+      "llm"
+    ],
+    "lecturer": {
+      "name": "Diellza Reçica",
+      "title": "Senior Data Scientist",
+      "bio": "Mbi 7 vite ekspertizë në LLM, Prompt Engineering, Data Analytics, Machine Learning dhe Python.",
+      "expertise": "Mbi 7 vite ekspertizë në LLM, Prompt Engineering, Data Analytics, Machine Learning dhe Python."
+    }
   },
   {
     "topic": "Moduli: Statistikat (Data Science & Analytics + AI)",
     "answer": "26 orë. Studentët ndërtojnë një bazë të fortë në statistikën deskriptive dhe inferenciale, duke mësuar intervalet e besimit, testimin e hipotezave dhe modelet e regresionit. Ata avancojnë në regresionin linear, logjistik, Poisson dhe modelet e avancuara statistikore, duke i aplikuar njohuritë përmes rasteve praktike dhe analizave të të dhënave.",
     "academy": "ds",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Statistikat",
+      "hours": 26,
+      "weeks": 6,
+      "description": "Studentët ndërtojnë një bazë të fortë në statistikën deskriptive dhe inferenciale, duke mësuar intervalet e besimit, testimin e hipotezave dhe modelet e regresionit. Ata avancojnë në regresionin linear, logjistik, Poisson dhe modelet e avancuara statistikore, duke i aplikuar njohuritë përmes rasteve praktike dhe analizave të të dhënave.",
+      "academy": "Data Science & Analytics + AI Academy"
+    },
+    "aliases": [
+      "statistika",
+      "statistikat",
+      "statistike",
+      "statistics"
+    ],
+    "lecturer": {
+      "name": "Olti Roka",
+      "title": "Senior Data Scientist",
+      "bio": "Me përvojë në industrinë financiare dhe bankare, me specializim në Machine Learning, Data Science dhe Python.",
+      "expertise": "Me përvojë në industrinë financiare dhe bankare, me specializim në analiza statistikore dhe Machine Learning."
+    }
   },
   {
     "topic": "Moduli: SQL (Data Science & Analytics + AI)",
     "answer": "26 orë. Studentët mësojnë të punojnë me databaza dhe SQL, duke filluar nga query-t bazë, filtrimi, agregimet dhe lidhja e tabelave përmes Joins. Më tej, zhvillojnë aftësi në query të avancuara, manipulimin e të dhënave, database objects, optimizimin dhe analizën e të dhënave.",
     "academy": "ds",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "SQL",
+      "hours": 26,
+      "weeks": 6,
+      "description": "Studentët mësojnë të punojnë me databaza dhe SQL, duke filluar nga query-t bazë, filtrimi, agregimet dhe lidhja e tabelave përmes Joins. Më tej, zhvillojnë aftësi në query të avancuara, manipulimin e të dhënave, database objects, optimizimin dhe analizën e të dhënave.",
+      "academy": "Data Science & Analytics + AI Academy"
+    },
+    "aliases": [
+      "sql",
+      "kerkime te te dhenave",
+      "query"
+    ],
+    "lecturer": {
+      "name": "Fitim Gashi",
+      "title": "Business Intelligence Specialist",
+      "bio": "I specializuar në SQL, menaxhimin e databazave, ETL, integrimin e të dhënave dhe Power BI.",
+      "expertise": "I specializuar në SQL, menaxhimin e databazave, ETL, integrimin e të dhënave dhe Power BI."
+    }
   },
   {
     "topic": "Moduli: Data Integration (Data Science & Analytics + AI)",
     "answer": "20 orë. Studentët mësojnë të integrojnë dhe menaxhojnë të dhëna nga burime të ndryshme përmes SSIS, duke punuar me transformime, SQL Tasks dhe procese ETL. Gjithashtu, zhvillojnë aftësi në error handling, debugging, automation, Slowly Changing Dimensions (SCD) dhe deployment përmes ushtrimeve praktike.",
     "academy": "ds",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Data Integration",
+      "hours": 20,
+      "weeks": 5,
+      "description": "Studentët mësojnë të integrojnë dhe menaxhojnë të dhëna nga burime të ndryshme përmes SSIS, duke punuar me transformime, SQL Tasks dhe procese ETL. Gjithashtu, zhvillojnë aftësi në error handling, debugging, automation, Slowly Changing Dimensions (SCD) dhe deployment përmes ushtrimeve praktike.",
+      "academy": "Data Science & Analytics + AI Academy"
+    },
+    "aliases": [
+      "data integration",
+      "integrim i te dhenave",
+      "etl",
+      "integrimi i te dhenave"
+    ],
+    "lecturer": {
+      "name": "Albin Bahtiri",
+      "title": "Data Engineer",
+      "bio": "Me përvojë të gjerë në analizën e të dhënave, proceset e inxhinierisë së të dhënave, vizualizimin e të dhënave dhe proceset ETL.",
+      "expertise": "Me përvojë të gjerë në analizën e të dhënave, proceset e inxhinierisë së të dhënave dhe proceset ETL."
+    }
   },
   {
     "topic": "Moduli: Power BI (Data Science & Analytics + AI)",
     "answer": "34 orë. Studentët mësojnë të përdorin Power BI për përgatitjen, modelimin dhe analizën e të dhënave, duke përfshirë Power Query, DAX dhe Data Visualization. Gjithashtu, zhvillojnë aftësi në krijimin e dashboard-eve interaktive, Data Storytelling dhe AI-Powered Analytics, si dhe në publikimin, ndarjen dhe menaxhimin e raporteve.",
     "academy": "ds",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Power BI",
+      "hours": 34,
+      "weeks": 8,
+      "description": "Studentët mësojnë të përdorin Power BI për përgatitjen, modelimin dhe analizën e të dhënave, duke përfshirë Power Query, DAX dhe Data Visualization. Gjithashtu, zhvillojnë aftësi në krijimin e dashboard-eve interaktive, Data Storytelling dhe AI-Powered Analytics, si dhe në publikimin, ndarjen dhe menaxhimin e raporteve.",
+      "academy": "Data Science & Analytics + AI Academy"
+    },
+    "aliases": [
+      "power bi",
+      "powerbi",
+      "dashboard",
+      "vizualizim i te dhenave"
+    ],
+    "lecturer": {
+      "name": "Shkumbin Halabaku",
+      "title": "Data Analytics Specialist",
+      "bio": "Ekspertizë të avancuar në Power BI, data storytelling dhe vizualizimin e të dhënave.",
+      "expertise": "Ekspertizë të avancuar në Power BI, data storytelling dhe vizualizimin e të dhënave."
+    }
   },
   {
     "topic": "Moduli: Python (Data Science & Analytics + AI)",
     "answer": "30 orë. Studentët mësojnë Python nga bazat deri te programimi i orientuar në objekte, duke përfshirë funksionet, klasat, modulet dhe strukturat e të dhënave. Gjithashtu, punojnë me Pandas, DataFrames dhe SQL në Python, si dhe mësojnë manipulimin e të dhënave dhe vizualizimin e tyre përmes Python.",
     "academy": "ds",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Python",
+      "hours": 30,
+      "weeks": 8,
+      "description": "Studentët mësojnë Python nga bazat deri te programimi i orientuar në objekte, duke përfshirë funksionet, klasat, modulet dhe strukturat e të dhënave. Gjithashtu, punojnë me Pandas, DataFrames dhe SQL në Python, si dhe mësojnë manipulimin e të dhënave dhe vizualizimin e tyre përmes Python.",
+      "academy": "Data Science & Analytics + AI Academy"
+    },
+    "aliases": [
+      "python"
+    ],
+    "lecturer": {
+      "name": "Diellza Reçica",
+      "title": "Senior Data Scientist",
+      "bio": "Mbi 7 vite ekspertizë në LLM, Prompt Engineering, Data Analytics, Machine Learning dhe Python.",
+      "expertise": "Mbi 7 vite ekspertizë në LLM, Prompt Engineering, Data Analytics, Machine Learning dhe Python."
+    }
   },
   {
     "topic": "Moduli: Machine Learning (Data Science & Analytics + AI)",
     "answer": "32 orë. Studentët mësojnë bazat e Machine Learning, nga përgatitja dhe pastrimi i të dhënave deri te përzgjedhja dhe ndërtimi i modeleve. Ata punojnë me Regression, Classification, Random Forests, Boosting dhe K-Means, si dhe mësojnë vlerësimin e modeleve, Cross-Validation dhe Hyperparameter Tuning. Moduli përfshin gjithashtu një hyrje në AI dhe CNN.",
     "academy": "ds",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Machine Learning",
+      "hours": 32,
+      "weeks": 8,
+      "description": "Studentët mësojnë bazat e Machine Learning, nga përgatitja dhe pastrimi i të dhënave deri te përzgjedhja dhe ndërtimi i modeleve. Ata punojnë me Regression, Classification, Random Forests, Boosting dhe K-Means, si dhe mësojnë vlerësimin e modeleve, Cross-Validation dhe Hyperparameter Tuning.",
+      "academy": "Data Science & Analytics + AI Academy"
+    },
+    "aliases": [
+      "machine learning",
+      "ml",
+      "makine mesimi",
+      "maccines learning"
+    ],
+    "lecturer": {
+      "name": "Olti Roka",
+      "title": "Senior Data Scientist",
+      "bio": "Me përvojë në industrinë financiare dhe bankare, me specializim në Machine Learning, Data Science dhe Python.",
+      "expertise": "Me përvojë në industrinë financiare dhe bankare, me specializim në Machine Learning dhe modele të paracaktuara."
+    }
   },
   {
     "topic": "Moduli: Career Prep (Data Science & Analytics + AI)",
     "answer": "6 orë. Studentët mësojnë si të përdorin LinkedIn si platformë për punësim dhe si rekrutuesit kërkojnë kandidatë, si dhe si të ndërtojnë një profil profesional në LinkedIn, CV dhe GitHub. Gjithashtu, përgatiten për intervista, kuptojnë kulturën dhe pritshmëritë e kompanive teknologjike dhe mësojnë të aplikojnë në mënyrë strategjike për vende pune.",
     "academy": "ds",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Career Prep",
+      "hours": 6,
+      "weeks": 2,
+      "description": "Studentët mësojnë si të përdorin LinkedIn si platformë për punësim dhe si rekrutuesit kërkojnë kandidatë, si dhe si të ndërtojnë një profil profesional në LinkedIn, CV dhe GitHub. Gjithashtu, përgatiten për intervista, kuptojnë kulturën dhe pritshmëritë e kompanive teknologjike dhe mësojnë të aplikojnë në mënyrë strategjike për vende pune.",
+      "academy": "Data Science & Analytics + AI Academy"
+    },
+    "aliases": [
+      "career prep",
+      "përgatitje karriere",
+      "pergatitje karriere"
+    ],
+    "lecturer": {
+      "name": "Agrina Sadiku",
+      "title": "Tech Recruiter",
+      "bio": "Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri.",
+      "expertise": "Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri."
+    }
   },
   {
     "topic": "Trajnerët – Data Science & Analytics + AI Academy",
@@ -646,43 +1179,200 @@
     "topic": "Moduli: Python (Full-stack Development + AI)",
     "answer": "50 orë. Studentët mësojnë të ndërtojnë aplikacione praktike me Python, të punojnë me të dhëna dhe API, të përdorin Object-Oriented Programming, të menaxhojnë skedarë dhe baza të të dhënave, të shkruajnë dhe testojnë kod asinkron, të gjitha përmes projekteve praktike.",
     "academy": "fs",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Python",
+      "hours": 50,
+      "weeks": 8,
+      "description": "Studentët mësojnë të ndërtojnë aplikacione praktike me Python, të punojnë me të dhëna dhe API, të përdorin Object-Oriented Programming, të menaxhojnë skedarë dhe baza të të dhënave, të shkruajnë dhe testojnë kod asinkron, të gjitha përmes projekteve praktike. Çdo temë përfundon me një projekt të vogël që depozitohet në GitHub dhe shqyrtohet gjatë rishikimit.",
+      "academy": "Full-stack Development + AI Academy"
+    },
+    "aliases": [
+      "python"
+    ],
+    "lecturer": {
+      "name": "Qëndrim Krasniqi",
+      "title": "Software Engineer",
+      "bio": "Python Developer me mbi 9 vite përvojë dhe mbi 4 vite përvojë si instruktor i Python.",
+      "expertise": "Python Developer me mbi 9 vite përvojë dhe mbi 4 vite përvojë si instruktor i Python."
+    }
   },
   {
     "topic": "Moduli: HTML - Bazat e Web-it (Full-stack Development + AI)",
     "answer": "6 orë. Studentët ndërtojnë një bazë të fortë në konceptet HTML.",
     "academy": "fs",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "HTML - Bazat e Web-it",
+      "hours": 6,
+      "weeks": 1,
+      "description": "Studentët ndërtojnë një bazë të fortë në konceptet HTML. Studentët ndërtojnë një faqe të plotë HTML me strukturë semantike, imazhe dhe forma.",
+      "academy": "Full-stack Development + AI Academy"
+    },
+    "aliases": [
+      "html",
+      "bazat e web-it",
+      "bazat html",
+      "html bazat"
+    ],
+    "lecturer": {
+      "name": "Ardit Curri",
+      "title": "Software Developer",
+      "bio": "Ekspert në Zhvillimin e Softuerëve të Personalizuar, Zhvillimin e Bazave të të Dhënave dhe Zhvillimin Web.",
+      "expertise": "Ekspert në Zhvillimin e Softuerëve të Personalizuar, Zhvillimin e Bazave të të Dhënave dhe Zhvillimin Web."
+    }
   },
   {
     "topic": "Moduli: CSS - Dizajn modern dhe responsiv (Full-stack Development + AI)",
     "answer": "6 orë. Studentët mësojnë të krijojnë struktura moderne, fleksibile dhe responsive për web, duke përdorur Flexbox, CSS Grid dhe parimet e dizajnit responsive dhe mobile-first.",
     "academy": "fs",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "CSS - Dizajn modern dhe responsiv",
+      "hours": 6,
+      "weeks": 1,
+      "description": "Studentët mësojnë të krijojnë struktura moderne, fleksibile dhe responsive për web, duke përdorur Flexbox, CSS Grid dhe parimet e dizajnit responsive dhe mobile-first. Moduli përfundon me një landing page responsive që funksionon në desktop, tablet dhe telefon.",
+      "academy": "Full-stack Development + AI Academy"
+    },
+    "aliases": [
+      "css",
+      "dizajn responsiv",
+      "responsive",
+      "flexbox",
+      "css grid"
+    ],
+    "lecturer": {
+      "name": "Ardit Curri",
+      "title": "Software Developer",
+      "bio": "Ekspert në Zhvillimin e Softuerëve të Personalizuar, Zhvillimin e Bazave të të Dhënave dhe Zhvillimin Web.",
+      "expertise": "Ekspert në Zhvillimin e Softuerëve të Personalizuar, Zhvillimin e Bazave të të Dhënave dhe Zhvillimin Web, me fokus në dizajnin modern dhe responsiv."
+    }
   },
   {
     "topic": "Moduli: JavaScript + TypeScript (Full-stack Development + AI)",
     "answer": "42 orë. Mësojnë JavaScript modern, përdorimin e API-ve, TypeScript, mjetet e zhvillimit dhe testimin, si dhe Git dhe përdorimin e AI për një proces më efikas të zhvillimit të aplikacioneve.",
     "academy": "fs",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "JavaScript + TypeScript",
+      "hours": 42,
+      "weeks": 7,
+      "description": "Mësojnë JavaScript modern, përdorimin e API-ve, TypeScript, mjetet e zhvillimit dhe testimin, si dhe Git dhe përdorimin e AI për një proces më efikas të zhvillimit të aplikacioneve. Në fund studentët shkruajnë, testojnë dhe organizojnë një projekt në Git, duke përdorur AI për zhvillim më të shpejtë.",
+      "academy": "Full-stack Development + AI Academy"
+    },
+    "aliases": [
+      "javascript",
+      "typescript",
+      "js",
+      "ts"
+    ],
+    "lecturer": {
+      "name": "Ardit Curri",
+      "title": "Software Developer",
+      "bio": "Ekspert në Zhvillimin e Softuerëve të Personalizuar, Zhvillimin e Bazave të të Dhënave dhe Zhvillimin Web.",
+      "expertise": "Ekspert në Zhvillimin e Softuerëve të Personalizuar dhe Zhvillimin Web, me thellësi në JavaScript modern dhe TypeScript."
+    }
   },
   {
     "topic": "Moduli: React JS (me TypeScript) (Full-stack Development + AI)",
     "answer": "24 orë. Mësojnë të ndërtojnë aplikacione moderne duke përdorur komponentët, menaxhimin e state-it, API-të, routing dhe arkitekturën e aplikacioneve, së bashku me testimin dhe menaxhimin e të dhënave nga serveri.",
     "academy": "fs",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "React JS (me TypeScript)",
+      "hours": 24,
+      "weeks": 4,
+      "description": "Mësojnë të ndërtojnë aplikacione moderne duke përdorur komponentët, menaxhimin e state-it, API-të, routing dhe arkitekturën e aplikacioneve, së bashku me testimin dhe menaxhimin e të dhënave nga serveri. Sfondi është aplikacioni final i akademisë, me autentikim dhe lidhje me back-end-in.",
+      "academy": "Full-stack Development + AI Academy"
+    },
+    "aliases": [
+      "react js",
+      "react",
+      "reactjs",
+      "react me typescript"
+    ],
+    "lecturer": {
+      "name": "Ardit Curri",
+      "title": "Software Developer",
+      "bio": "Ekspert në Zhvillimin e Softuerëve të Personalizuar, Zhvillimin e Bazave të të Dhënave dhe Zhvillimin Web.",
+      "expertise": "Ekspert në Zhvillimin e Softuerëve të Personalizuar dhe Zhvillimin Web, me përvojë në ndërtimin e ndërfaqeve moderne me React."
+    }
   },
   {
     "topic": "Moduli: Back-end me Python (Django) (Full-stack Development + AI)",
     "answer": "24 orë. Mësojnë të zhvillojnë aplikacione back-end me Python dhe Django, duke punuar me views, models, ORM, forms dhe autentikimin e përdoruesve, si dhe krijimin e API-ve me Django REST Framework.",
     "academy": "fs",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Back-end me Python (Django)",
+      "hours": 24,
+      "weeks": 4,
+      "description": "Mësojnë të zhvillojnë aplikacione back-end me Python dhe Django, duke punuar me views, models, ORM, forms dhe autentikimin e përdoruesve, si dhe krijimin e API-ve me Django REST Framework. Studentët ndërtojnë një API funksional me autentikim dhe dokumentim të endpoint-eve.",
+      "academy": "Full-stack Development + AI Academy"
+    },
+    "aliases": [
+      "django",
+      "back end",
+      "backend",
+      "back-end me python",
+      "django me python"
+    ],
+    "lecturer": {
+      "name": "Qëndrim Krasniqi",
+      "title": "Software Engineer",
+      "bio": "Python Developer me mbi 9 vite përvojë dhe mbi 4 vite përvojë si instruktor i Python.",
+      "expertise": "Python Developer me mbi 9 vite përvojë dhe mbi 4 vite përvojë si instruktor i Python, i specializuar në zhvillimin back-end me Django."
+    }
   },
   {
     "topic": "Moduli: Generative AI + OpenAI (Full-stack Development + AI)",
     "answer": "12 orë. Mësojnë bazat e Generative AI, krijimin e prompt-eve efektive dhe ndërtimin e workflow-ve me AI, si dhe integrimin e teknologjive OpenAI në aplikacione moderne.",
     "academy": "fs",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Generative AI + OpenAI",
+      "hours": 12,
+      "weeks": 2,
+      "description": "Mësojnë bazat e Generative AI, krijimin e prompt-eve efektive dhe ndërtimin e workflow-ve me AI, si dhe integrimin e teknologjive OpenAI në aplikacione moderne. Moduli përfundon me një workflow që përdor API-të e OpenAI brenda një aplikacioni.",
+      "academy": "Full-stack Development + AI Academy"
+    },
+    "aliases": [
+      "openai",
+      "generative ai",
+      "genai",
+      "chatgpt",
+      "api e openai"
+    ],
+    "lecturer": {
+      "name": "Qëndrim Krasniqi",
+      "title": "Software Engineer",
+      "bio": "Python Developer me mbi 9 vite përvojë dhe mbi 4 vite përvojë si instruktor i Python.",
+      "expertise": "Python Developer me mbi 9 vite përvojë dhe mbi 4 vite përvojë si instruktor i Python, me fokus në integrimin e API-ve të AI në aplikacione."
+    }
+  },
+  {
+    "topic": "Moduli: Career Prep (Full-stack Development + AI Academy)",
+    "answer": "6 orë. Studentët mësojnë si të ndërtojnë një profil profesional, si të përgatisin CV dhe si funksionon procesi i rekrutimit për rolet e zhvillimit të softuerëve. Gjithashtu përgatiten për intervista dhe mësojnë të aplikojnë në mënyrë strategjike.",
+    "academy": "fs",
+    "kind": "module",
+    "module": {
+      "name": "Career Prep",
+      "hours": 6,
+      "weeks": 1,
+      "description": "Studentët mësojnë si të ndërtojnë një profil profesional, si të përgatisin CV dhe si funksionon procesi i rekrutimit për rolet e zhvillimit të softuerëve. Gjithashtu përgatiten për intervista dhe mësojnë të aplikojnë në mënyrë strategjike.",
+      "academy": "Full-stack Development + AI Academy"
+    },
+    "aliases": [
+      "career prep",
+      "përgatitje karriere",
+      "pergatitje karriere"
+    ],
+    "lecturer": {
+      "name": "Agrina Sadiku",
+      "title": "Tech Recruiter",
+      "bio": "Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri.",
+      "expertise": "Mbi 7 vite përvojë në lidhjen e Tech talenteve me kompanitë kryesore dhe në krijimin e mundësive për zhvillimin e karrierës në industri."
+    }
   },
   {
     "topic": "Trajnerët – Full-stack Development + AI Academy",
@@ -767,43 +1457,213 @@
     "topic": "Moduli: Rekrutimi & Përzgjedhja (Human Resources + AI)",
     "answer": "12 orë. Studentët mësojnë të menaxhojnë procesin e rekrutimit dhe përzgjedhjes së kandidatëve, nga analiza e pozitës dhe përgatitja e përshkrimeve të vendeve të punës deri te screening, teknikat e intervistimit dhe zhvillimi i strategjive për tërheqjen e talenteve.",
     "academy": "hr",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Rekrutimi & Përzgjedhja",
+      "hours": 12,
+      "weeks": 3,
+      "description": "Studentët mësojnë të menaxhojnë procesin e rekrutimit dhe përzgjedhjes së kandidatëve, nga analiza e pozitës dhe përgatitja e përshkrimeve të vendeve të punës deri te screening, teknikat e intervistimit dhe zhvillimi i strategjive për tërheqjen e talenteve. Në fund studentët praktikojnë analizën e CV-ve dhe teknikat e intervistimit me role reale.",
+      "academy": "Human Resources + AI Academy"
+    },
+    "aliases": [
+      "rekrutimi",
+      "rekrutim",
+      "perzgjedhja",
+      "recruitment",
+      "intervista",
+      "procesi i rekrutimit"
+    ],
+    "lecturer": {
+      "name": "Florent Bajrami",
+      "title": "Senior Recruiter",
+      "bio": "Rekrutues i specializuar në tërheqjen e talenteve, përvojën e kandidatëve dhe ndërtimin e ekipeve me performancë të lartë për organizatat globale.",
+      "expertise": "Rekrutues i specializuar në tërheqjen e talenteve, përvojën e kandidatëve dhe ndërtimin e ekipeve me performancë të lartë për organizatat globale."
+    }
   },
   {
     "topic": "Moduli: Menaxhimi i Performancës (Human Resources + AI)",
     "answer": "12 orë. Studentët mësojnë të vendosin objektiva të qarta për performancën, të përdorin teknika efektive të feedback-ut dhe të zhvillojnë vlerësime të performancës. Gjithashtu, mësojnë të dizajnojnë sisteme shpërblimi dhe të krijojnë strategji për motivimin dhe mbajtjen e talenteve me performancë të lartë.",
     "academy": "hr",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Menaxhimi i Performancës",
+      "hours": 12,
+      "weeks": 3,
+      "description": "Studentët mësojnë të vendosin objektiva të qarta për performancën, të përdorin teknika efektive të feedback-ut dhe të zhvillojnë vlerësime të performancës. Gjithashtu, mësojnë të dizajnojnë sisteme shpërblimi dhe të krijojnë strategji për motivimin dhe mbajtjen e talenteve me performancë të lartë.",
+      "academy": "Human Resources + AI Academy"
+    },
+    "aliases": [
+      "performance",
+      "menaxhimi i performance",
+      "performanca",
+      "kpi",
+      "vleresim i performance"
+    ],
+    "lecturer": {
+      "name": "Hana Gashi Salihu",
+      "title": "Head of Human Resources",
+      "bio": "Eksperte në Menaxhimin e Ndryshimeve, Menaxhimin e Performancës, Parashikimin e nevojave të HR-së dhe Planifikimin Strategjik Organizativ, etj.",
+      "expertise": "Eksperte në Menaxhimin e Ndryshimeve, Menaxhimin e Performancës, Parashikimin e nevojave të HR-së dhe Planifikimin Strategjik Organizativ."
+    }
   },
   {
     "topic": "Moduli: Aspektet Ligjore të HR (Human Resources + AI)",
     "answer": "10 orë. Mësojnë të kuptojnë aspektet ligjore të menaxhimit të burimeve njerëzore, duke përfshirë kuadrin ligjor, rregulloret në vendin e punës, kontratat e punës, përfitimet, përfundimin e marrëdhënies së punës dhe menaxhimin e rreziqeve ligjore.",
     "academy": "hr",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Aspektet Ligjore të HR",
+      "hours": 10,
+      "weeks": 3,
+      "description": "Mësojnë të kuptojnë aspektet ligjore të menaxhimit të burimeve njerëzore, duke përfshirë kuadrin ligjor, rregulloret në vendin e punës, kontratat e punës, përfitimet, përfundimin e marrëdhënies së punës dhe menaxhimin e rreziqeve ligjore. Moduli mbështetet nga praktika ligjore në vendin e punës dhe nga shembujt e kontratave dhe rregulloreve.",
+      "academy": "Human Resources + AI Academy"
+    },
+    "aliases": [
+      "aspektet ligjore",
+      "aspektet ligjore të hr",
+      "ligjore",
+      "legal hr",
+      "e drejta e punes",
+      "kontratat e punes"
+    ],
+    "lecturer": {
+      "name": "Ardian Rexha",
+      "title": "Managing Partner",
+      "bio": "Profesionist ligjor me mbi 11 vite përvojë në të drejtat dhe marrëdhëniet e punës dhe pajtueshmërinë me legjislacionin në vendin e punës.",
+      "expertise": "Profesionist ligjor me mbi 11 vite përvojë në të drejtat dhe marrëdhëniet e punës dhe pajtueshmërinë me legjislacionin në vendin e punës."
+    }
   },
   {
     "topic": "Moduli: Aspektet Financiare të HR (Human Resources + AI)",
     "answer": "10 orë. Mësojnë të menaxhojnë aspektet financiare të HR, duke përfshirë analizën e të dhënave të burimeve njerëzore, strategjitë financiare, kompensimin dhe përfitimet, buxhetimin, parashikimin dhe raportimin, si dhe strukturat e pagave dhe mundësitë për optimizimin e kostove.",
     "academy": "hr",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Aspektet Financiare të HR",
+      "hours": 10,
+      "weeks": 3,
+      "description": "Mësojnë të menaxhojnë aspektet financiare të HR, duke përfshirë analizën e të dhënave të burimeve njerëzore, strategjitë financiare, kompensimin dhe përfitimet, buxhetimin, parashikimin dhe raportimin, si dhe strukturat e pagave dhe mundësitë për optimizimin e kostove. Studentët përgatijnë një buxhetin e pagave dhe një raport të kostos së punës për njësitë.",
+      "academy": "Human Resources + AI Academy"
+    },
+    "aliases": [
+      "aspektet financiare",
+      "aspektet financiare të hr",
+      "financiare",
+      "financial hr",
+      "buxheti i hr",
+      "kosto e punes",
+      "pagat"
+    ],
+    "lecturer": {
+      "name": "Fortesa Manaj",
+      "title": "HR Head of Unit",
+      "bio": "Ekspertizë në menaxhimin financiar të HR, planifikimin e fuqisë punëtore dhe përafrimin e strategjive të burimeve njerëzore me objektivat e biznesit.",
+      "expertise": "Ekspertizë në menaxhimin financiar të HR, planifikimin e fuqisë punëtore dhe përafrimin e strategjive të burimeve njerëzore me objektivat e biznesit."
+    }
   },
   {
     "topic": "Moduli: Trajnimi & Zhvillimi (Human Resources + AI)",
     "answer": "14 orë. Mësojnë të planifikojnë dhe zhvillojnë programe trajnimi për punonjësit, duke përfshirë orientimin e tyre, zhvillimin e lidershipit, të mësuarit organizativ, menaxhimin e talenteve, si dhe teknikat e coaching dhe mentoring.",
     "academy": "hr",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Trajnimi & Zhvillimi",
+      "hours": 14,
+      "weeks": 4,
+      "description": "Mësojnë të planifikojnë dhe zhvillojnë programe trajnimi për punonjësit, duke përfshirë orientimin e tyre, zhvillimin e lidershipit, të mësuarit organizativ, menaxhimin e talenteve, si dhe teknikat e coaching dhe mentoring. Në fund studentët dizajnojnë një plan trajnimi dhe një plan zhvillimi individual për një ekip.",
+      "academy": "Human Resources + AI Academy"
+    },
+    "aliases": [
+      "trajnimi",
+      "trajnime",
+      "zhvillimi",
+      "training",
+      "coaching",
+      "mentoring",
+      "zhvillim i punonjesve"
+    ],
+    "lecturer": {
+      "name": "Arta Celina",
+      "title": "Head of People, Culture & Learning",
+      "bio": "22+ vite drejtuese e Burimeve Njerëzore me ekspertizë në strategjinë, menaxhimin e talenteve dhe zhvillimin organizativ.",
+      "expertise": "22+ vite drejtuese e Burimeve Njerëzore me ekspertizë në strategjinë, menaxhimin e talenteve dhe zhvillimin organizativ."
+    }
   },
   {
     "topic": "Moduli: Angazhimi i Punonjësve (Human Resources + AI)",
     "answer": "10 orë. Mësojnë të masin dhe përmirësojnë angazhimin dhe kënaqësinë e punonjësve, duke zhvilluar një kulturë të fortë organizative, bashkëpunim efektiv në ekip dhe praktika për mirëqenien e punonjësve. Gjithashtu, fokusohen në rritjen e produktivitetit dhe mbajtjen e talenteve.",
     "academy": "hr",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Angazhimi i Punonjësve",
+      "hours": 10,
+      "weeks": 2,
+      "description": "Mësojnë të masin dhe përmirësojnë angazhimin dhe kënaqësinë e punonjësve, duke zhvilluar një kulturë të fortë organizative, bashkëpunim efektiv në ekip dhe praktika për mirëqenien e punonjësve. Gjithashtu, fokusohen në rritjen e produktivitetit dhe mbajtjen e talenteve.",
+      "academy": "Human Resources + AI Academy"
+    },
+    "aliases": [
+      "angazhimi",
+      "angazhim",
+      "engagement",
+      "motivimi",
+      "kënaqësia e punonjesve"
+    ],
+    "lecturer": {
+      "name": "Lavdrim Reçica",
+      "title": "Lead of Talent Management & Retention",
+      "bio": "Udhëheqës i Talenteve në Gjirafa, Inc., i specializuar në strategjinë e menaxhimit të talenteve, mbajtjen e punonjësve, analitikën dhe kulturën organizative.",
+      "expertise": "Udhëheqës i Talenteve në Gjirafa, Inc., i specializuar në strategjinë e menaxhimit të talenteve, mbajtjen e punonjësve dhe kulturën organizative."
+    }
   },
   {
     "topic": "Moduli: HR Business Partner & Strategy (Human Resources + AI)",
     "answer": "10 orë. Mësojnë të pozicionojnë HR si partner strategjik të biznesit, duke përfshirë kompensimin dhe përfitimet, transformimin digjital, përdorimin e AI dhe automatizimeve, HR Analytics, menaxhimin e kulturës dhe ndryshimeve organizative, si dhe zhvillimin e Employer Branding.",
     "academy": "hr",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "HR Business Partner & Strategy",
+      "hours": 10,
+      "weeks": 2,
+      "description": "Mësojnë të pozicionojnë HR si partner strategjik të biznesit, duke përfshirë kompensimin dhe përfitimet, transformimin digjital, përdorimin e AI dhe automatizimeve, HR Analytics, menaxhimin e kulturës dhe ndryshimeve organizative, si dhe zhvillimin e Employer Branding. Moduli lidh analitikën e HR-së me automatizime të bazuara në AI dhe me Employer Branding.",
+      "academy": "Human Resources + AI Academy"
+    },
+    "aliases": [
+      "hr business partner",
+      "business partner",
+      "hrbp",
+      "strategjia e hr",
+      "hr strategy"
+    ],
+    "lecturer": {
+      "name": "Kaltrina Lloncari Cena",
+      "title": "Senior HR Business Partner",
+      "bio": "HR Business Partner në Mercedes-Benz, e specializuar në strategjinë e burimeve njerëzore, zhvillimin e talenteve dhe krijimin e kulturave të shëndetshme dhe të suksesshme në vendin e punës.",
+      "expertise": "HR Business Partner në Mercedes-Benz, e specializuar në strategjinë e burimeve njerëzore, zhvillimin e talenteve dhe krijimin e kulturave të shëndetshme."
+    }
+  },
+  {
+    "topic": "Moduli: Career Prep (Human Resources + AI Academy)",
+    "answer": "6 orë. Studentët mësojnë si të ndërtojnë një profil profesional, si të përgatisin CV dhe si funksionon procesi i rekrutimit për rolet e burimeve njerëzore. Gjithashtu përgatiten për intervista dhe mësojnë të aplikojnë në mënyrë strategjike.",
+    "academy": "hr",
+    "kind": "module",
+    "module": {
+      "name": "Career Prep",
+      "hours": 6,
+      "weeks": 1,
+      "description": "Studentët mësojnë si të ndërtojnë një profil profesional, si të përgatisin CV dhe si funksionon procesi i rekrutimit për rolet e burimeve njerëzore. Gjithashtu përgatiten për intervista dhe mësojnë të aplikojnë në mënyrë strategjike.",
+      "academy": "Human Resources + AI Academy"
+    },
+    "aliases": [
+      "career prep",
+      "përgatitje karriere",
+      "pergatitje karriere"
+    ],
+    "lecturer": {
+      "name": "Arta Celina",
+      "title": "Head of People, Culture & Learning",
+      "bio": "22+ vite drejtuese e Burimeve Njerëzore me ekspertizë në strategjinë, menaxhimin e talenteve dhe zhvillimin organizativ.",
+      "expertise": "22+ vite drejtuese e Burimeve Njerëzore me ekspertizë në strategjinë, menaxhimin e talenteve dhe zhvillimin organizativ, me fokus në përgatitjen e kandidatëve për karrierë."
+    }
   },
   {
     "topic": "Trajnerët – Human Resources + AI Academy",
@@ -929,61 +1789,251 @@
     "topic": "Moduli: Parapërgaditja (Vibe Coding & AI Agents)",
     "answer": "2 orë. Studentët përgatiten për fillimin e programit duke instaluar dhe verifikuar të gjitha mjetet e nevojshme, duke krijuar llogaritë dhe konfigurimet për Google Antigravity, Firebase dhe Gemini API, si dhe duke bërë commit-in e parë në GitHub.",
     "academy": "vc",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Parapërgaditja",
+      "hours": 2,
+      "weeks": 1,
+      "description": "Studentët përgatiten për fillimin e programit duke instaluar dhe verifikuar të gjitha mjetet e nevojshme, duke krijuar llogaritë dhe konfigurimet për Google Antigravity, Firebase dhe Gemini API, si dhe duke bërë commit-in e parë në GitHub. Kontrolli i fundit siguron që mjedisi i punës është gati para orës së parë.",
+      "academy": "Vibe Coding & AI Agents Academy"
+    },
+    "aliases": [
+      "parapergaditja",
+      "perparatja",
+      "google antigravity",
+      "pergatitja e ambientit"
+    ],
+    "lecturer": {
+      "name": "Richmond Taylor",
+      "title": "Lead AI Lecturer",
+      "bio": "Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet.",
+      "expertise": "Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet, me fokus në mjedisin e punës dhe veglat e zhvillimit."
+    }
   },
   {
     "topic": "Moduli: Java 1 - Bazat (Vibe Coding & AI Agents)",
     "answer": "4 orë. Njihen me workflow-n me tre modele për zhvillim me AI duke përdorur Google Antigravity, nga planifikimi dhe arkitektura deri te implementimi. Mësojnë të përdorin AI për të ndërtuar aplikacionin e tyre të parë të asistuar nga AI.",
     "academy": "vc",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Java 1 - Bazat",
+      "hours": 4,
+      "weeks": 1,
+      "description": "Njihen me workflow-n me tre modele për zhvillim me AI duke përdorur Google Antigravity, nga planifikimi dhe arkitektura deri te implementimi. Mësojnë të përdorin AI për të ndërtuar aplikacionin e tyre të parë të asistuar nga AI.",
+      "academy": "Vibe Coding & AI Agents Academy"
+    },
+    "aliases": [
+      "java 1",
+      "java1",
+      "bazat e java",
+      "java bazat"
+    ],
+    "lecturer": {
+      "name": "Richmond Taylor",
+      "title": "Lead AI Lecturer",
+      "bio": "Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet.",
+      "expertise": "Themelues i një kompanie të automatizimit me AI në Miami, me ekspertizë në modelet e AI dhe në zhvillimin e workflow-eve me tre modele."
+    }
   },
   {
     "topic": "Moduli: Java 2 - Prompts + AI OS (Vibe Coding & AI Agents)",
     "answer": "4 orë. Studentët mësojnë si të optimizojnë rezultatet e AI duke kuptuar parametrat si tokens, temperature dhe hallucinations, si dhe të ndërtojnë arkitekturën bazë të një AI OS. Përmes praktikës, krijojnë sistemin e parë të agentëve dhe zhvillojnë system prompt-in e tyre.",
     "academy": "vc",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Java 2 - Prompts + AI OS",
+      "hours": 4,
+      "weeks": 1,
+      "description": "Studentët mësojnë si të optimizojnë rezultatet e AI duke kuptuar parametrat si tokens, temperature dhe hallucinations, si dhe të ndërtojnë arkitekturën bazë të një AI OS. Përmes praktikës, krijojnë sistemin e parë të agentëve dhe zhvillojnë system prompt-in e tyre.",
+      "academy": "Vibe Coding & AI Agents Academy"
+    },
+    "aliases": [
+      "java 2",
+      "java2",
+      "prompts",
+      "prompt engineering",
+      "ai os"
+    ],
+    "lecturer": {
+      "name": "Richmond Taylor",
+      "title": "Lead AI Lecturer",
+      "bio": "Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet.",
+      "expertise": "Anëtar aktiv i komunitetit të zhvilluesve të AI në qytet, me ekspertizë në prompt engineering dhe optimizim të rezultateve të AI."
+    }
   },
   {
     "topic": "Moduli: Java 3 - Build (Vibe Coding & AI Agents)",
     "answer": "4 orë. Mësojnë të zgjerojnë AI OS me skills të reja, duke përfshirë ndërtimin e faqeve dhe përdorimin e GitHub si bibliotekë për skills të gatshme. Në praktikë, integrojnë skills në AI OS dhe ndërtojnë një portfolio të publikuar online përmes Netlify.",
     "academy": "vc",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Java 3 - Build",
+      "hours": 4,
+      "weeks": 1,
+      "description": "Mësojnë të zgjerojnë AI OS me skills të reja, duke përfshirë ndërtimin e faqeve dhe përdorimin e GitHub si bibliotekë për skills të gatshme. Në praktikë, integrojnë skills në AI OS dhe ndërtojnë një portfolio të publikuar online përmes Netlify.",
+      "academy": "Vibe Coding & AI Agents Academy"
+    },
+    "aliases": [
+      "java 3",
+      "java3",
+      "ndërtimi"
+    ],
+    "lecturer": {
+      "name": "Richmond Taylor",
+      "title": "Lead AI Lecturer",
+      "bio": "Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet.",
+      "expertise": "Themelues i një kompanie të automatizimit me AI, i specializuar në ndërtimin e skills-ve dhe zgjerimin e AI OS-it."
+    }
   },
   {
     "topic": "Moduli: Java 4 - Deploy (Vibe Coding & AI Agents)",
     "answer": "4 orë. Mësojnë të integrojnë Gemini API në një aplikacion web, duke lidhur backend-in me frontend-in dhe duke publikuar aplikacionin përmes Firebase Hosting. Gjithashtu, zgjerojnë AI OS me skills për research dhe writing dhe prezantojnë projektin e tyre të parë live.",
     "academy": "vc",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Java 4 - Deploy",
+      "hours": 4,
+      "weeks": 1,
+      "description": "Mësojnë të integrojnë Gemini API në një aplikacion web, duke lidhur backend-in me frontend-in dhe duke publikuar aplikacionin përmes Firebase Hosting. Gjithashtu, zgjerojnë AI OS me skills për research dhe writing dhe prezantojnë projektin e tyre të parë live.",
+      "academy": "Vibe Coding & AI Agents Academy"
+    },
+    "aliases": [
+      "java 4",
+      "java4",
+      "deploy",
+      "deployimi"
+    ],
+    "lecturer": {
+      "name": "Richmond Taylor",
+      "title": "Lead AI Lecturer",
+      "bio": "Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet.",
+      "expertise": "Ekspert në zhvillimin e aplikacioneve të integruara me Gemini API dhe në publikimin e zgjidhjeve në prodhim."
+    }
   },
   {
     "topic": "Moduli: Java 5 - AI Chatbot (Vibe Coding & AI Agents)",
     "answer": "4 orë. Mësojnë të ndërtojnë një chatbot të fuqizuar nga Gemini dhe ta publikojnë online përmes Firebase. Gjithashtu, njihen me GTM agents për research të leads dhe analizë të tregut, duke zhvilluar aftësi praktike për përdorimin e AI në proceset e marketingut dhe shitjeve.",
     "academy": "vc",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Java 5 - AI Chatbot",
+      "hours": 4,
+      "weeks": 1,
+      "description": "Mësojnë të ndërtojnë një chatbot të fuqizuar nga Gemini dhe ta publikojnë online përmes Firebase. Gjithashtu, njihen me GTM agents për research të leads dhe analizë të tregut, duke zhvilluar aftësi praktike për përdorimin e AI në proceset e marketingut dhe shitjeve.",
+      "academy": "Vibe Coding & AI Agents Academy"
+    },
+    "aliases": [
+      "java 5",
+      "java5",
+      "ai chatbot",
+      "chatbot"
+    ],
+    "lecturer": {
+      "name": "Richmond Taylor",
+      "title": "Lead AI Lecturer",
+      "bio": "Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet.",
+      "expertise": "Themelues i një kompanie të automatizimit me AI në Miami, me përvojë në ndërtimin e chatbot-eve të fuqizuar me Gemini."
+    }
   },
   {
     "topic": "Moduli: Java 6 - Go-to-market (Vibe Coding & AI Agents)",
     "answer": "4 orë. Mësojnë të ndërtojnë automatizime për outreach dhe follow-up brenda AI OS, si dhe të krijojnë workflows me shumë agjentë, ku një agjent përcjell informacionin dhe kontekstin te tjetri. Përmes praktikës, zhvillojnë dhe përmirësojnë projektin final përmes feedback-ut të strukturuar.",
     "academy": "vc",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Java 6 - Go-to-market",
+      "hours": 4,
+      "weeks": 1,
+      "description": "Mësojnë të ndërtojnë automatizime për outreach dhe follow-up brenda AI OS, si dhe të krijojnë workflows me shumë agjentë, ku një agjent përcjell informacionin dhe kontekstin te tjetri. Përmes praktikës, zhvillojnë dhe përmirësojnë projektin final përmes feedback-ut të strukturuar.",
+      "academy": "Vibe Coding & AI Agents Academy"
+    },
+    "aliases": [
+      "java 6",
+      "java6",
+      "go to market",
+      "go-to-market"
+    ],
+    "lecturer": {
+      "name": "Richmond Taylor",
+      "title": "Lead AI Lecturer",
+      "bio": "Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet.",
+      "expertise": "Anëtar aktiv i komunitetit të zhvilluesve të AI, me ekspertizë në automatizimin e outreach-it dhe rrjedhave go-to-market."
+    }
   },
   {
     "topic": "Moduli: Java 7 - Multi-agent (Vibe Coding & AI Agents)",
     "answer": "4 orë. Mësojnë parimet e sigurisë, privatësisë dhe përdorimit të përgjegjshëm të AI, si dhe zhvillojnë projektin final përmes përcaktimit të scope-it, përgatitjes së product brief dhe strukturimit të repository-t. Gjithashtu, prezantojnë GTM agent stack dhe aplikacionet e zhvilluara full-stack.",
     "academy": "vc",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Java 7 - Multi-agent",
+      "hours": 4,
+      "weeks": 1,
+      "description": "Mësojnë parimet e sigurisë, privatësisë dhe përdorimit të përgjegjshëm të AI, si dhe zhvillojnë projektin final përmes përcaktimit të scope-it, përgatitjes së product brief dhe strukturimit të repository-t. Gjithashtu, prezantojnë GTM agent stack dhe aplikacionet e zhvilluara full-stack.",
+      "academy": "Vibe Coding & AI Agents Academy"
+    },
+    "aliases": [
+      "java 7",
+      "java7",
+      "multi agent",
+      "multi-agent",
+      "sisteme multi agent"
+    ],
+    "lecturer": {
+      "name": "Richmond Taylor",
+      "title": "Lead AI Lecturer",
+      "bio": "Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet.",
+      "expertise": "Ekspert në sigurinë, privatësinë dhe dizajnin e sistemeve multi-agent me AI."
+    }
   },
   {
     "topic": "Moduli: Java 8 - Capstone Sprint (Vibe Coding & AI Agents)",
     "answer": "4 orë. Zbatojnë në praktikë Three-Model Pattern për të zhvilluar versionin e parë funksional të projektit final. Përgatiten për prezantimin e projektit përmes testimeve, simulimeve të demos dhe feedback-ut nga kolegët.",
     "academy": "vc",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Java 8 - Capstone Sprint",
+      "hours": 4,
+      "weeks": 1,
+      "description": "Zbatojnë në praktikë Three-Model Pattern për të zhvilluar versionin e parë funksional të projektit final. Përgatiten për prezantimin e projektit përmes testimeve, simulimeve të demos dhe feedback-ut nga kolegët.",
+      "academy": "Vibe Coding & AI Agents Academy"
+    },
+    "aliases": [
+      "java 8",
+      "java8",
+      "capstone",
+      "capstone sprint"
+    ],
+    "lecturer": {
+      "name": "Richmond Taylor",
+      "title": "Lead AI Lecturer",
+      "bio": "Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet.",
+      "expertise": "Themelues i një kompanie të automatizimit me AI, i specializuar në zbatimin e Three-Model Pattern për zhvillim të shpejtë."
+    }
   },
   {
     "topic": "Moduli: Java 9 - Demo Day (Vibe Coding & AI Agents)",
     "answer": "2 orë. Përfundojnë AI OS, dokumentojnë skills dhe sigurohen që projektet të jenë të publikuara dhe funksionale. Në Demo Day, prezantojnë projektin final para grupit dhe të ftuarve, duke demonstruar zgjidhjen përmes një prezantimi live dhe sesioni Q&A.",
     "academy": "vc",
-    "kind": "module"
+    "kind": "module",
+    "module": {
+      "name": "Java 9 - Demo Day",
+      "hours": 2,
+      "weeks": 1,
+      "description": "Përfundojnë AI OS, dokumentojnë skills dhe sigurohen që projektet të jenë të publikuara dhe funksionale. Në Demo Day, prezantojnë projektin final para grupit dhe të ftuarve, duke demonstruar zgjidhjen përmes një prezantimi live dhe sesioni Q&A.",
+      "academy": "Vibe Coding & AI Agents Academy"
+    },
+    "aliases": [
+      "java 9",
+      "java9",
+      "demo day"
+    ],
+    "lecturer": {
+      "name": "Richmond Taylor",
+      "title": "Lead AI Lecturer",
+      "bio": "Themelues i një kompanie të automatizimit me AI në Miami dhe anëtar aktiv i komunitetit të zhvilluesve të AI në qytet.",
+      "expertise": "Anëtar aktiv i komunitetit të zhvilluesve të AI në qytet, me ekspertizë në prezantimin e produkteve dhe sigurimin e financimit."
+    }
   },
   {
     "topic": "Trajnerët – Vibe Coding & AI Agents Academy",
